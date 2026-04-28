@@ -7,7 +7,7 @@
 
 ## Core Principles
 
-- **Plan first** -- enter plan mode before non-trivial tasks; save plans to `quality_reports/plans/`
+- **Plan first** -- enter plan mode before non-trivial tasks; save plans to `logs/plans/`
 - **Verify after** -- compile and confirm output at the end of every task
 - **Source of truth** -- Paper `paper/main.tex` is authoritative on the overall idea, but details are in current evolution
 - **Quality gates** -- weighted aggregate score; nothing ships below 80/100; see `quality.md`
@@ -47,22 +47,22 @@ Brazil_IP/
 |-- .claude/                     # Claude rules, skills, agents, hooks
 |-- Bibliography_base.bib        # Centralized bibliography
 |-- paper/                       # Main LaTeX manuscript (source of truth)
-|   |-- main.tex                 # Primary paper file (old: draft.tex)
+|   |-- main.tex                 # Primary paper file
 |   |-- sections/                # regs.tex, first_stage.tex, review_aggregation.tex
 |   |-- figures/                 # Generated figures (.pdf, .png)
 |   |-- tables/                  # Generated tables - firm/, sector/, sector_grouped/, agg_firm/
-|   |-- meetings/                # Beamer presentations (comparison_firm_agg, progress updates)
 |   |-- preambles/               # LaTeX headers / shared preamble
 |   `-- replication/             # Replication package for deposit
+|-- presentations/               # Beamer talks (comparison_firm_agg, progress updates, first_stage)
 |-- data/                        # Project data
 |   |-- raw/                     # Original untouched data (BNDES, RAIS, politics, GDP)
 |   `-- processed/               # Intermediate datasets (.qs2, .fst) + diagnostics/
 |-- scripts/                     # Analysis code
 |   `-- R/                       # 55 pipeline scripts (numbered 11->54) + _utils/ + _archive/
-|-- quality_reports/             # Plans, session logs, reviews, scores
+|-- logs/                        # Session logs, plans, research journal
 |-- explorations/                # Research sandbox
 |-- templates/                   # Session log, quality report templates
-`-- master_supporting_docs/      # Design docs, reference papers, brainstorms
+`-- docs/                        # Design notes, brainstorms, meeting records, reference papers
 ```
 
 ---
@@ -129,7 +129,7 @@ xelatex -interaction=nonstopmode main.tex
 xelatex -interaction=nonstopmode main.tex
 
 # Talk compilation
-cd paper/meetings && xelatex -interaction=nonstopmode comparison_firm_agg.tex
+cd presentations && xelatex -interaction=nonstopmode comparison_firm_agg.tex
 ```
 
 ---
@@ -185,11 +185,11 @@ Helpers: `raw_path()`, `output_path()`, `tables_path()`, `project_path()`
 
 ## Logging
 
-For every non-trivial task, agents must maintain a session log in `quality_reports/session_logs/`.
+For every non-trivial task, agents must maintain a session log in `logs/session_logs/`.
 
 ### Session Log Requirements
 
-- Create or append a file named `quality_reports/session_logs/YYYY-MM-DD_<slug>.md`
+- Create or append a file named `logs/session_logs/YYYY-MM-DD_<slug>.md`
 - Log proactively, not only at the end
 - Append-only within a session; never overwrite earlier entries
 
@@ -237,7 +237,7 @@ Before final handoff, record:
 
 ### Research Journal
 
-Agents should also append one short entry per substantial invocation to `quality_reports/research_journal.md`.
+Agents should also append one short entry per substantial invocation to `logs/research_journal.md`.
 
 ```markdown
 ### YYYY-MM-DD HH:MM - [Agent Name]

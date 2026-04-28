@@ -117,7 +117,11 @@ Main LaTeX manuscript. `main.tex` is the source of truth.
 | `supplementary/` | Online appendix |
 | `replication/` | Replication package for journal deposit |
 
-### `master_supporting_docs/`
+### `presentations/`
+
+Beamer `.tex` source files and compiled PDFs for all meeting presentations.
+
+### `docs/`
 
 Design documents, reference materials, and research notes.
 
@@ -134,14 +138,15 @@ Design documents, reference materials, and research notes.
 | `solutions/` | Past solutions and institutional knowledge |
 | `supporting_papers/` | Reference papers (PDF) |
 | `supporting_slides/` | Reference slides (PDF) |
+| `meetings/` | Meeting notes |
 
-### `quality_reports/`
+### `logs/`
 
 | Directory | Contents |
 |-----------|----------|
 | `plans/` | Implementation plans (dated, with status) |
 | `session_logs/` | Session progress logs |
-| `merges/` | Merge-related reports |
+| `research_journal.md` | Cumulative agent invocation log |
 
 ### `explorations/`
 
