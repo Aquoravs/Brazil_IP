@@ -94,7 +94,7 @@ The editor:
 4. Lists MUST address, SHOULD address, and MAY push back items
 
 #### Save Reports
-Save all outputs to `quality_reports/reviews/`:
+Save all outputs to `logs/reviews/`:
 - `YYYY-MM-DD_desk_review.md` (Phase 1)
 - `YYYY-MM-DD_referee_domain.md` (Phase 2)
 - `YYYY-MM-DD_referee_methods.md` (Phase 2)
@@ -106,7 +106,7 @@ Log the referee assignments (dispositions + pet peeves) in the editorial decisio
 
 Continues the review cycle after the author has revised the paper.
 
-1. **Load prior review state** — read previous referee reports and editorial decision from `quality_reports/reviews/`
+1. **Load prior review state** — read previous referee reports and editorial decision from `logs/reviews/`
 2. **Skip desk review** — the paper was already accepted for review
 3. **Same referees** — reload the same dispositions and pet peeves from round 1
 4. **Referee R&R mode** — each referee receives their previous report alongside the revised manuscript:
@@ -121,7 +121,7 @@ the original — improvement matters.
 They check whether each concern was: Resolved / Partially resolved / Not addressed. They may flag new concerns from the revisions.
 
 5. **Editor R&R decision** — Round 2 allows Accept/Minor/Major/Reject. Round 3 allows Accept/Minor/Reject only. Max 3 rounds total — editor's patience runs out, just like real life.
-6. **Save reports** with `_r2` or `_r3` suffix to `quality_reports/reviews/`
+6. **Save reports** with `_r2` or `_r3` suffix to `logs/reviews/`
 
 ### Hostile Stress Test (`--stress [journal]`)
 
@@ -188,7 +188,7 @@ Include the lint report in the coder-critic's input so it can skip already-flagg
 
 **Do NOT edit any source files.** Only produce reports. Fixes are applied after user review, either manually or by re-dispatching the Coder agent.
 
-Save report to `quality_reports/[file]_code_review.md`
+Save report to `logs/audits/[file]_code_review.md`
 
 ### Causal Audit (`--methods`)
 
@@ -230,12 +230,12 @@ Dispatch **strategist-critic** standalone for a full 4-phase causal inference re
 - **MAJOR ISSUES** — Significant concerns that could change conclusions
 - **CRITICAL ERRORS** — Fundamental design flaw or incorrect implementation
 
-Save report to `quality_reports/[file]_strategy_review.md`
+Save report to `logs/audits/[file]_strategy_review.md`
 
 ### Manuscript Polish (`--proofread`)
 Dispatch **writer-critic** standalone:
 - 6 categories: structure, claims-evidence, ID fidelity, writing, grammar, compilation
-- Save report to `quality_reports/[file]_proofread_report.md`
+- Save report to `logs/audits/[file]_proofread_report.md`
 
 ### Cross-Language Replication (`--replicate [language]`)
 1. Auto-detect source language from file extension

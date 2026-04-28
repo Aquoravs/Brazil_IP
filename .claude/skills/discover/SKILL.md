@@ -42,7 +42,7 @@ Interview style:
 
 After interview (5-8 exchanges), produce three outputs:
 
-**Output 1: Research Specification** → `quality_reports/research_spec_[topic].md`
+**Output 1: Research Specification** → `logs/specs/research_spec_[topic].md`
 ```markdown
 # Research Specification: [Title]
 ## Research Question — [one sentence]
@@ -58,7 +58,7 @@ After interview (5-8 exchanges), produce three outputs:
 **Output 2: Domain Profile** → `.claude/references/domain-profile.md` (if still template)
 Fill in field, target journals, common data sources, identification strategies, field conventions, seminal references, and referee concerns based on the interview.
 
-**Output 3: Decision Record** → `quality_reports/decisions/discovery_[topic].md`
+**Output 3: Decision Record** → `logs/decisions/discovery_[topic].md`
 Using `templates/decision-record.md`, record:
 - **Decision:** The research question chosen
 - **Alternatives:** Other angles, framings, or questions that came up during the interview
@@ -89,7 +89,7 @@ Workflow:
    - **5** — Tangentially related (useful framing only)
 6. Dispatch librarian-critic to check coverage, gaps, recency, scope
 7. If gaps found, re-dispatch Librarian for targeted search (max 1 round)
-8. Save to `quality_reports/lit_review_[topic].md`
+8. Save to `logs/literature/lit_review_[topic].md`
 
 **Unverified citations:** If you cannot verify a citation, mark the BibTeX entry with `% UNVERIFIED`. Do NOT fabricate or guess citation details. Note when working papers have been published — cite the published version.
 
@@ -137,7 +137,7 @@ Workflow:
    3. **External validity** — Can we generalize from this sample?
    4. **Identification compatibility** — Does this data support the proposed design?
    5. **Known issues** — Documented problems with this dataset in the literature
-7. Save exploration to `quality_reports/data_exploration_[topic].md`
+7. Save exploration to `logs/data_exploration/data_exploration_[topic].md`
 
 **Rejected datasets:** Include a rejection table:
 
@@ -155,7 +155,7 @@ Generate:
 1. 3-5 research questions with clear hypotheses
 2. For each: potential identification strategy, data requirements, expected contribution
 3. Rank by feasibility and novelty
-4. Save to `quality_reports/research_ideas_[topic].md`
+4. Save to `logs/specs/research_ideas_[topic].md`
 
 ---
 

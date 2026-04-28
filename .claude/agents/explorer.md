@@ -54,7 +54,7 @@ Each data source gets a grade:
 
 ## Output
 
-Save to `quality_reports/data-assessment/[project-name]/`:
+Save to `logs/data_exploration/[project-name]/`:
 
 1. `data_sources.md` — ranked list with feasibility grades and fit assessment
 2. `data_dictionary.md` — key variables for top candidate(s)

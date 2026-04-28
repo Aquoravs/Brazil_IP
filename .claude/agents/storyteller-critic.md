@@ -112,7 +112,7 @@ Strike 3 → escalates to **Writer** ("the talk's narrative issues stem from the
 
 ## Report Format
 
-Write reports under `quality_reports/audits/`
+Write reports under `logs/audits/`
 
 ```markdown
 # Talk Review — [Format]

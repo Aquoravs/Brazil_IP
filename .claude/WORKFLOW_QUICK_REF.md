@@ -2,6 +2,8 @@
 
 **Model:** Contractor (you direct, Claude orchestrates via dependency graph)
 
+> **Project state (2026-04):** mid-pipeline, **exploration phase** (Anderson-Rubin policy evaluation; see `docs/research_state.md` §1). Preferred entry points are the **standalone skills** below — primarily `/analyze`, `/strategize`, `/discover data`, `/tools`. The full orchestrated `/new-project` flow is **not** appropriate from this state. The pipeline diagram is for reference and for forks starting from scratch.
+
 ---
 
 ## The Research Pipeline

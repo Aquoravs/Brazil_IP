@@ -67,7 +67,7 @@ After the Storyteller returns, dispatch the storyteller-critic to review across 
 | **Scope for format** | Right amount of content for the duration — not cramming a seminar into a lightning talk, not padding a short talk to seminar length |
 | **Compilation** | Does it compile cleanly without errors or warnings? |
 
-Score as advisory (non-blocking). Save report to `quality_reports/[format]_talk_review.md`.
+Score as advisory (non-blocking). Save report to `logs/audits/[format]_talk_review.md`.
 
 **Step 4: Fix Critical Issues**
 

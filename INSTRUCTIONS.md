@@ -16,6 +16,16 @@
 
 ---
 
+## Current Focus
+
+**Phase:** exploration (Anderson-Rubin policy evaluation; see [`docs/research_state.md`](docs/research_state.md) §1).
+**Active comments:** C4 (pooled + muni-by-muni AR test), C8 (penalized methods for many-instruments AR) — `logs/referee_response_tracker.md`.
+**Awaiting advisor:** C6 (alternative employment / production-factor data), C7 (local deflators) — memos in `logs/data_exploration/`.
+**Use:** `/analyze`, `/strategize`, `/discover data`, `/tools` standalone. Do **not** invoke `/new-project`.
+**Quality gating:** exploration-phase renormalization is in effect (see `.claude/rules/quality.md` §1).
+
+---
+
 ## Research Design
 
 **Research question**: Is the allocation of BNDES lending across municipalities GDP-optimal?
@@ -48,12 +58,11 @@ Brazil_IP/
 |-- Bibliography_base.bib        # Centralized bibliography
 |-- paper/                       # Main LaTeX manuscript (source of truth)
 |   |-- main.tex                 # Primary paper file
-|   |-- sections/                # regs.tex, first_stage.tex, review_aggregation.tex
-|   |-- figures/                 # Generated figures (.pdf, .png)
-|   |-- tables/                  # Generated tables - firm/, sector/, sector_grouped/, agg_firm/
-|   |-- preambles/               # LaTeX headers / shared preamble
-|   `-- replication/             # Replication package for deposit
-|-- presentations/               # Beamer talks (comparison_firm_agg, progress updates, first_stage)
+|   |-- regs.tex                 # Authoritative draft of Section 5 (Specifications)
+|   |-- output/                  # Generated tables organized by-script -- firm/, sector/, sector_grouped/, agg_firm/, agg_firm_bndes_sector/, agg_firm_grouped/, agg_firm_size_bin/, ...
+|   |-- build/                   # latexmk build artifacts (gitignored)
+|   `-- latexmkrc                # XeLaTeX + biber configuration
+|-- presentations/               # Beamer talks (comparison_firm_agg, progress updates, first_stage, agg_first_stage, summary_first_stage)
 |-- data/                        # Project data
 |   |-- raw/                     # Original untouched data (BNDES, RAIS, politics, GDP)
 |   `-- processed/               # Intermediate datasets (.qs2, .fst) + diagnostics/
@@ -165,7 +174,7 @@ cd presentations && xelatex -interaction=nonstopmode comparison_firm_agg.tex
 All R scripts use env-var-based paths via `_utils/utils.R`:
 - `BNDES_BASE` -> `data/` (raw data under `data/raw/`)
 - `BNDES_OUTPUT` -> `data/processed/` (intermediate .qs2/.fst files)
-- `BNDES_TABLES` -> `paper/tables/` (regression table outputs)
+- `BNDES_TABLES` -> `paper/output/` (regression table outputs, organized by script: firm/, sector/, agg_firm*/, ...)
 - `ENCFS_MOUNT` -> encrypted RAIS mount (server-specific)
 
 Helpers: `raw_path()`, `output_path()`, `tables_path()`, `project_path()`

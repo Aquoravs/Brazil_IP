@@ -94,7 +94,7 @@ The following preamble is the project standard. New papers should use this struc
             urldate=long,
             url=true,
             natbib=true]{biblatex}
-\addbibresource{references.bib}
+\addbibresource{Bibliography_base.bib}  % Project root bib; resolved via BIBINPUTS in paper/latexmkrc
 
 % Citation color settings
 \renewcommand*{\nameyeardelim}{\addcomma\space}

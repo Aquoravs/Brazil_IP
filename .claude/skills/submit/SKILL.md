@@ -23,7 +23,7 @@ Get ranked journal recommendations.
 Considers: contribution fit, methodology fit, audience fit, recent publications, desk rejection risk. Consults .claude/references/domain-profile.md for journal tiers.
 
 Output: Ranked list of 3 target journals with rationale.
-Save to `quality_reports/journal_recommendations_[date].md`
+Save to `logs/journal_recommendations_[date].md`
 
 ### `/submit package` — Build Replication Package
 Assemble AEA-compliant replication package.

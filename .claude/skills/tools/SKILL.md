@@ -130,7 +130,7 @@ Step 3: REPLACE
   - Restore saved customizations from Step 2
 
 Step 4: DO NOT TOUCH
-  - paper/, scripts/, data/, explorations/, quality_reports/
+  - paper/, scripts/, data/, explorations/, logs/
   - CLAUDE.md, Bibliography_base.bib, README.md, .gitignore
   - Any other user content
 

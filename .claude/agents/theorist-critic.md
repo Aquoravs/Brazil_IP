@@ -184,7 +184,7 @@ Floor at 0. Score ≥ 80 to approve the theory section.
 
 ## Report Format
 
-Save to `quality_reports/[FILENAME]_theory_review.md`:
+Save to `logs/audits/[FILENAME]_theory_review.md`:
 
 ```markdown
 # Theory Review: [Filename]

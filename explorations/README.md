@@ -10,8 +10,8 @@ This folder is a **sandbox** for experimental and exploratory work. All new idea
 
 ## Rules
 
-- See `.claude/rules/exploration-folder-protocol.md` for the full protocol
-- See `.claude/rules/exploration-fast-track.md` for the lightweight workflow
+- See `.claude/rules/content-standards.md` §4 (Exploration Folder Protocol) for the full protocol
+- See `.claude/rules/content-standards.md` §5 (Exploration Fast-Track) for the lightweight workflow
 
 ## Structure
 

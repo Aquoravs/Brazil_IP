@@ -50,6 +50,12 @@ Not every project uses all components. If a component hasn't been scored:
 - Remaining weights are renormalized
 - Example: no literature review → weights become 11%, 28%, 17%, 28%, 11%, 6%
 
+### Exploration-Phase Renormalization
+
+In the exploration phase (no manuscript, no theory section, no peer review yet) — e.g. when the project is iterating on identification design and code in `explorations/` — the active components are **Code (15%), Data (10%), Identification (25%), Replication (5%)**. Renormalize within these so they sum to 100%. The submission gate (>= 95) does not apply during exploration; only the commit (>= 80) and PR (>= 90) gates do, computed on the active components.
+
+Critics should not deduct for missing manuscript polish, missing peer-review reports, missing theory sections, or missing replication-package items during this phase. Once a paper draft is integrated (`paper/main.tex` `\input{}`-s the active sections), the standard weighting in the table above resumes.
+
 ---
 
 ## 2. Severity Gradient
