@@ -1,0 +1,27 @@
+\sbox0{%
+\begin{tabular}[t]{lcccccc}
+\toprule
+\multicolumn{1}{c}{\textbf{ }} & \multicolumn{6}{c}{\textbf{Dep.~var: $\log(\text{BNDES}_{fmt})$}} \\
+\cmidrule(l{3pt}r{3pt}){2-7}
+  & M & G & P & M+G & M+P & M+G+P\\
+\midrule
+$FA^{\text{mayor}}_{\text{coal.}}$ & -0.495 &  &  & -0.478 & -0.494 & -0.485\\
+  & (0.351) &  &  & (0.344) & (0.350) & (0.344)\\
+$FA^{\text{gov}}_{\text{coal.}}$ &  & -0.234 &  & -0.204 &  & -0.220\\
+  &  & (0.183) &  & (0.190) &  & (0.225)\\
+$FA^{\text{pres}}_{\text{coal.}}$ &  &  & -0.096 &  & -0.008 & 0.094\\
+  &  &  & (0.593) &  & (0.567) & (0.603)\\
+\midrule
+$F$-statistic & 2.0 & 1.6 & 0.0 & 2.0 & 1.0 & 1.4\\
+Observations & 10,520 & 10,520 & 10,520 & 10,520 & 10,520 & 10,520\\
+$R^2$ & 0.875 & 0.875 & 0.875 & 0.875 & 0.875 & 0.875\\
+\bottomrule
+\end{tabular}
+}%
+\ifdim\wd0>\linewidth
+  \resizebox{\linewidth}{!}{\usebox0}%
+  \par\vspace{3pt}\parbox{\linewidth}{\raggedright\scriptsize Firm + muni $\times$ year FE. Coalition alignment. Cycle-specific baseline. Pooled-count exposure. Sample: BNDES $> 0$. SEs clustered by firm + muni in parentheses. Weighted by pre-election baseline employment. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\else
+  \usebox0%
+  \par\vspace{3pt}\parbox{\wd0}{\raggedright\scriptsize Firm + muni $\times$ year FE. Coalition alignment. Cycle-specific baseline. Pooled-count exposure. Sample: BNDES $> 0$. SEs clustered by firm + muni in parentheses. Weighted by pre-election baseline employment. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\fi

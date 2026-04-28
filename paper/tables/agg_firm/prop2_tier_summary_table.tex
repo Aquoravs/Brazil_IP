@@ -1,0 +1,14 @@
+\begin{table}[ht]
+\centering
+\footnotesize
+\begin{tabular}{llrrr}
+\toprule
+Tier & Restrictions & Max $|\Delta\hat{\beta}|$ & Specs & Obs range \\
+\midrule
+Gold & Synthetic DGP (C1--C6) & $1.0 \times 10^{-15}$ & 5 & 10{,}000 \\
+Silver & Single-cell + balanced + no-rm + exact FE & $2.40e-01$ & 8 & 13{,}000{,}619--14{,}144{,}058 \\
+Bronze & Full sample + no-rm + exact FE & $1.36e-01$ & 8 & 22{,}703{,}715--24{,}157{,}111 \\
+\bottomrule
+\end{tabular}
+\parbox{\linewidth}{\scriptsize Gold tier from \texttt{verify\_proposition2\_synthetic.R}. Silver--Bronze gap is a joint effect of relaxing single-cell and balanced constraints (nested comparison, not additive decomposition). Residual Silver gap reflects within-cell regressor heterogeneity (C6).}
+\end{table}

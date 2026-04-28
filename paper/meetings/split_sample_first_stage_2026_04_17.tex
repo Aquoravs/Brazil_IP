@@ -1,0 +1,128 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{itemize items}[circle]
+
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage[T1]{fontenc}
+\usepackage{array}
+
+% Table directory
+\newcommand{\tabledir}{../tables/firm}
+
+% Colors
+\definecolor{darkblue}{RGB}{0,51,102}
+\definecolor{alertred}{RGB}{180,30,30}
+\definecolor{pass}{RGB}{198,232,198}
+
+\setbeamercolor{frametitle}{fg=white}
+\setbeamercolor{title}{fg=white}
+\setbeamercolor{structure}{fg=darkblue}
+
+\newcommand{\fpass}[1]{\cellcolor{pass}\textbf{#1}}
+
+\title{Split-Sample First Stage: Big vs.\ Small Cities}
+\subtitle{Script 51 --- Abril 17, 2026}
+\author{}
+\date{}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+% ===========================================================================
+% BNDES EXTENSIVE MARGIN
+% ===========================================================================
+
+\begin{frame}[plain]
+\begin{center}
+{\Large\textbf{BNDES Extensive Margin --- $\mathbf{1}(\text{BNDES}>0)$}}
+\end{center}
+\end{frame}
+
+% --- Cycle-specific baseline ------------------------------------------------
+
+\begin{frame}[t,shrink=5]{BNDES Extensive --- Top-Quartile Municipalities}
+\framesubtitle{Cycle-specific baseline $\cdot$ Unweighted $\cdot$ Coalition $\cdot$ Pooled-count}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__bndes_extensive__coalition__cycle_specific__unweighted__top_q4__pooled_count}
+\end{center}
+\end{frame}
+
+\begin{frame}[t,shrink=5]{BNDES Extensive --- Bottom Three Quartiles}
+\framesubtitle{Cycle-specific baseline $\cdot$ Unweighted $\cdot$ Coalition $\cdot$ Pooled-count}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__bndes_extensive__coalition__cycle_specific__unweighted__bottom_3q__pooled_count}
+\end{center}
+\end{frame}
+
+% --- 2002-fixed baseline ----------------------------------------------------
+
+\begin{frame}[t,shrink=5]{BNDES Extensive --- Top-Quartile Municipalities}
+\framesubtitle{2002-fixed baseline $\cdot$ Unweighted $\cdot$ Coalition $\cdot$ Pooled-count}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__bndes_extensive__coalition__2002_fixed__unweighted__top_q4__pooled_count}
+\end{center}
+\end{frame}
+
+\begin{frame}[t,shrink=5]{BNDES Extensive --- Bottom Three Quartiles}
+\framesubtitle{2002-fixed baseline $\cdot$ Unweighted $\cdot$ Coalition $\cdot$ Pooled-count}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__bndes_extensive__coalition__2002_fixed__unweighted__bottom_3q__pooled_count}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+% EMPLOYMENT SHARE
+% ===========================================================================
+
+\begin{frame}[plain]
+\begin{center}
+{\Large\textbf{Employment Share --- $\text{RAIS employment share}_{fmt,mt}$}}
+\end{center}
+\end{frame}
+
+% --- Cycle-specific baseline ------------------------------------------------
+
+\begin{frame}[t,shrink=5]{Employment Share --- Top-Quartile Municipalities}
+\framesubtitle{Cycle-specific baseline $\cdot$ Unweighted $\cdot$ Coalition $\cdot$ Pooled-count}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_share__coalition__cycle_specific__unweighted__top_q4__pooled_count}
+\end{center}
+\end{frame}
+
+\begin{frame}[t,shrink=5]{Employment Share --- Bottom Three Quartiles}
+\framesubtitle{Cycle-specific baseline $\cdot$ Unweighted $\cdot$ Coalition $\cdot$ Pooled-count}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_share__coalition__cycle_specific__unweighted__bottom_3q__pooled_count}
+\end{center}
+\end{frame}
+
+% --- 2002-fixed baseline ----------------------------------------------------
+
+\begin{frame}[t,shrink=5]{Employment Share --- Top-Quartile Municipalities}
+\framesubtitle{2002-fixed baseline $\cdot$ Unweighted $\cdot$ Coalition $\cdot$ Pooled-count}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_share__coalition__2002_fixed__unweighted__top_q4__pooled_count}
+\end{center}
+\end{frame}
+
+\begin{frame}[t,shrink=5]{Employment Share --- Bottom Three Quartiles}
+\framesubtitle{2002-fixed baseline $\cdot$ Unweighted $\cdot$ Coalition $\cdot$ Pooled-count}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_share__coalition__2002_fixed__unweighted__bottom_3q__pooled_count}
+\end{center}
+\end{frame}
+
+\end{document}

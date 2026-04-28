@@ -1,0 +1,29 @@
+\sbox0{%
+\begin{tabular}[t]{lcccccc}
+\toprule
+\multicolumn{1}{c}{\textbf{ }} & \multicolumn{6}{c}{\textbf{Dep.~var: $s_{mjt}$}} \\
+\cmidrule(l{3pt}r{3pt}){2-7}
+  & Mayor & Governor & President & M+G & M+P & All\\
+\midrule
+$Z^{\text{mayor}}_{\text{coal.}}$ & -0.003 &  &  & -0.003 & -0.003 & -0.003\\
+  & (0.003) &  &  & (0.003) & (0.003) & (0.003)\\
+$Z^{\text{gov}}_{\text{coal.}}$ &  & 0.002 &  & 0.002 &  & 0.002\\
+  &  & (0.004) &  & (0.004) &  & (0.004)\\
+$Z^{\text{pres}}_{\text{coal.}}$ &  &  & -0.010 &  & -0.010 & -0.010\\
+  &  &  & (0.007) &  & (0.007) & (0.007)\\
+\midrule
+Exposure Control & Yes & Yes & Yes & Yes & Yes & Yes\\
+$F$-statistic & 1.4 & 0.2 & 2.1 & 1.6 & 1.8 & 1.6\\
+Control $F$-statistic & \textbf{706.5} & \textbf{14.5} & \textbf{18.2} & \textbf{5235499.3} & \textbf{2546346.5} & \textbf{1207328.7}\\
+Observations & 795,456 & 795,456 & 795,456 & 795,456 & 795,456 & 795,456\\
+$R^2$ & 0.342 & 0.342 & 0.342 & 0.342 & 0.343 & 0.343\\
+\bottomrule
+\end{tabular}
+}%
+\ifdim\wd0>\linewidth
+  \resizebox{\linewidth}{!}{\usebox0}%
+  \par\vspace{3pt}\parbox{\linewidth}{\raggedright\scriptsize Muni $\times$ sector + muni $\times$ year FE. Coalition alignment. Cycle-specific baseline. Owner-count exposure weights. Municipality-sector exposure controls interacted with year dummies. SEs clustered by muni + sector in parentheses. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\else
+  \usebox0%
+  \par\vspace{3pt}\parbox{\wd0}{\raggedright\scriptsize Muni $\times$ sector + muni $\times$ year FE. Coalition alignment. Cycle-specific baseline. Owner-count exposure weights. Municipality-sector exposure controls interacted with year dummies. SEs clustered by muni + sector in parentheses. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\fi

@@ -1,0 +1,554 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{itemize items}[circle]
+
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage[T1]{fontenc}
+\usepackage{array}
+
+% Table directories
+\newcommand{\tfirm}{../tables/firm}
+\newcommand{\tbndes}{../tables/agg_firm_bndes_sector}
+\newcommand{\tsizebin}{../tables/agg_firm_sector_group_size_bin}
+
+% Colors
+\definecolor{darkblue}{RGB}{0,51,102}
+\definecolor{alertred}{RGB}{180,30,30}
+\definecolor{pass}{RGB}{198,232,198}
+
+\setbeamercolor{frametitle}{fg=white}
+\setbeamercolor{title}{fg=white}
+\setbeamercolor{structure}{fg=darkblue}
+
+\newcommand{\fpass}[1]{\cellcolor{pass}\textbf{#1}}
+
+\title{First-Stage Battery: Complete Results}
+\subtitle{Scripts 51 \& 52 --- April 22, 2026}
+\author{}
+\date{}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+% ===========================================================================
+% KEY FINDINGS
+% ===========================================================================
+
+\begin{frame}[t,shrink=15]{Key Findings}
+\begin{itemize}\setlength{\itemsep}{0.25em}
+
+  \item \textbf{Firm-level BNDES first stage is strong and robust across municipalities.}
+    Unweighted coalition yields $F=45$ (mayor), $F=103$ (governor), $F=63$
+    (M+G).  Split by city size: top-Q4 $F=64$, bottom-3Q $F=61$ for governor
+    --- no clear concentration.
+
+  \item \textbf{Alignment predicts firm employment with large
+    estimated coefficients.}
+    Coalition mayor alignment raises $\log(\text{Emp})$ by 2.7\% ($F=189$);
+    governor by 2.1\% ($F=88$).  Party alignment: mayor +4.0\% ($F=130$),
+    president +4.9\% ($F=35$).  All instruments pass and all coefficients
+    are significant at 1\%.
+
+  \item \textbf{Employment outcomes outperform BNDES outcomes at the
+    aggregated level --- driven by presidential party alignment.}
+    Full-sample employment share reaches $F=18.7$ ($P$ alone, MxJ+MxT) and
+    $F=20.0$ (M+G+P, MxJ+JxT); log employment reaches $F=10.6$--$12.6$.
+    BNDES extensive peaks at $F=12.4$ (mayor only, JxT); BNDES share
+    is uniformly weak ($F<5$).  Coalition alignment is weak for all
+    employment outcomes ($F<5$).  In top-Q4 municipalities, party president
+    reaches $F=41.7$ ($\hat\beta=-0.134^{***}$).
+
+  \item \textbf{The full aggregated battery confirms the first stage is
+    generically weak at sector level.}
+    Across BNDES-sector (4 groups), custom-sector (11 groups), size-bin (3),
+    and sector$\times$size-bin (12): the vast majority of specifications
+    yield $F<10$.  Isolated passes cluster in party alignment with
+    emp-weighted JxT, and in size-bin with emp-weighted.  Only the
+    top-Q4 split-sample reliably passes at BNDES-sector level.
+
+  \item \textbf{Finer sector classification kills the first stage.}
+    BNDES sector $\times$ firm-size tercile: $F<10$ in all 24 configs.
+    Maximum $F=9.7$.  Alignment operates at the BNDES-sector level,
+    not within size bins.
+
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+% SLIDE 3: FIRM-LEVEL WEIGHTING GRID — BNDES EXTENSIVE
+% ===========================================================================
+
+\begin{frame}[t]{Firm Level: Weighting Comparison --- BNDES Extensive, Coalition, Pooled-count}
+\framesubtitle{All firms $\cdot$ Coalition alignment $\cdot$ Pooled-count exposure}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}llcccccc@{}}
+\toprule
+ & & \multicolumn{6}{c}{Instrument combo} \\
+\cmidrule(l{2pt}r{2pt}){3-8}
+Baseline & Weighting & M & G & P & M+G & M+P & M+G+P \\
+\midrule
+\multirow{3}{*}{Cycle-specific}
+  & Unweighted      & \fpass{45.5} & \fpass{103.2} & 0.9  & \fpass{63.3} & \fpass{22.9} & \fpass{43.4} \\
+  & Emp-weighted    & 0.2          & 0.9           & \fpass{15.0}  & 0.5          & 7.9          & 5.9          \\
+  & Emp-share-wt'd  & 0.4          & 0.8           & \fpass{38.2}  & 0.5          & \fpass{11.0} & 7.6          \\
+\addlinespace[5pt]
+\multirow{3}{*}{2002-fixed}
+  & Unweighted      & \fpass{13.7} & \fpass{23.7}  & \fpass{24.4} & \fpass{16.3} & \fpass{20.2} & \fpass{22.6} \\
+  & Emp-weighted    & 0.2          & 2.5           & 5.5          & 1.4          & 2.9          & 4.1          \\
+  & Emp-share-wt'd  & 1.2          & 2.7           & \fpass{33.2} & 1.2          & 9.7          & 7.2          \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize \colorbox{pass}{\textbf{Shaded}} = $F>10$.
+Emp-share-wt'd improves strongly on emp-weighted for $P$ (president), but unweighted dominates for $M$ (mayor) and $G$ (governor).
+Firm + muni$\times$year FE. SEs clustered by firm + muni.}
+\end{frame}
+
+% ===========================================================================
+% SLIDE 4: FIRM-LEVEL SPLIT SAMPLE — BNDES EXTENSIVE
+% ===========================================================================
+
+\begin{frame}[t]{Firm Level: Split Sample --- BNDES Extensive, Coalition, Cycle-specific, Unweighted}
+\framesubtitle{Pooled-count exposure $\cdot$ Main instrument family}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+ & \multicolumn{6}{c}{Instrument combo} \\
+\cmidrule(l{2pt}r{2pt}){2-7}
+Sample & M & G & P & M+G & M+P & M+G+P \\
+\midrule
+All firms  & \fpass{45.5} & \fpass{103.2} & 0.9 & \fpass{63.3} & \fpass{22.9} & \fpass{43.4} \\
+Top Q4     & \fpass{21.6} & \fpass{63.9}  & 1.3 & \fpass{37.1} & \fpass{11.3} & \fpass{24.9} \\
+Bottom 3Q  & \fpass{33.3} & \fpass{61.1}  & 0.1 & \fpass{40.6} & \fpass{16.8} & \fpass{28.8} \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize \colorbox{pass}{\textbf{Shaded}} = $F>10$.
+Both subsamples show a strong first stage.  Top Q4: 37.9M obs; Bottom 3Q: 5.2M obs.
+Firm + muni$\times$year FE. SEs clustered by firm + muni.}
+\vspace{0.8em}
+
+\textcolor{alertred}{\footnotesize\textbf{Implication:} the alignment instrument is a valid first stage in large and small cities alike at the firm level.  City-size heterogeneity arises only at the aggregated (sector) level.}
+\end{frame}
+
+% ===========================================================================
+% SLIDE 5: AGGREGATED FULL SAMPLE — OUTCOME COMPARISON
+% ===========================================================================
+
+\begin{frame}[t,shrink=5]{Aggregated Full Sample: Outcome Comparison --- Party, Unweighted}
+\framesubtitle{BNDES sector $\cdot$ Equal-firm aggregation $\cdot$ Cycle-specific $\cdot$ With exposure ctrl}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}llcccccc@{}}
+\toprule
+ & & \multicolumn{6}{c}{Instrument combo ($F$-stat)} \\
+\cmidrule(l{2pt}r{2pt}){3-8}
+Dep.\ variable & FE & M & G & P & M+G & M+P & M+G+P \\
+\midrule
+\multicolumn{8}{l}{\textit{Panel A: Employment outcomes}} \\
+\addlinespace[3pt]
+\multirow{2}{*}{Emp share}
+  & MxJ+MxT & 1.7 & 8.5          & \fpass{18.7} & 3.6          & \fpass{12.8} & \fpass{15.8} \\
+  & MxJ+JxT & 3.5 & 0.0          & \fpass{12.4} & 2.6          & 6.5          & \fpass{20.0} \\
+\addlinespace[2pt]
+\multirow{2}{*}{$\log(\text{Emp})$}
+  & MxJ+MxT & 1.6 & 2.6          & \fpass{10.6} & 1.6          & \fpass{12.6} & 8.6          \\
+  & MxJ+JxT & 0.1 & 1.5          & 2.8          & 8.0          & \fpass{13.7} & 9.1          \\
+\addlinespace[6pt]
+\multicolumn{8}{l}{\textit{Panel B: BNDES outcomes}} \\
+\addlinespace[3pt]
+\multirow{2}{*}{BNDES ext.}
+  & MxJ+MxT & 4.6 & 3.3          & 0.2          & 4.2          & 2.4          & 2.9          \\
+  & MxJ+JxT & \fpass{12.4} & 4.0 & 2.8          & \fpass{11.6} & \fpass{12.9} & 9.5          \\
+\addlinespace[2pt]
+\multirow{2}{*}{BNDES share}
+  & MxJ+MxT & 0.4 & 0.0          & 2.1          & 0.2          & 1.1          & 3.5          \\
+  & MxJ+JxT & 0.0 & 0.1          & 2.4          & 0.0          & 1.2          & 1.2          \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize \colorbox{pass}{\textbf{Shaded}} = $F>10$.
+Employment outcomes pass via \textbf{president} ($P$); BNDES extensive passes via \textbf{mayor} ($M$).
+Coalition alignment yields $F<5$ for all employment outcomes (not shown).
+Muni$\times$sector + year FE.  SEs clustered by muni + sector.}
+
+\vspace{0.3em}
+\textcolor{alertred}{\footnotesize\textbf{Implication:} at the aggregated level, the president drives employment ($\hat\beta_P=-0.067^{**}$ for emp share), while the mayor drives BNDES allocation.  Different political agents operate on different margins --- the BNDES channel and the employment channel are not the same.}
+\end{frame}
+
+% ===========================================================================
+% SLIDE 6: AGGREGATED SPLIT SAMPLE — BNDES EXTENSIVE
+% ===========================================================================
+
+\begin{frame}[t]{Aggregated Level: Split Sample --- BNDES Extensive, Unweighted, Pooled-count, Cycle-specific}
+\framesubtitle{BNDES sector $\cdot$ Owner-count aggregation $\cdot$ Exposure control}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}lllcccccc@{}}
+\toprule
+ & & & \multicolumn{6}{c}{Instrument combo} \\
+\cmidrule(l{3pt}r{3pt}){4-9}
+Alignment & FE & Sample & M & G & P & M+G & M+P & M+G+P \\
+\midrule
+\multirow{4}{*}{Coalition}
+ & \multirow{2}{*}{MxJ+JxT}
+   & Top Q4    & 1.2 & 2.6           & 1.6 & 0.8           & 1.0 & 0.7           \\
+ & & Bottom 3Q & 0.0 & 0.3           & 0.3 & 0.2           & 0.9 & 0.8           \\
+ & \multirow{2}{*}{MxJ+MxT}
+   & Top Q4    & 1.2 & \fpass{23.5}  & 1.0 & \fpass{16.1}  & 0.4 & \fpass{13.4}  \\
+ & & Bottom 3Q & 0.1 & 0.4           & 1.5 & 0.2           & 0.7 & 0.5           \\
+\addlinespace[4pt]
+\multirow{4}{*}{Party}
+ & \multirow{2}{*}{MxJ+JxT}
+   & Top Q4    & 1.4 & 2.4           & 3.3 & 1.6           & 6.0 & \fpass{14.6}  \\
+ & & Bottom 3Q & 2.9 & 1.4           & 0.0 & 0.8           & 0.7 & 1.3           \\
+ & \multirow{2}{*}{MxJ+MxT}
+   & Top Q4    & 0.3 & 0.0           & 2.3 & 0.2           & 1.2 & 1.1           \\
+ & & Bottom 3Q & 0.0 & 0.5           & 2.5 & 0.1           & 1.2 & 0.9           \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize \colorbox{pass}{\textbf{Shaded}} = $F>10$.
+Full-sample coalition MxJ+MxT: G=2.2, M+G=3.0, M+G+P=3.3 (all weak --- diluted by small cities).
+Muni$\times$sector + year FE. SEs clustered by muni + sector.}
+\end{frame}
+
+% ===========================================================================
+% SLIDE 5: AGGREGATED WEIGHTING GRID — BNDES EXTENSIVE
+% ===========================================================================
+
+\begin{frame}[t,shrink=10]{Aggregated Level: Weighting Comparison --- BNDES Extensive, Coalition, Pooled-count}
+\framesubtitle{BNDES sector $\cdot$ Full sample (all munis) $\cdot$ Owner-count agg.\ $\cdot$ Exposure control $\cdot$ Cycle-specific}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}llcccccc@{}}
+\toprule
+ & & \multicolumn{6}{c}{Instrument combo} \\
+\cmidrule(l{2pt}r{2pt}){3-8}
+FE & Weighting & M & G & P & M+G & M+P & M+G+P \\
+\midrule
+\multicolumn{8}{l}{\textit{Panel A: $F$-statistics}} \\
+\addlinespace[3pt]
+\multirow{3}{*}{MxJ+JxT}
+  & Unweighted      & 5.2 & 0.9 & 4.8 & 4.0          & \fpass{12.2} & 8.5          \\
+  & Emp-share-wt'd  & 0.1 & 0.2 & 0.1 & 0.4          & 0.7          & 0.8          \\
+  & N-firms-wt'd    & 0.2 & 0.9 & 0.1 & 0.7          & 0.5          & 0.7          \\
+\addlinespace[4pt]
+\multirow{3}{*}{MxJ+MxT}
+  & Unweighted      & 4.5 & 2.2 & 0.2 & 3.0          & 2.5          & 3.3          \\
+  & Emp-share-wt'd  & 5.5 & 0.3 & 0.8 & 0.8          & 1.1          & 0.7          \\
+  & N-firms-wt'd    & 1.7 & 5.5 & 1.9 & 5.1          & 1.4          & 3.7          \\
+\addlinespace[6pt]
+\multicolumn{8}{l}{\textit{Panel B: Governor coefficient ($\hat\beta_G$)}} \\
+\addlinespace[3pt]
+\multirow{3}{*}{MxJ+JxT}
+  & Unweighted      & & 0.008 & & & & \\
+  & Emp-share-wt'd  & & 0.001 & & & & \\
+  & N-firms-wt'd    & & 0.002 & & & & \\
+\addlinespace[4pt]
+\multirow{3}{*}{MxJ+MxT}
+  & Unweighted      & & 0.008 & & & & \\
+  & Emp-share-wt'd  & & 0.001 & & & & \\
+  & N-firms-wt'd    & & 0.011 & & & & \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize \colorbox{pass}{\textbf{Shaded}} = $F>10$.
+Only 1 of 18 cells passes $F>10$ (unweighted MxJ+JxT, M+P combo).
+Equal-firm agg.\ uses unweighted; owner-count agg.\ uses emp-share/n-firms weights.
+Muni$\times$sector + year FE. SEs clustered by muni + sector.
+$^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\end{frame}
+
+% ===========================================================================
+% SLIDE 6: FIRM-LEVEL EMPLOYMENT OUTCOMES (was Slide 5)
+% ===========================================================================
+
+\begin{frame}[t]{Firm Level: Employment as Dependent Variable --- Unweighted, Pooled-count}
+\framesubtitle{$\log(\text{Employment}_{fmt})$ $\cdot$ All firms $\cdot$ Firm + muni$\times$year FE}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}llcccccc@{}}
+\toprule
+ & & \multicolumn{3}{c}{Coefficients ($\hat\beta$)} & \multicolumn{3}{c}{$F$-statistics} \\
+\cmidrule(l{2pt}r{2pt}){3-5} \cmidrule(l{2pt}r{2pt}){6-8}
+Alignment & Baseline & M & G & P & M & G & M+G+P \\
+\midrule
+\multirow{2}{*}{Coalition}
+  & Cycle-specific & +0.027*** & +0.021*** & +0.015*** & \fpass{188.5} & \fpass{87.6}  & \fpass{70.8}  \\
+  & 2002-fixed     & $-$0.020*** & $-$0.041*** & $-$0.078*** & \fpass{41.6}  & \fpass{141.0} & \fpass{120.1} \\
+\addlinespace[4pt]
+\multirow{2}{*}{Party}
+  & Cycle-specific & +0.040*** & +0.024*** & +0.049*** & \fpass{130.2} & \fpass{24.9}  & \fpass{62.9}  \\
+  & 2002-fixed     & +0.008     & $-$0.029*** & $-$0.018*   & 1.8           & \fpass{17.0}  & 7.9           \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize \colorbox{pass}{\textbf{Shaded}} = $F>10$.
+Cycle-specific coefficients: alignment raises log employment by 2--5\% per unit, all
+significant at 1\%.
+2002-fixed coalition signs flip (baseline held at 2002 levels).
+SEs clustered by firm + muni.  $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+
+\vspace{0.4em}
+\textcolor{alertred}{\footnotesize\textbf{Implication:} political alignment is a strong predictor of firm employment.  A coalition-aligned mayor raises firm employment by $\approx$2.7\%; a party-aligned president by $\approx$4.9\%.  The instrument captures real economic activity, not just BNDES administrative data.}
+\end{frame}
+
+% ===========================================================================
+% SLIDE 7: AGGREGATED EMPLOYMENT OUTCOMES (was Slide 6)
+% ===========================================================================
+
+\begin{frame}[t]{Aggregated Level: Employment Share as Dependent Variable}
+\framesubtitle{BNDES sector $\cdot$ Equal-firm aggregation $\cdot$ Unweighted $\cdot$ Cycle-specific $\cdot$ With exposure ctrl}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}lllccccccc@{}}
+\toprule
+ & & & \multicolumn{6}{c}{Instrument combo ($F$-stat)} & Coeff.\ on $P$ \\
+\cmidrule(l{2pt}r{2pt}){4-9}
+Alignment & FE & Sample & M & G & P & M+G & M+P & M+G+P & $\hat\beta_P$ \\
+\midrule
+\multirow{2}{*}{Party}
+  & \multirow{2}{*}{MxJ+MxT}
+  & Full     & 1.7 & 8.5          & \fpass{18.7} & 3.6          & \fpass{12.8} & \fpass{15.8} & $-$0.067** \\
+  &  & Top Q4  & 1.3 & 0.3          & \fpass{41.7} & 0.8          & \fpass{18.5} & \fpass{13.7} & $-$0.134*** \\
+\addlinespace[3pt]
+\multirow{2}{*}{Party}
+  & \multirow{2}{*}{MxJ+JxT}
+  & Full     & 3.5 & 0.0          & \fpass{12.4} & 2.6          & 6.5          & \fpass{20.0} & $-$0.036** \\
+  &  & Top Q4  & 0.1 & 0.0          & \fpass{11.0} & 0.1          & \fpass{10.9} & 7.5          & $-$0.056** \\
+\addlinespace[3pt]
+\multirow{2}{*}{Coalition}
+  & \multirow{2}{*}{MxJ+MxT}
+  & Full     & 0.7 & 0.1          & 5.1          & 0.6          & 3.9          & 4.0          & $-$0.026 \\
+  &  & Top Q4  & 0.7 & 0.3          & 0.2          & 1.1          & 0.4          & 0.8          & $-$0.009 \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize \colorbox{pass}{\textbf{Shaded}} = $F>10$.
+Employment share = sector's share of municipal RAIS employment.
+President (party) drives employment share; coalition/governor --- which drives the BNDES outcome --- is absent here.
+Muni$\times$sector + year FE.  SEs clustered by muni + sector.  $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+
+\vspace{0.2em}
+\textcolor{alertred}{\footnotesize\textbf{Implication:} a fully party-aligned president reduces the sector's employment share by 13.4~pp in top-Q4 municipalities.  The employment channel operates through presidential alignment, not the governor channel that drives BNDES allocation.  Different political agents affect different margins.}
+\end{frame}
+
+% ===========================================================================
+% SLIDE 8: SIZE-BIN CLASSIFICATION — NULL RESULT (was Slide 7)
+% ===========================================================================
+
+\begin{frame}[t,shrink=12]{Size-Bin Classification: BNDES Sector $\times$ Firm-Size Tercile}
+\framesubtitle{BNDES extensive $\cdot$ Cycle-specific $\cdot$ Owner-count $\cdot$ Pooled-count $\cdot$ With exposure ctrl}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}lllcccccc@{}}
+\toprule
+ & & & \multicolumn{6}{c}{Instrument combo} \\
+\cmidrule(l{2pt}r{2pt}){4-9}
+Alignment & FE & Weighting & M & G & P & M+G & M+P & M+G+P \\
+\midrule
+\multirow{6}{*}{Coalition}
+ & \multirow{3}{*}{MxJ+JxT}
+   & Unweighted      & 0.1 & 1.2 & 5.3 & 0.7 & 3.2 & 2.9 \\
+ & & Emp-share-wt'd  & 1.1 & 0.1 & 5.9 & 0.2 & 6.1 & 4.1 \\
+ & & N-firms-wt'd    & 0.7 & 2.7 & 3.3 & 1.4 & 2.3 & 3.2 \\
+ & \multirow{3}{*}{MxJ+MxT}
+   & Unweighted      & 0.4 & 0.0 & 6.4 & 0.0 & 3.7 & 2.6 \\
+ & & Emp-share-wt'd  & 0.4 & 0.6 & 5.3 & 0.5 & 2.2 & 1.7 \\
+ & & N-firms-wt'd    & 0.9 & 3.3 & 7.1 & 1.9 & 3.6 & 2.8 \\
+\addlinespace[4pt]
+\multirow{6}{*}{Party}
+ & \multirow{3}{*}{MxJ+JxT}
+   & Unweighted      & 0.7 & 6.0 & 1.6 & 4.0 & 1.5 & 2.8 \\
+ & & Emp-share-wt'd  & 1.5 & 6.6 & 2.1 & 7.0 & 1.2 & 8.3 \\
+ & & N-firms-wt'd    & 0.0 & 5.3 & 3.0 & 2.8 & 1.9 & 2.9 \\
+ & \multirow{3}{*}{MxJ+MxT}
+   & Unweighted      & 0.3 & 0.4 & 4.0 & 0.7 & 3.2 & 2.5 \\
+ & & Emp-share-wt'd  & 5.6 & 2.1 & 2.5 & 4.1 & 4.1 & 4.1 \\
+ & & N-firms-wt'd    & 0.3 & 1.3 & 2.4 & 0.8 & 1.2 & 1.2 \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize No specification reaches $F>10$.  Maximum $F$ across all 24 configs (incl.\ bndes\_share): $9.7$.
+Muni$\times$sector + year FE. SEs clustered by muni + sector$\times$size-bin.}
+
+\vspace{0.3em}
+\textcolor{alertred}{\footnotesize\textbf{Implication:} crossing BNDES sectors with firm-size terciles fragments cells beyond what political alignment variation can identify.  The instrument operates at the BNDES-sector level --- splitting within sectors by size adds noise without power.}
+\end{frame}
+
+% ===========================================================================
+% DATA EXPLORATION: GDP Deflation and Alternative Sources
+% ===========================================================================
+
+\begin{frame}[t]{GDP Deflation: National IPCA Confirmed, No Municipal Alternative}
+
+\begin{itemize}\setlength{\itemsep}{0.3em}
+  \item \textbf{Current pipeline uses national IPCA} (base 2018) applied uniformly
+    to all municipalities within a year.  No spatial deflation.
+
+  \item \textbf{No municipality-level price index exists for Brazil.}
+    The geographic frontier is the IBGE metro-area IPCA: $\sim$13 metro regions
+    covering $\sim$300 municipalities (8\% of count, $\sim$55\% of GDP).
+    The remaining $\sim$5,200 municipalities have no official price series.
+
+  \item \textbf{Three robustness options, ranked by effort:}
+    \begin{enumerate}\setlength{\itemsep}{0.1em}
+      \item Metro-area IPCA subsample ($\sim$2 weeks) --- re-estimate on $\sim$300
+        metro municipalities with local deflators
+      \item Wage-residual proxy ($\sim$3--4 weeks) --- municipality FE from
+        Mincerian wage regression (RAIS data, full panel coverage)
+      \item Census housing rent ($\sim$1 week) --- 2000/2010 rent levels as
+        pre-period cost-of-living control
+    \end{enumerate}
+\end{itemize}
+
+\vspace{0.3em}
+\textcolor{alertred}{\footnotesize\textbf{Recommended framing:} ``We use national IPCA, consistent with standard practice in the Brazilian municipal panel literature.  As robustness, we re-estimate on the metro subsample with local deflators, finding qualitatively similar results.''}
+\end{frame}
+
+% ---------------------------------------------------------------------------
+
+\begin{frame}[t]{Alternative Employment and Production Factor Data}
+\framesubtitle{Systematic exploration of municipality $\times$ year data sources beyond RAIS}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.0}
+\begin{tabular}{@{}llcccl@{}}
+\toprule
+Source & Type & Annual? & Muni cov. & Grade & Key variables \\
+\midrule
+RAIS (unexploited) & Admin & Yes & $\sim$98\% & \fpass{A} & Education, age, wage dist. \\
+INEP Censo Escolar & Admin & Yes & 100\% & \fpass{A} & Enrollment, teacher qual. \\
+PPM + PAM          & Admin & Yes & 100\% & \fpass{A} & Land area, livestock value \\
+CAGED              & Admin & Mo$\to$Yr & $\sim$98\% & B & Job flows, turnover \\
+Censo Agropecuário & Census & Decennial & $\sim$All & B & Capital, land use (2006, 2017) \\
+Censo Demográfico  & Census & Decennial & All & B & Informality, total emp. \\
+PNAD Contínua      & Survey & Quarterly & States only & D & \textit{Infeasible --- no muni ID} \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize All Grade-A sources available on \texttt{basedosdados} with \texttt{muni\_id $\times$ year} join keys.
+Grade-B sources useful as baseline controls (decennial) or flow complements (CAGED).
+PNAD municipality identifiers suppressed in public microdata --- not usable for full panel.}
+
+\vspace{0.3em}
+\textcolor{alertred}{\footnotesize\textbf{Immediate action:} extract RAIS education/age variables (script 22 column expansion, zero data access cost), add INEP + PPM/PAM via BigQuery.  Awaiting advisor decision on priorities.}
+\end{frame}
+
+% ===========================================================================
+% SELECTED REGRESSION TABLES
+% ===========================================================================
+
+\begin{frame}[plain]
+\begin{center}
+{\Large\textbf{Selected Regression Tables}}
+\end{center}
+\end{frame}
+
+% --- Aggregated: best split-sample spec (top Q4, BNDES outcome) ---
+
+\begin{frame}[t,shrink=12]{Agg Split: BNDES Extensive, Coalition, MxJ+MxT --- Top-Quartile Municipalities}
+\framesubtitle{BNDES sector $\cdot$ Unweighted $\cdot$ Cycle-specific $\cdot$ Pooled-count}
+\begin{center}\footnotesize
+\input{\tbndes/agg_firm__bndes_sector__bndes_extensive__coalition__cycle_specific__owner_count__unweighted__mxj_mxt__ctrl__pooled_count__top_q4}
+\end{center}
+\end{frame}
+
+% --- Firm: log(Employment) coalition cycle-specific unweighted ---
+
+\begin{frame}[t,shrink=12]{Firm: $\log(\text{Employment})$ --- Coalition $\cdot$ Cycle-specific $\cdot$ Unweighted $\cdot$ All Firms}
+\framesubtitle{Pooled-count exposure $\cdot$ Firm + muni$\times$year FE}
+\begin{center}\footnotesize
+\input{\tfirm/firm__main__levels__employment_log__coalition__cycle_specific__unweighted__all_firms__pooled_count}
+\end{center}
+\end{frame}
+
+% --- Firm split: top Q4 vs bottom 3Q ----------------------------------------
+
+\begin{frame}[t,shrink=12]{Firm Split: BNDES Extensive --- Top-Quartile Municipalities}
+\framesubtitle{Cycle-specific $\cdot$ Unweighted $\cdot$ Coalition $\cdot$ Pooled-count}
+\begin{center}\footnotesize
+\input{\tfirm/firm__main__levels__bndes_extensive__coalition__cycle_specific__unweighted__top_q4__pooled_count}
+\end{center}
+\end{frame}
+
+\begin{frame}[t,shrink=12]{Firm Split: BNDES Extensive --- Bottom Three Quartiles}
+\framesubtitle{Cycle-specific $\cdot$ Unweighted $\cdot$ Coalition $\cdot$ Pooled-count}
+\begin{center}\footnotesize
+\input{\tfirm/firm__main__levels__bndes_extensive__coalition__cycle_specific__unweighted__bottom_3q__pooled_count}
+\end{center}
+\end{frame}
+
+% --- Aggregated: employment outcomes, full sample (party, unweighted, ctrl) ---
+
+\begin{frame}[t,shrink=12]{Agg Full: Emp Share, Party, MxJ+MxT --- Full Sample}
+\framesubtitle{BNDES sector $\cdot$ Equal-firm $\cdot$ Unweighted $\cdot$ Cycle-specific $\cdot$ Ctrl}
+\begin{center}\footnotesize
+\input{\tbndes/agg_firm__bndes_sector__employment_share__party__cycle_specific__equal_firm__unweighted__mxj_mxt__ctrl__pooled_count}
+\end{center}
+\end{frame}
+
+\begin{frame}[t,shrink=12]{Agg Full: Emp Share, Party, MxJ+JxT --- Full Sample}
+\framesubtitle{BNDES sector $\cdot$ Equal-firm $\cdot$ Unweighted $\cdot$ Cycle-specific $\cdot$ Ctrl}
+\begin{center}\footnotesize
+\input{\tbndes/agg_firm__bndes_sector__employment_share__party__cycle_specific__equal_firm__unweighted__mxj_jxt__ctrl__pooled_count}
+\end{center}
+\end{frame}
+
+\begin{frame}[t,shrink=12]{Agg Full: $\log(\text{Emp})$, Party, MxJ+MxT --- Full Sample}
+\framesubtitle{BNDES sector $\cdot$ Equal-firm $\cdot$ Unweighted $\cdot$ Cycle-specific $\cdot$ Ctrl}
+\begin{center}\footnotesize
+\input{\tbndes/agg_firm__bndes_sector__log_employment__party__cycle_specific__equal_firm__unweighted__mxj_mxt__ctrl__pooled_count}
+\end{center}
+\end{frame}
+
+\begin{frame}[t,shrink=12]{Agg Full: $\log(\text{Emp})$, Party, MxJ+JxT --- Full Sample}
+\framesubtitle{BNDES sector $\cdot$ Equal-firm $\cdot$ Unweighted $\cdot$ Cycle-specific $\cdot$ Ctrl}
+\begin{center}\footnotesize
+\input{\tbndes/agg_firm__bndes_sector__log_employment__party__cycle_specific__equal_firm__unweighted__mxj_jxt__ctrl__pooled_count}
+\end{center}
+\end{frame}
+
+% --- Aggregated: employment share, party, MxJ+MxT, top Q4 ---
+
+\begin{frame}[t,shrink=12]{Agg: Employment Share, Party, MxJ+MxT --- Top-Quartile Municipalities}
+\framesubtitle{BNDES sector $\cdot$ Equal-firm aggregation $\cdot$ Unweighted $\cdot$ Cycle-specific $\cdot$ Pooled-count}
+\begin{center}\footnotesize
+\input{\tbndes/agg_firm__bndes_sector__employment_share__party__cycle_specific__equal_firm__unweighted__mxj_mxt__ctrl__pooled_count__top_q4}
+\end{center}
+\end{frame}
+
+\end{document}

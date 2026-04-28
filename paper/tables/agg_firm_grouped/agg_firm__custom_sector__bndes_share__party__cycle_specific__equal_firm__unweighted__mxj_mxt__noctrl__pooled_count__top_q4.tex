@@ -1,0 +1,28 @@
+\sbox0{%
+\begin{tabular}[t]{lcccccc}
+\toprule
+\multicolumn{1}{c}{\textbf{ }} & \multicolumn{6}{c}{\textbf{Dep.~var: $\text{BNDES share}_{jmt}$}} \\
+\cmidrule(l{3pt}r{3pt}){2-7}
+  & M & G & P & M+G & M+P & M+G+P\\
+\midrule
+$\overline{FA}^{\text{mayor}}_{\text{party}}$ & -0.005 &  &  & -0.005 & -0.005 & -0.004\\
+  & (0.024) &  &  & (0.023) & (0.022) & (0.021)\\
+$\overline{FA}^{\text{gov}}_{\text{party}}$ &  & -0.007 &  & -0.007 &  & -0.005\\
+  &  & (0.055) &  & (0.054) &  & (0.049)\\
+$\overline{FA}^{\text{pres}}_{\text{party}}$ &  &  & -0.012 &  & -0.011 & -0.010\\
+  &  &  & (0.065) &  & (0.064) & (0.057)\\
+\midrule
+Exposure Control & No & No & No & No & No & No\\
+$F$-statistic & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 & 0.0\\
+Observations & 138,083 & 138,083 & 138,083 & 138,083 & 138,083 & 138,083\\
+$R^2$ & 0.524 & 0.524 & 0.524 & 0.524 & 0.524 & 0.524\\
+\bottomrule
+\end{tabular}
+}%
+\ifdim\wd0>\linewidth
+  \resizebox{\linewidth}{!}{\usebox0}%
+  \par\vspace{3pt}\parbox{\linewidth}{\raggedright\scriptsize Muni $\times$ sector + muni $\times$ year FE. Party alignment. Cycle-specific baseline. Pooled-count exposure. Equal-firm aggregation. Unweighted regressions. Sample: top-quartile municipalities by mean RAIS employment (2002--2017). No exposure controls. SEs clustered by muni + sector group in parentheses. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\else
+  \usebox0%
+  \par\vspace{3pt}\parbox{\wd0}{\raggedright\scriptsize Muni $\times$ sector + muni $\times$ year FE. Party alignment. Cycle-specific baseline. Pooled-count exposure. Equal-firm aggregation. Unweighted regressions. Sample: top-quartile municipalities by mean RAIS employment (2002--2017). No exposure controls. SEs clustered by muni + sector group in parentheses. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\fi

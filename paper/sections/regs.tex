@@ -1,0 +1,553 @@
+\documentclass{article}
+\usepackage[top=2.3cm, bottom=2.3cm, left=2.1cm, right=2.1cm]{geometry}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{threeparttable}
+\usepackage{booktabs}
+\usepackage{rotating}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{dsfont}
+\usepackage{booktabs}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{setspace}
+\usepackage{babel}
+\usepackage{pstricks}
+\usepackage{pstricks-add}
+\let\clipbox\relax
+\usepackage{tikz}
+%\usepackage{subfig}
+\usepackage{adjustbox}
+\usepackage{enumitem}
+\usepackage{bbm}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{multirow}
+%\usepackage{pgfplots}
+\usepackage{accents}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{lscape}
+\hypersetup{colorlinks,linkcolor={blue},citecolor={blue},urlcolor={red}}
+%\usepackage[capposition=top]{floatrow}
+\usepackage{microtype}
+\usepackage[default,regular,black]{sourceserifpro}
+\usepackage[T1]{fontenc}
+
+\newcommand{\Align}{\mathrm{Align}}
+\newcommand{\FA}{\mathrm{FA}}
+\newcommand{\EC}{\mathrm{EC}}
+
+\begin{document}
+
+\title{Testing Industrial Policymakers: Evidence from Brazil's BNDES}
+\author{}
+\date{\today}
+
+\maketitle
+
+\begin{abstract}
+    Industrial policy. Everyone is doing it. Is it effective?
+\end{abstract}
+
+\normalsize
+
+\newpage
+\clearpage
+\setcounter{page}{1}
+\setlength{\parskip}{10pt}
+\setlength{\parindent}{10pt}
+
+\section{Shift-Share Idea}
+
+Our identification strategy exploits the fact that political alignment shocks differentially affect sectors based on their pre-existing exposure to party-affiliated firms. If the policymaker is optimally allocating resources across sectors, then exogenous perturbations to this allocation---induced by changes in which party controls the mayoralty, governorship, or presidency---should have no first-order effect on municipal output. We implement this test using a shift-share instrumental variables design, where the ``shift'' is the change in political alignment at the municipality level and the ``share'' is each sector's baseline exposure to the newly aligned party.
+
+The identifying assumption is that conditional on sector, municipality and time fixed effects, the interaction of political alignment shocks with pre-determined sectoral party exposure is orthogonal to unobserved determinants of municipality output. This assumption would be violated if, for example, parties systematically gain power in municipalities where their affiliated sectors were about to experience productivity growth for reasons unrelated to BNDES credit. We address this concern in several ways. First, we show that our instruments predict BNDES sectoral credit but not other municipal revenue sources or federal transfers. Second, we conduct placebo tests using leads of political alignment, which should have no predictive power if the parallel trends assumption holds. Third, we implement the Borusyak et al. (2022) shock-level inference procedure, which accounts for potential correlation in shocks across municipalities.
+
+When party $p$ becomes aligned in a place–time cell $(m,t)$, BNDES tilts relatively more credit toward firms connected to $p$. The sectors of municipality $m$ that (before the elections) were home to more $p$-connected companies obtain a greater boost, plausibly exogenous within the municipality, to their share $s_{jmt}$. That is the “shift” (alignment) times “share” (baseline party exposure).
+
+\section{Specifications}
+
+
+\subsection{Firm-level, Levels}
+
+The sector-level instruments $Z^{\ell}_{jmt}$ aggregate firm-level political connections within each sector. To validate that the political channel operates at the micro level, we estimate firm-level first-stage specifications that test whether firms whose owners are aligned with officeholders receive more BNDES credit.
+
+\paragraph{Baseline party exposure.}
+Let $L_{f,p,t}$ denote the number of owners of firm $f$ affiliated with party $p$ at time $t$, and $L_{f,t}$ the total number of owners of firm $f$ at time $t$ (including owners not affiliated with any party). We define the baseline exposure of firm $f$ to party $p$ for office $\ell$ at year $t$. Because both the shift and the share components of the instrument are office-specific, the baseline exposure carries three indices: the firm--party pair $(f,p)$, the office $\ell$, and the year $t$.
+
+The year $t$ matters because it determines which electoral cycle is relevant. Let $e_\ell(t)$ denote the last election year for office $\ell$ on or before year $t$. The pre-election window is the four-year period preceding that election, clipped to data availability:
+\[
+  T^\ell_t \equiv [e_\ell(t) - 4,\; e_\ell(t) - 1] \cap [2002, 2017].
+\]
+The baseline exposure of firm $f$ to party $p$ for office $\ell$ at year $t$ pools affiliated and total owner counts across the pre-election window, giving more weight to years in which the firm has more owners:
+\[
+  \omega^\ell_{fp,t} \equiv
+  \frac{\sum_{s \in T^\ell_t} L_{f,p,s}}{\sum_{s \in T^\ell_t} L_{f,s}},
+  \qquad
+  \sum_{p} \omega^\ell_{fp,t} \leq 1.
+\]
+This pooled-count definition weights each owner-year observation equally rather than each calendar year equally: a year in which the firm has many owners contributes more to the baseline than a year in which it has few. Equivalently, $\omega^\ell_{fp,t}$ is the owner-year-weighted average of the annual affiliation shares $L_{f,p,s}/L_{f,s}$.
+
+Because mayors, governors, and presidents are elected in different years, for any given year $t$ the mayor instrument and the governor/president instrument generally use different baseline windows. For instance, in $t = 2009$ the mayor instrument references the 2008 municipal election ($e_{\mathrm{M}}(2009) = 2008$, window 2004--2007), while the governor instrument references the 2006 state election ($e_{\mathrm{G}}(2009) = 2006$, window 2002--2005). If $t$ changes to a year in a different electoral cycle for office $\ell$---for example, from $t = 2008$ to $t = 2009$ for the mayor tier---then $e_\ell(t)$ advances and the weights $\omega^\ell_{fp,t}$ update accordingly. Within any single electoral term of office $\ell$, however, $e_\ell(t)$ is constant, so the weights $\omega^\ell_{fp,t}$ are fixed throughout that term.%
+\footnote{Cycle-specific baselines: for mayors elected in year $e_{\mathrm{M}}$,
+the baseline window is $[e_{\mathrm{M}}-4, e_{\mathrm{M}}-1]$;
+for governors/presidents elected in $e_{\mathrm{G}}$, it is $[e_{\mathrm{G}}-4, e_{\mathrm{G}}-1]$.
+For example, for mayor treatment 2005--2008 (election 2004),
+the window is 2000--2003, of which only 2002--2003 are available;
+for governor treatment 2007--2010 (election 2006), all four years 2002--2005 are used.
+The 2003--2006 governor/president cycle is dropped entirely
+because no pre-election data is available (the window 1998--2001 precedes our data).
+As a robustness exercise we fix the baseline at 2002 for all offices and cycles.}
+
+The residual $1 - \sum_p \omega^\ell_{fp,t}$ represents the share of owners
+not affiliated with any political party;
+these owners contribute zero to the instrument because they have no alignment shock.
+
+\paragraph{Extensive-margin baseline exposure (robustness).}
+As an alternative, we define an extensive-margin baseline that captures whether firm $f$ has \emph{any} owner affiliated with party $p$ during the pre-election window, rather than the share of affiliated owners:
+\[
+  \tilde{\omega}^\ell_{fp,t} \equiv
+  \max_{s \in T^\ell_t} \mathbf{1}(L_{f,p,s} > 0).
+\]
+This equals one if at least one owner of firm $f$ is affiliated with party $p$ in any year of the pre-election window, and zero otherwise. By construction $\tilde{\omega}^\ell_{fp,t} \in \{0,1\}$, but unlike the share-based measure, the sum across parties can exceed one if the firm has owners affiliated with multiple parties. Replacing $\omega^\ell_{fp,t}$ with $\tilde{\omega}^\ell_{fp,t}$ in the instrument definitions below yields the extensive-margin instrument variants $\widetilde{\FA}^{\ell}_{fmt}$ and $\widetilde{Z}^{\ell}_{jmt}$, which we report as robustness.
+
+\paragraph{Political shocks.}
+For office $\ell\in\{\mathrm{mayor},\mathrm{governor},\mathrm{president}\}$, we define the political shock $\Align^{\ell}_{mpt}$ as an indicator of whether party $p$ holds office $\ell$ in the jurisdiction to which municipality $m$ belongs at period $t$. Alignment can be defined at the party level or at the coalition level (i.e., whether $p$ belongs to the governing coalition for office $\ell$). We present both variants in the empirical results. Apart from extraordinary events such as impeachment proceedings or appeals, changes in the alignment only occur after elections, so $\Align^{\ell}_{mpt}$ is typically constant within electoral term length (four-year periods): if party $p$ wins election $e_\ell$ for office $\ell$, then $\Align^{\ell}_{mpt} = 1$ for $t \in \{e_\ell+1, e_\ell + 2, e_\ell + 3, e_\ell + 4\}$.
+
+\paragraph{Firm-level shift-share instrument.}
+Define the firm-level levels instrument as
+\[
+  \FA^{\ell}_{fmt} \equiv \sum_{p} \omega^\ell_{fp,t} \cdot \Align^{\ell}_{mpt}.
+\]
+Both the baseline exposure $\omega^\ell_{fp,t}$ and the alignment shock $\Align^{\ell}_{mpt}$ are indexed by the same office $\ell$: the shift is whether party $p$ holds office $\ell$, and the share is firm $f$'s pre-election exposure to $p$ measured over the pre-election window specific to $\ell$'s electoral cycle. This is the share of firm $f$'s owners who are affiliated with the party currently
+holding office $\ell$ in the jurisdiction to which municipality $m$ belongs.
+Because $\omega^\ell_{fp,t}$ does not vary across municipalities,
+variation in $\FA^{\ell}_{fmt}$ across firms in the same $(m,t)$ cell
+is driven purely by differences in owner-party composition.
+
+\paragraph{Interaction instruments.}
+To capture the additional effect of simultaneous alignment across tiers,
+we define interaction instruments.
+For two offices $\ell_1, \ell_2$, the joint-alignment instrument is
+\[
+  \FA^{\ell_1 \times \ell_2}_{fmt} \equiv
+  \sum_p \omega^{\ell_1,\ell_2}_{fp,t}\,\Align^{\ell_1}_{mpt}\,\Align^{\ell_2}_{mpt},
+\]
+where $\omega^{\ell_1,\ell_2}_{fp,t}$ is defined analogously to the single-tier case but considering the period leading up to the last election. Since mayoral and gubernatorial or presidential elections are held two years apart, the baseline exposure changes every two years.
+
+The triple instrument is
+$\FA^{\mathrm{triple}}_{fmt}
+= \sum_p \omega^{\mathrm{M,G,P}}_{fp,t}\,\Align^{\mathrm{M}}_{mpt}\,\Align^{\mathrm{G}}_{mpt}\,\Align^{\mathrm{P}}_{mpt}$.
+
+\paragraph{Extensive margin (levels).}
+We first ask whether alignment affects the probability of receiving any BNDES loan.
+Using the full firm panel, we estimate the linear probability model
+\[
+  \mathbf{1}(\text{BNDES}_{fmt} > 0) = \sum_{\ell} \lambda^{\text{ext}}_{\ell}\, \FA^{\ell}_{fmt}
+  + \gamma_{f} + \alpha_{mt} + u_{fmt},
+\]
+where $\gamma_f$ are firm fixed effects
+and $\alpha_{mt}$ are municipality$\times$year fixed effects.
+Standard errors are two-way clustered by firm and municipality.
+When the relevant election year is $e$, the post-election outcome years are
+$t \in \{e+1,\dots,e+4\}$ and the exposure weights in $\FA^\ell_{fmt}$ are held fixed
+at the baseline attached to the last election for office $\ell$.
+The primary specification uses analytic regression weights equal to firm employment, 
+so that $\lambda^{\text{ext}}_\ell$ estimates the
+employment-weighted average effect of alignment through office $\ell$
+on the probability of receiving BNDES credit.
+An unweighted specification serves as robustness.
+
+To derive the sector-level counterpart, the aggregation set must be
+defined explicitly. Let
+\[
+  T_e^{\mathrm{pre}} \equiv [e-4,e-1] \cap [2002,2017]
+\]
+denote the pre-election window for election $e$, and let
+\[
+  \mathcal{F}^{\mathrm{pre}}_{jme}
+  \equiv
+  \bigcup_{s \in T_e^{\mathrm{pre}}} \mathcal{F}_{jms}
+\]
+be the set of firms observed in municipality-sector cell $(m,j)$ during that
+pre-election window. Our baseline sector aggregation holds this firm base fixed
+throughout the post-election years $t \in \{e+1,\dots,e+4\}$ rather than using
+the contemporaneous post-election set of firms. The reason is identification:
+if entry, exit, relocation, or survival after the election were allowed to
+redefine the aggregation set, the sector-level object would mix changes in
+credit allocation with post-treatment composition changes in which firms belong
+to the cell.
+
+Accordingly, the extensive-margin outcome counterpart at the sector level is the share
+of the pre-election firm base that receives any BNDES credit in post-election
+year $t$,
+\[
+  H^{\mathrm{pre}}_{jmt}
+  \equiv
+  \frac{1}{N^{\mathrm{pre}}_{jme}}
+  \sum_{f \in \mathcal{F}^{\mathrm{pre}}_{jme}}
+  \mathbf{1}(\text{BNDES}_{fmt} > 0),
+  \qquad
+  N^{\mathrm{pre}}_{jme} \equiv \left|\mathcal{F}^{\mathrm{pre}}_{jme}\right|.
+\]
+Its firm-instrument counterpart is
+\[
+  \overline{\FA}^{\ell,\mathrm{pre}}_{jmt}
+  \equiv
+  \frac{1}{N^{\mathrm{pre}}_{jme}}
+  \sum_{f \in \mathcal{F}^{\mathrm{pre}}_{jme}}
+  \FA^\ell_{fmt}.
+\]
+This object should be read as the exposure of the pre-election
+municipality-sector firm base to political alignment. By contrast, an
+aggregation over the year-specific post-election set
+$\mathcal{F}_{jmt}$, or over the union of firms observed at any point in the
+post-election cycle, would introduce post-treatment composition into the
+sector-level object. We therefore treat those alternatives as robustness
+checks rather than the main specification.
+
+Aggregating all terms of the firm-level regression across the pre-election firm base yields the following equation:
+\[
+  H^{\mathrm{pre}}_{jmt} = \sum_{\ell} \lambda^{\text{ext}}_{\ell}\, \overline{\FA}^{\ell,\mathrm{pre}}_{jmt}
+  + \bar{\gamma}_{jme} + \alpha_{mt} + \epsilon_{jmt}
+\]
+where $\bar{\gamma}_{jme}$ is the average of firm fixed effects within the pre-election firm base $\mathcal{F}^{\mathrm{pre}}_{jme}$.
+
+In theory, the $\lambda ^{\text{ext}}_\ell$ coefficients from both the firm-level and the sector-level should be the same, at least if each firm has equal weight in both cases.
+
+\paragraph{Intensive margin (levels).}
+Conditional on receiving a positive loan in a given year, we estimate
+\[
+  \log(\text{BNDES}_{fmt}) = \sum_{\ell} \lambda^{\text{int}}_{\ell}\, \FA^{\ell}_{fmt}
+  + \gamma_{f} + \alpha_{mt} + u_{fmt},
+  \qquad \text{BNDES}_{fmt} > 0,
+\]
+where $\lambda^{\text{int}}_\ell$ captures the semi-elasticity of loan size
+with respect to alignment, among firms that receive any credit.
+Fixed effects, clustering, and employment weighting follow the extensive-margin specification.
+Comparing $\lambda^{\text{ext}}_\ell$ and $\lambda^{\text{int}}_\ell$ reveals
+whether alignment operates primarily through access to credit or through the size of loans granted.
+
+\subsection{Firm-level, Changes}\label{sec:firm-changes}
+
+As a robustness exercise, we also estimate specifications that exploit only the
+variation induced by political turnover at inauguration years, rather than the
+cross-sectional differences in alignment status used in the primary levels
+specification.
+
+\paragraph{Firm-level alignment turnover instrument.}
+To exploit only the variation induced by political turnover, define
+\[
+  \Delta\FA^{\ell}_{fmt} \equiv \sum_{p} \omega^\ell_{fp,t} \cdot \Delta\Align^{\ell}_{mpt},
+\]
+where $\Delta\Align^{\ell}_{mpt} = \Align^{\ell}_{mpt} - \Align^{\ell}_{mp,t-1}$
+is the alignment turnover shock and $\omega^\ell_{fp,t}$ is the office-specific baseline defined above.%
+\footnote{\label{fn:not-first-diff}$\Delta\FA^{\ell}_{fmt}$ is constructed from alignment turnover,
+not as the first difference of $\FA^{\ell}_{fmt}$.
+The two coincide only when baseline weights $\omega^\ell_{fp,t}$ are constant across
+adjacent years---which holds within an electoral cycle but not at cycle boundaries.
+Unlike the levels instrument, $\Delta\FA$ is \emph{not} spread across the electoral term:
+it is non-zero only at inauguration years (2005, 2009, 2013, 2017 for mayors;
+2007, 2011, 2015 for governors/presidents).
+Non-inauguration years contribute only to fixed-effect estimation.}
+
+\paragraph{Extensive margin (changes).}
+We first estimate whether political turnover affects the probability of receiving a loan:
+\[
+  \Delta\mathbf{1}(\text{BNDES}_{fmt} > 0) = \sum_{\ell} \lambda^{\text{ext}}_{\ell}\,\Delta\FA^{\ell}_{fmt}
+  + \gamma_{f} + \alpha_{mt} + u_{fmt},
+\]
+where $\Delta\mathbf{1}(\text{BNDES}_{fmt} > 0)
+= \mathbf{1}(\text{BNDES}_{fmt} > 0) - \mathbf{1}(\text{BNDES}_{fm,t-1} > 0)$.
+This specification is more demanding than the levels version: identification relies exclusively on election-year political turnover rather than cross-sectional differences in alignment status.
+
+\paragraph{Intensive margin (changes).}
+Conditional on positive lending in both $t$ and $t-1$, we estimate
+\[
+  \Delta\log(\text{BNDES}_{fmt}) = \sum_{\ell} \lambda^{\text{int}}_{\ell}\,\Delta\FA^{\ell}_{fmt}
+  + \gamma_{f} + \alpha_{mt} + u_{fmt},
+  \qquad \text{BNDES}_{fmt} > 0,\; \text{BNDES}_{fm,t-1} > 0,
+\]
+where $\Delta\log(\text{BNDES}_{fmt}) = \log(\text{BNDES}_{fmt}) - \log(\text{BNDES}_{fm,t-1})$.
+Fixed effects, clustering, and employment weighting follow the extensive-margin specification.
+
+\subsection{Sector-level, Levels}
+
+\paragraph{Sector-level baseline exposure.}
+For sector $j$ in municipality $m$, define the sector-party exposure weight for office $\ell$ as
+\[
+  w^\ell_{jmp,t} \equiv
+  \frac{1}{|T^\ell_t|}\sum_{s\in T^\ell_t}
+  \frac{\sum_{f\in\mathcal{F}(j,m)} L_{f,p,s}}
+       {\sum_{f\in\mathcal{F}(j,m)} L_{f,s}},
+\]
+where $\mathcal{F}(j,m)$ is the set of firms in sector $j$ of municipality $m$
+and $T^\ell_t$ is the same office-specific pre-election window used for firm-level baselines.
+As at the firm level, the baseline window depends on the office tier $\ell$:
+the mayor instrument uses the pre-election window anchored to the last municipal election,
+while the governor and president instruments use the window anchored to the last state/federal election.
+This is the owner-count-weighted average of firm-level exposures:
+$w^\ell_{jmp,t} = \sum_{f\in\mathcal{F}(j,m)} (L_{f,t}/N^\ell_{jm,t})\,\omega^\ell_{fp,t}$,
+where $N^\ell_{jm,t} = \sum_{f\in\mathcal{F}(j,m)} L_{f,t}$.
+As at the firm level, unaffiliated owners enter the denominator but contribute zero
+to the instrument; $\sum_p w^\ell_{jmp,t} \leq 1$.
+
+\paragraph{Levels instrument.}
+The sector-level levels instrument is
+\[
+  Z^{\ell}_{jmt} \equiv \sum_{p} w^\ell_{jmp,t}\,\Align^{\ell}_{mpt}.
+\]
+Both the share $w^\ell_{jmp,t}$ and the shift $\Align^{\ell}_{mpt}$ are specific to office $\ell$.
+Because $\Align^{\ell}_{mpt}$ is constant across sectors $j$ within $(m,t)$,
+variation in $Z^{\ell}_{jmt}$ across sectors is driven by baseline exposure $w^\ell_{jmp,t}$.
+
+\paragraph{First stage and exclusion.}
+We estimate
+\[
+  s_{jmt} = \sum_{\ell} \lambda_{\ell}\, Z^{\ell}_{jmt}
+  + \sum_{\ell} \phi_\ell\,\EC^\ell_{jm,t} + \gamma_{jm} + \alpha_{jt} + u_{jmt},
+\]
+where $s_{jmt}$ is sector $j$'s share of BNDES credit in municipality $m$ at time $t$,
+$\EC^\ell_{jm,t} \equiv \sum_p w^\ell_{jmp,t}$ is the office-specific sector-level exposure control
+(measuring overall political connectedness of the sector-municipality cell).%
+\footnote{The pooled-count exposure control is bounded above by 1 because $\sum_p w^\ell_{jmp,t} \leq 1$.
+For the extensive-margin baseline robustness, the analogous control
+$\widetilde{\EC}^\ell_{jm,t} \equiv \sum_p \widetilde{w}^\ell_{jmp,t}$
+can exceed~1 because $\widetilde{\omega}^\ell_{fp,t} = (1/|T^\ell_t|)\sum_s \mathbf{1}(L_{fp,s}>0)$
+allows multi-party firms to contribute exposure to several parties simultaneously.
+At the firm level the binary exposure control is $\sum_p \widetilde{\omega}^\ell_{fp,t}$.}
+$\gamma_{jm}$ are municipality$\times$sector fixed effects,
+and $\alpha_{jt}$ are sector$\times$year fixed effects.
+Standard errors are two-way clustered by municipality and sector.
+
+\paragraph{Aggregation link.}
+The sector-level instrument is the owner-count-weighted aggregation of firm-level instruments:
+\[
+  Z^{\ell}_{jmt}
+  =
+  \sum_{f \in \mathcal{F}^{\mathrm{pre}}_{jme}}
+  \frac{L_{f,t}}{\sum_{f' \in \mathcal{F}^{\mathrm{pre}}_{jme}} L_{f',t}}\,
+  \FA^{\ell}_{fmt}.
+\]
+The aggregation weight is each firm's share of total baseline owners in the
+pre-election municipality-sector firm base.
+The employment-weighted counterpart---aggregating $\FA^{\ell}_{fmt}$ with weights
+proportional to $n_{\text{employees},ft}$---produces a distinct object that corresponds
+to the estimand of the employment-weighted firm first stage.
+We verify this aggregation identity diagnostically by collapsing firm instruments
+within each $(j,m,t)$ cell and confirming that the collapsed quantity satisfies
+the instrument's support bounds.
+Therefore, the firm-level F-statistics provide a micro-level validation of the sector-level instrument relevance: if political alignment does not predict firm-level lending, the sector-level instrument cannot have a first stage.
+
+\subsection{Sector-level, Changes}
+
+The sector-level analogue of the firm-level changes specification
+(Section~\ref{sec:firm-changes}) serves as the corresponding robustness check:
+it tests whether political turnover also reallocates BNDES credit across
+sectors, exploiting only inauguration-year variation rather than the
+cross-sectional alignment differences used in the levels specification above.
+
+\paragraph{Shift-share changes instrument.}
+The sector-level changes instrument is
+\[
+  \Delta Z^{\ell}_{jmt} \equiv \sum_{p} w^\ell_{jmp,t}\,\Delta\Align^{\ell}_{mpt}.
+\]
+As with $\Delta\FA$,
+this is constructed from alignment turnover, not as the first difference of $Z^{\ell}_{jmt}$,
+and is not spread across electoral terms---it is non-zero only at inauguration years.%
+\footnote{See footnote~\ref{fn:not-first-diff} above.
+Within an electoral cycle, $w^\ell_{jmp,t}$ is constant and the two coincide.}
+
+\paragraph{First stage.}
+We estimate
+\[
+  \Delta s_{jmt} = \sum_{\ell} \lambda_{\ell}\,\Delta Z^{\ell}_{jmt}
+  + \sum_{\ell} \phi_\ell\,\EC^\ell_{jm,t} + \gamma_{jm} + \alpha_{jt} + u_{jmt}.
+\]
+Because shares sum to unity within each municipality-year
+($\sum_j s_{jmt} = 1$), changes satisfy the simplex constraint
+$\sum_j \Delta s_{jmt} = 0$ in municipality-years with positive total BNDES
+in both $t$ and $t-1$.
+We therefore drop the sector with the largest mean share ($j_0$)
+and interpret coefficients relative to it.
+
+\subsection{Two Complementary Pipelines}
+
+The paper estimates two complementary first-stage pipelines that exploit the
+same political shocks and the same electoral-cycle timing, but operate at
+different levels of aggregation.
+
+\paragraph{Firm-level pipeline.}
+The unit of observation is a firm$\times$municipality$\times$year cell.
+Exposure is firm-specific:
+$\omega^\ell_{fp,t}$ is the firm's baseline owner-party share for office $\ell$, averaged over the
+four-year pre-election window attached to the last election for $\ell$.
+The estimation sample is the full firm panel, and the main specifications use
+analytic employment weights $n_{\text{employees},ft}$.
+This pipeline asks whether firms whose owners are more exposed to newly aligned
+parties become more likely to receive BNDES credit, and whether conditional
+loan size also rises.
+Its main advantage is that it directly validates the micro political-lending
+channel under firm fixed effects and municipality$\times$year fixed effects.
+Its main drawback is that it does not itself deliver the municipality-sector
+reallocation object used in the second stage.
+
+\paragraph{Sector-level pipeline.}
+The unit of observation is a municipality$\times$sector$\times$year cell.
+Exposure is sector-specific:
+$w^\ell_{jmp,t}$ aggregates pre-election firm-level political exposure within
+$(m,j)$ using owner-count baseline weights, with the pre-election window specific to office $\ell$.
+In the baseline design, the relevant firm support is the fixed pre-election
+firm base exposed to turnover, not the contemporaneous post-election set of
+firms.
+The sector outcomes $s_{jmt}$ and $\Delta s_{jmt}$ are then measured on the
+post-election municipality-sector panel, with zero-credit sectors retained in
+the RAIS-based skeleton.
+This pipeline asks whether political alignment changes the sectoral composition
+of municipal BNDES lending.
+Its main advantage is that it matches the object needed for the
+municipality-level optimality test.
+Its main drawback is that sector shares compress the underlying firm responses
+and may attenuate the signal through within-municipality cancellation across
+sectors.
+
+\subsubsection{Aggregated firm extensive margin}\label{sec:agg-ext-sector}
+
+To make the comparison between pipelines precise, we aggregate the
+\emph{unweighted} firm-level extensive-margin specification across firms in a
+municipality-sector cell and compare the resulting object term by term with the
+sector-level first stage.
+
+Start from the unweighted firm extensive margin in levels:
+\[
+  \mathbf{1}(\text{BNDES}_{fmt} > 0)
+  = \sum_{\ell} \lambda^{\text{ext}}_{\ell}\, \FA^{\ell}_{fmt}
+  + \gamma_{f} + \alpha_{mt} + u_{fmt}.
+\]
+Sum both sides over the pre-election firm base
+$\mathcal{F}^{\mathrm{pre}}_{jme}$ and divide by
+$N^{\mathrm{pre}}_{jme} \equiv |\mathcal{F}^{\mathrm{pre}}_{jme}|$:
+\begin{equation}\label{eq:agg-ext}
+  \underbrace{
+    \frac{1}{N^{\mathrm{pre}}_{jme}}
+    \sum_{f \in \mathcal{F}^{\mathrm{pre}}_{jme}}
+    \mathbf{1}(\text{BNDES}_{fmt} > 0)
+  }_{= H^{\mathrm{pre}}_{jmt}}
+  =
+  \sum_{\ell} \lambda^{\text{ext}}_{\ell}\,
+  \underbrace{
+    \frac{1}{N^{\mathrm{pre}}_{jme}}
+    \sum_{f \in \mathcal{F}^{\mathrm{pre}}_{jme}}
+    \FA^{\ell}_{fmt}
+  }_{= \overline{\FA}^{\ell,\mathrm{pre}}_{jmt}}
+  +
+  \underbrace{
+    \frac{1}{N^{\mathrm{pre}}_{jme}}
+    \sum_{f \in \mathcal{F}^{\mathrm{pre}}_{jme}}
+    \gamma_f
+  }_{= \bar{\gamma}_{jme}}
+  + \alpha_{mt}
+  + \bar{u}_{jmt}.
+\end{equation}
+The left-hand side is $H^{\mathrm{pre}}_{jmt}$, the share of the pre-election
+firm base that receives any BNDES credit in year $t$ (defined in the
+firm-level section above).
+Expanding the averaged instrument,
+\[
+  \overline{\FA}^{\ell,\mathrm{pre}}_{jmt}
+  = \sum_p
+  \underbrace{
+    \Bigl(\frac{1}{N^{\mathrm{pre}}_{jme}}
+    \sum_{f \in \mathcal{F}^{\mathrm{pre}}_{jme}} \omega^\ell_{fp,t}\Bigr)
+  }_{= \bar{\omega}^\ell_{jmp,t}}
+  \Align^{\ell}_{mpt},
+\]
+where $\bar{\omega}^\ell_{jmp,t}$ is the \emph{simple} (equal-firm-weight)
+average of firm-level baseline party exposure for office $\ell$ within the municipality-sector
+cell.
+
+Now compare equation~\eqref{eq:agg-ext} with the sector-level first stage:
+\[
+  s_{jmt}
+  = \sum_{\ell} \lambda_{\ell}\, Z^{\ell}_{jmt}
+  + \sum_{\ell} \phi_\ell\,\EC^\ell_{jm,t} + \gamma_{jm} + \alpha_{jt} + u_{jmt},
+\]
+where $Z^{\ell}_{jmt} = \sum_p w^\ell_{jmp,t}\,\Align^{\ell}_{mpt}$
+and $w^\ell_{jmp,t} = \sum_f (L_{f,t}/N^\ell_{jm,t})\,\omega^\ell_{fp,t}$
+is the \emph{owner-count-weighted} average of firm exposure for office $\ell$.
+Three differences emerge.
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Outcome.}
+  The aggregated firm object $H^{\mathrm{pre}}_{jmt}$ is the
+  \emph{unweighted} share of pre-election firms receiving any BNDES credit---a
+  head-count extensive margin.
+  The sector outcome $s_{jmt}$ is the \emph{value} share of BNDES credit
+  flowing to sector $j$ within municipality $m$.
+  The two coincide only if every firm that receives credit obtains the same
+  amount and the pre-election firm base exhausts the sector.
+  In general, $s_{jmt}$ reflects both the extensive margin (how many firms
+  receive credit) and the intensive margin (how much each receives), weighted
+  by credit volume rather than firm count.
+
+\item \textbf{Instrument weighting.}
+  The aggregated firm instrument $\overline{\FA}^{\ell,\mathrm{pre}}_{jmt}$
+  weights each firm equally ($1/N^{\mathrm{pre}}_{jme}$), so it recovers
+  $\bar{\omega}^\ell_{jmp,t}$---the simple average of firm exposure.
+  The sector instrument $Z^{\ell}_{jmt}$ weights firms by their baseline
+  owner count ($L_{f,t}/N^\ell_{jm,t}$), recovering
+  $w^\ell_{jmp,t}$---the owner-count-weighted average.
+  The two differ whenever firm-level party exposure
+  $\omega^\ell_{fp,t}$ covaries with firm size measured by total owners
+  $L_{f,t}$: if larger firms (more owners) are more politically exposed,
+  then $w^\ell_{jmp,t} > \bar{\omega}^\ell_{jmp,t}$, and vice versa.
+
+\item \textbf{Fixed effects and residual structure.}
+  The aggregated firm equation absorbs a cell-specific average of firm fixed
+  effects $\bar{\gamma}_{jme}$ plus the municipality$\times$year effect
+  $\alpha_{mt}$.
+  Together these span a municipality$\times$sector fixed effect (since
+  $\bar{\gamma}_{jme}$ varies by $(j,m,e)$ and is constant within an
+  electoral cycle) and a municipality$\times$year effect.
+  The sector regression instead absorbs municipality$\times$sector effects
+  $\gamma_{jm}$ and sector$\times$year effects $\alpha_{jt}$.
+  The aggregated firm specification therefore has \emph{finer} absorbing
+  structure in the municipality dimension (municipality$\times$year rather
+  than sector$\times$year) but \emph{coarser} in the sector dimension (no
+  sector$\times$year trend).
+  The sector regression adds office-specific exposure controls $\EC^\ell_{jm,t}$ that the
+  firm aggregation does not include explicitly (though firm fixed effects
+  partially absorb time-invariant connectedness).
+\end{enumerate}
+
+In summary, even starting from the same firm-level political shocks, the
+aggregated firm extensive margin and the sector first stage differ in the
+\emph{outcome object} (head-count vs.\ value share), the \emph{weighting
+scheme} over firms (equal vs.\ owner-count), and the \emph{conditioning set}
+(firm FE + municipality$\times$year FE vs.\ municipality$\times$sector FE +
+sector$\times$year FE + exposure control).
+These differences mean that the sector-level $\lambda_\ell$ does not in
+general equal the firm-level $\lambda^{\text{ext}}_\ell$: the sector
+coefficient captures a credit-value-weighted, owner-count-adjusted, and
+differently-conditioned version of the political lending channel.
+The firm pipeline validates the micro mechanism; the sector pipeline
+transforms it into the reallocation object needed for the second stage.
+
+\subsection{Multi-Municipality Firm Robustness}
+
+Approximately 2\% of firm-years in the panel correspond to firms operating in two or more municipalities in a given year, but these firms account for nearly 30\% of total employment.
+For multi-municipality firms, the same owner-affiliation vector interacts with
+alignment shocks in different municipalities, potentially creating correlation
+in the instrument across observations sharing the same firm.
+As a robustness check, we re-estimate the firm-level battery restricting
+the sample to single-municipality firms ($\texttt{is\_multi\_muni} = 0$),
+which ensures that each firm-year maps to a unique municipality-alignment environment.
+
+\end{document}
+

@@ -1,0 +1,28 @@
+\sbox0{%
+\begin{tabular}[t]{lcccccc}
+\toprule
+\multicolumn{1}{c}{\textbf{ }} & \multicolumn{6}{c}{\textbf{Dep.~var: $\text{Share of firms receiving a BNDES loan}_{jmt}$}} \\
+\cmidrule(l{3pt}r{3pt}){2-7}
+  & M & G & P & M+G & M+P & M+G+P\\
+\midrule
+$\overline{FA}^{\text{mayor}}_{\text{coal.}}$ & -0.013** &  &  & -0.009** & -0.010** & -0.009**\\
+  & (0.002) &  &  & (0.002) & (0.002) & (0.002)\\
+$\overline{FA}^{\text{gov}}_{\text{coal.}}$ &  & -0.024** &  & -0.022** &  & -0.022**\\
+  &  & (0.004) &  & (0.004) &  & (0.004)\\
+$\overline{FA}^{\text{pres}}_{\text{coal.}}$ &  &  & -0.012 &  & -0.013 & -0.015\\
+  &  &  & (0.006) &  & (0.006) & (0.005)\\
+\midrule
+Exposure Control & Yes & Yes & Yes & Yes & Yes & Yes\\
+$F$-statistic & \textbf{38.2} & \textbf{29.5} & 3.2 & \textbf{20.2} & \textbf{32.9} & \textbf{33.5}\\
+Observations & 208,485 & 208,485 & 208,485 & 208,485 & 208,485 & 208,485\\
+$R^2$ & 0.687 & 0.688 & 0.688 & 0.689 & 0.689 & 0.689\\
+\bottomrule
+\end{tabular}
+}%
+\ifdim\wd0>\linewidth
+  \resizebox{\linewidth}{!}{\usebox0}%
+  \par\vspace{3pt}\parbox{\linewidth}{\raggedright\scriptsize Muni $\times$ sector + sector $\times$ year FE. Coalition alignment. Cycle-specific baseline. Pooled-count exposure. Employment-weighted aggregation. WLS uses pre-election cell employment. Exposure controls interacted with year. SEs clustered by muni + size bin in parentheses. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\else
+  \usebox0%
+  \par\vspace{3pt}\parbox{\wd0}{\raggedright\scriptsize Muni $\times$ sector + sector $\times$ year FE. Coalition alignment. Cycle-specific baseline. Pooled-count exposure. Employment-weighted aggregation. WLS uses pre-election cell employment. Exposure controls interacted with year. SEs clustered by muni + size bin in parentheses. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\fi

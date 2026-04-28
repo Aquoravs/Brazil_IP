@@ -1,0 +1,361 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{itemize items}[circle]
+
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{appendixnumberbeamer}
+\usepackage{hyperref}
+\usepackage{adjustbox}
+\usepackage{multirow}
+
+\newcommand*{\bkmtranslateto}{\languagename}
+\newcommand*{\bkmtranslate}[1]{%
+  \ifcsname tr@@@\bkmtranslateto @#1\endcsname
+    \csname tr@@@\bkmtranslateto @#1\endcsname
+  \else
+    #1%
+  \fi
+}
+\pdfstringdefDisableCommands{%
+  \let\translate\bkmtranslate
+}
+
+\newcommand{\Align}{\mathrm{Align}}
+\newcommand{\FA}{\mathrm{FA}}
+\newcommand{\ind}{\mathbf{1}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cFpre}{\mathcal{F}^{\mathrm{pre}}}
+\newcommand{\Pass}{\textcolor{notegreen}{\textbf{PASS}}}
+\newcommand{\Fail}{\textcolor{alertred}{\textbf{FAIL}}}
+
+\definecolor{darkblue}{RGB}{0,51,102}
+\definecolor{alertred}{RGB}{180,30,30}
+\definecolor{notegreen}{RGB}{0,100,50}
+
+\setbeamercolor{titlelike}{bg=darkblue,fg=white}
+\setbeamercolor{frametitle}{bg=darkblue,fg=white}
+\setbeamercolor{title}{fg=white}
+\setbeamercolor{structure}{fg=darkblue}
+
+\title{Firm-to-Cell Aggregation}
+\author{}
+\date{March 26, 2026}
+
+\begin{document}
+
+% ===========================================================================
+% Frame 1: Title
+% ===========================================================================
+\begin{frame}
+\titlepage
+\end{frame}
+
+% ===========================================================================
+% Frame 2: Setup and Notation
+% ===========================================================================
+\begin{frame}{Setup and Notation}
+
+\footnotesize
+\textbf{Cell}: $c = (j, m, e)$ = sector $\times$ municipality $\times$ election cycle.\\
+$\cFpre_c$: set of pre-election firms in cell $c$,\quad $N_c = |\cFpre_c|$.
+
+\medskip
+\textbf{Firm-level regression} (for each firm $f \in \cFpre_c$, post-election year $t$):
+\begin{equation}\label{eq:firm}
+  \ind(\text{BNDES}_{fmt} > 0)
+  = \sum_\ell \lambda_\ell\, \FA^\ell_{fmt}
+  + \gamma_f + \alpha_{mt} + u_{fmt}
+\end{equation}
+
+\medskip
+\textbf{Cell-level averages} (averaging over $f \in \cFpre_c$):
+\[
+  H^\mathrm{pre}_{jmt}
+  \equiv \frac{1}{N_c}\sum_{f\in\cFpre_c} \ind(\text{BNDES}_{fmt}>0),
+  \qquad
+  \overline{\FA}^{\ell}_{jmt}
+  \equiv \frac{1}{N_c}\sum_{f\in\cFpre_c} \FA^\ell_{fmt}
+\]
+
+\medskip
+\textbf{Instrument structure}: $\FA^\ell_{fmt} = \sum_p \omega_{fp,0}(e) \cdot \Align^\ell_{mpt}$
+
+\begin{itemize}\setlength{\itemsep}{2pt}
+  \item $\omega_{fp,0}(e)$: firm baseline party exposure --- fixed within each election cycle
+  \item $\Align^\ell_{mpt}$: alignment indicator --- spread across the tier's 4-year term
+  \item Within-cycle variation in $\FA^\ell_{fmt}$ arises only when a different-tier
+        inauguration changes $\Align$ mid-cycle (e.g., governor inaugurates in 2007
+        during the 2005--2008 mayor term)
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+% Frame 3: Proposition 2 --- The Averaging Step
+% ===========================================================================
+\begin{frame}{The Averaging Step}
+
+\footnotesize
+\textbf{Claim}: summing \eqref{eq:firm} over $f \in \cFpre_c$ and dividing by $N_c$ yields:
+\begin{equation}\label{eq:cell}
+  H^\mathrm{pre}_{jmt}
+  = \sum_\ell \lambda_\ell\,\overline{\FA}^{\ell}_{jmt}
+  + \bar\gamma_c + \alpha_{mt} + \epsilon_{jmt}
+\end{equation}
+
+\textbf{Proof.}\; Sum both sides of~\eqref{eq:firm} over $f \in \cFpre_c$, divide by $N_c$:
+\[
+  \underbrace{\frac{1}{N_c}\sum_f \ind(\text{BNDES}_{fmt}>0)}_{H^\mathrm{pre}_{jmt}}
+  = \sum_\ell \lambda_\ell
+    \underbrace{\frac{1}{N_c}\sum_f \FA^\ell_{fmt}}_{\overline{\FA}^{\ell}_{jmt}}
+  + \underbrace{\frac{1}{N_c}\sum_f \gamma_f}_{\bar\gamma_c}
+  + \alpha_{mt}
+  + \underbrace{\frac{1}{N_c}\sum_f u_{fmt}}_{\epsilon_{jmt}}
+\]
+
+The $\lambda_\ell$ pass through unchanged because averaging is linear and the
+coefficients are common to all firms. \hfill$\square$
+
+\medskip
+\textbf{Key}: this is a \emph{population identity}. For the \emph{estimated}
+$\hat\lambda$ to coincide between the firm-level and cell-level regressions,
+six additional conditions must hold.
+
+\end{frame}
+
+% ===========================================================================
+% Frame 4: The Six Conditions
+% ===========================================================================
+\begin{frame}{The Six Conditions for Estimated Equivalence}
+
+\scriptsize
+\renewcommand{\arraystretch}{1.35}
+\begin{center}
+\begin{tabular}{c p{9.5cm}}
+\toprule
+\textbf{Cond.} & \textbf{Meaning} \\
+\midrule
+C1 & \textbf{Correct weighting.}\; The cell-level regression must weight each cell by $N_c$ (the number of pre-election firms). Otherwise, large cells are down-weighted relative to the firm regression. \\
+C2 & \textbf{Same sample.}\; The cell averages must be computed over exactly the same firm set $\cFpre_c$ used by the firm regression (after FE pruning / singleton removal). \\
+C3 & \textbf{One cell per firm.}\; Each firm $f$ belongs to exactly one cell $(j, m)$. Otherwise, $\gamma_f$ creates cross-cell links that the cell-level FE projector treats as independent. \\
+C4 & \textbf{Correct aggregated FE.}\; The cell regression must absorb $\bar\gamma_c = N_c^{-1}\sum_f \gamma_f$ (a cell-level FE) and $\alpha_{mt}$, not a different FE structure. \\
+C5 & \textbf{Fixed cell composition within cycle.}\; The firm set $\cFpre_c(t)$ must be constant across all years of the regime. Otherwise $\bar\gamma_c(t)$ is time-varying and a single cell FE cannot absorb it. \\
+C6 & \textbf{No within-cell regressor heterogeneity.}\; After FE projection, all firms in the same cell-year must have the same projected $\widetilde{\FA}^\ell$. Otherwise the cell regression loses within-cell variation that the firm regression uses. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{frame}
+
+% ===========================================================================
+% Frame 5: Synthetic Benchmark
+% ===========================================================================
+\begin{frame}{Synthetic Benchmark: Proposition 2 Works}
+
+\small
+\begin{center}
+\begin{tabular}{p{5.8cm}cc}
+\toprule
+\textbf{Test} & \textbf{Max $|\Delta \hat\lambda|$} & \textbf{Result} \\
+\midrule
+All C1--C6 enforced & $1.0 \times 10^{-15}$ & \Pass \\
+Drop $N_c$ weights (violate C1) & 0.004 & \Fail \\
+Allow sample mismatch (violate C2) & 0.004 & \Fail \\
+Use wrong aggregated FE (violate C4) & 0.041 & \Fail \\
+Allow firm mobility across cells (violate C3) & 0.010 & \Fail \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\begin{itemize}\setlength{\itemsep}{3pt}
+  \item Synthetic data forces $\FA^\ell_{fmt}$ constant within each cell-year $\Rightarrow$ C6 holds by construction.
+  \item When all conditions hold, equivalence at machine precision.
+  \item Breaking any single condition destroys it.
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+% Frame 6: Which Conditions Can Hold on Real Data?
+% ===========================================================================
+\begin{frame}{Which Conditions Can Hold on Real Data?}
+
+\scriptsize
+\renewcommand{\arraystretch}{1.3}
+\begin{center}
+\begin{tabular}{c p{3.8cm} c p{5.8cm}}
+\toprule
+ & \textbf{Condition} & \textbf{Holds?} & \textbf{What it takes} \\
+\midrule
+C1 & $N_c$-weighting & Yes & Use analytic weights in the cell regression \\
+C2 & Same sample & Yes & Use the rows not dropped by the firm regression \\
+C4 & Correct aggregated FE & Yes & Absorb $\bar\gamma_c + \alpha_{mt}$ (cell FE + muni$\times$year FE) \\
+\midrule
+C3 & One cell per firm & \textcolor{alertred}{No$^*$} & Restrict to single-$(j,m)$ firms; must rerun the firm regression on this subsample ($\sim$20\% of firms dropped) \\
+C5 & Fixed composition within cycle & \textcolor{alertred}{No$^*$} & Balance the panel within each regime; must rerun the firm regression on this subsample ($\sim$40\% of single-cell obs dropped) \\
+\midrule
+C6 & No within-cell heterogeneity & \textcolor{alertred}{No} & Requires $\omega_{fp,0} = \omega_{f'p,0}$ for all $f, f'$ in same cell; \textbf{structurally impossible} on real data \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\small
+\begin{itemize}\setlength{\itemsep}{3pt}
+  \item C1, C2, C4 are free choices --- they can be enforced without changing the firm regression.
+  \item C3 and C5 require \textbf{changing the firm sample} and re-estimating.
+  \item C6 is intrinsic to the data: firms in the same cell have different party affiliations.
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+% Frame 7: C3 and C5 --- What They Require
+% ===========================================================================
+\begin{frame}{C3 and C5: Changing the Firm Regression}
+
+\footnotesize
+\textbf{C3 (firm immobility)} requires that each firm operates in exactly one $(j, m)$ cell.
+
+\begin{itemize}\setlength{\itemsep}{2pt}
+  \item $\sim$20\% of firms (36\% of observations) operate in multiple cells.
+  \item If firm $f$ spans cells $c_1$ and $c_2$, the firm FE $\gamma_f$ links them: estimating $\hat\gamma_f$ uses data from \emph{both} cells.
+  \item The cell regression treats $\bar\gamma_{c_1}$ and $\bar\gamma_{c_2}$ as independent $\Rightarrow$ different FWL projection $\Rightarrow$ different $\hat\lambda$.
+  \item \textbf{Fix}: drop multi-cell firms and rerun the firm regression.
+\end{itemize}
+
+\medskip
+\textbf{C5 (fixed composition)} requires that no firm enters or exits the panel within an election cycle.
+
+\begin{itemize}\setlength{\itemsep}{2pt}
+  \item If firm $C$ exits mid-cycle, $\bar\gamma_c(t)$ shifts but the cell FE absorbs only one constant.
+  \item The cell-mean instrument $\overline{\FA}_{ct}$ also shifts compositionally, even though each firm's own $\FA$ barely changes within cycle (only via cross-tier inaugurations).
+  \item This compositional variation in $\overline{\FA}_{ct}$ is \textbf{spurious}: it reflects selection, not alignment.
+  \item \textbf{Fix}: keep only firms present in all years of each regime, then rerun the firm regression.
+\end{itemize}
+
+\medskip
+Both fixes change the firm regression's estimand (different sample $\Rightarrow$ different $\hat\lambda^\mathrm{firm}$).
+
+\end{frame}
+
+% ===========================================================================
+% Frame 8: C6 --- The Irreducible Gap
+% ===========================================================================
+\begin{frame}{C6: The Irreducible Gap}
+
+\footnotesize
+Even with C1--C5 enforced, the firm-level normal equation decomposes into:
+\[
+  \underbrace{
+    \sum_c N_c\, \tilde{\bar{X}}_{ct}'
+    (\tilde{\bar{Y}}_{ct} - \tilde{\bar{X}}_{ct}\,\lambda)
+  }_{\text{between-cell } B(\lambda)}
+  \;+\;
+  \underbrace{
+    \sum_c \sum_{f \in c}
+    (\tilde{X}_{fmt} - \tilde{\bar{X}}_{ct})'
+    \bigl((\tilde{Y}_{fmt} - \tilde{\bar{Y}}_{ct})
+    - (\tilde{X}_{fmt} - \tilde{\bar{X}}_{ct})\lambda\bigr)
+  }_{\text{within-cell } W(\lambda)}
+  = 0
+\]
+
+The $N_c$-weighted cell regression solves only $B(\lambda) = 0$.
+They coincide iff $W(\hat\lambda) = 0$, i.e., zero within-cell variation in projected $\FA$.
+
+\medskip
+\textbf{Evidence from the reference spec:} share of total $\sum_i \tilde{X}_i^2$ coming from within-cell terms:
+\begin{itemize}\setlength{\itemsep}{2pt}
+  \item Mayor: 91.9\%
+  \item Governor: 91.9\%
+  \item President: 93.7\%
+\end{itemize}
+
+\medskip
+\textbf{Interpretation}: $>$90\% of identifying variation in $\FA$ is \emph{between firms within the same cell}, not between cell means. The cell regression is blind to this variation.
+
+\medskip
+\centering
+\textbf{C6 is the structural reason a cell-mean regression cannot replicate the firm regression.}
+
+\end{frame}
+
+% ===========================================================================
+% Frame 9: Best Comparison So Far
+% ===========================================================================
+\begin{frame}{Best Comparison: Firm vs.\ Cell-Mean Regression}
+
+\footnotesize
+\textbf{Setup}: cell-mean regression enforcing C1 ($N_c$-weights), C2 (same sample $B$), and
+C4 (saved fitted FE from the firm regression).
+C3, C5, and C6 remain violated.
+
+\medskip
+\begin{center}
+\begin{tabular}{l rrr rrr}
+\toprule
+ & \multicolumn{3}{c}{\textbf{Firm regression}} & \multicolumn{3}{c}{\textbf{Cell-mean regression}} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+\textbf{Tier} & $\hat\lambda$ & SE & $F$ & $\hat\lambda$ & SE & $F$ \\
+\midrule
+Mayor     & 0.00218 & 0.00032 & 45.5 & 0.00129 & 0.00516 & 0.06 \\
+Governor  & 0.00340 & 0.00034 & 103.2 & 0.00440 & 0.00781 & 0.32 \\
+President & 0.00038 & 0.00040 & 0.88 & $-$0.00660 & 0.02135 & 0.10 \\
+\midrule
+\multicolumn{4}{l}{\textit{Firm $N$ = 43.18M}} & \multicolumn{3}{l}{\textit{Cells = 661,430}} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\begin{itemize}\setlength{\itemsep}{3pt}
+  \item Cell-mean SE inflates 10--50$\times$; $F$-stats collapse below 1 --- the cell regression
+        has almost no power because it relies on $<$10\% of identifying variation.
+  \item The gap is not a coding error --- it is C3 + C5 + C6.
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+% Frame 10: Takeaway
+% ===========================================================================
+\begin{frame}{Takeaway}
+
+\small
+\begin{enumerate}\setlength{\itemsep}{6pt}
+  \item \textbf{The algebra is correct.}\; Averaging the firm equation over
+        $\cFpre_c$ yields the cell equation with the same population $\lambda_\ell$.
+
+  \item \textbf{Estimation equivalence requires six conditions.}\;
+        C1, C2, C4 are free; C3 and C5 require re-estimating the firm
+        regression on a restricted sample; C6 cannot hold on real data.
+
+  \item \textbf{C3 and C5 are feasible but costly.}\; Restricting to
+        single-cell, balanced-within-cycle firms changes the estimand and
+        drops a large share of observations.
+
+  \item \textbf{C6 is the main structural gap.}\; $>$90\% of identifying
+        variation in $\FA$ is within-cell. The cell regression sees only the
+        remaining $<$10\%.
+
+  \item \textbf{The firm and cell regressions are complementary, not
+        identical.}\; The firm regression exploits within-cell heterogeneity
+        in party exposure; the cell regression identifies from between-cell
+        variation in average exposure. Comparing them is informative about
+        the robustness of the political-lending channel.
+\end{enumerate}
+
+\end{frame}
+
+\end{document}

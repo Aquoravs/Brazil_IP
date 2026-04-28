@@ -1,0 +1,464 @@
+\documentclass{article}
+\usepackage[top=2.3cm, bottom=2.3cm, left=2.1cm, right=2.1cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{bbm}
+\usepackage{hyperref}
+\usepackage[default,regular,black]{sourceserifpro}
+\usepackage[T1]{fontenc}
+\hypersetup{colorlinks,linkcolor={blue},citecolor={blue},urlcolor={red}}
+
+\newcommand{\FA}{\mathrm{FA}}
+\newcommand{\ind}{\mathbf{1}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cFpre}{\mathcal{F}^{\mathrm{pre}}}
+
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+\theoremstyle{definition}
+\newtheorem{condition}{Condition}
+\newtheorem{example}{Example}
+
+\begin{document}
+
+\title{Understanding Conditions C3, C5, and C6\\
+for Proposition~2 Aggregation Equivalence}
+\author{}
+\date{\today}
+\maketitle
+
+\section*{Recap: The Setup}
+
+The firm-level regression is
+\begin{equation}\label{eq:firm}
+  \ind(\text{BNDES}_{fmt} > 0)
+  = \sum_\ell \lambda_\ell\, \FA^\ell_{fmt}
+  + \gamma_f + \alpha_{mt} + u_{fmt},
+\end{equation}
+where $f$ indexes firms, $m$ municipalities, $t$ years, and $\ell$ alignment
+tiers.  The fixed effects are $\gamma_f$ (firm) and $\alpha_{mt}$
+(municipality$\times$year).
+
+Each firm belongs to a \textbf{cell} $c = (j, m, e)$, where $j$ is the sector,
+$m$ is the municipality, and $e$ is the election cycle (support regime).  The
+pre-election firm set in cell $c$ is $\cFpre_c$ with $N_c = |\cFpre_c|$ firms.
+
+Averaging equation~\eqref{eq:firm} over firms in cell $c$ gives the
+\textbf{cell-level equation}:
+\begin{equation}\label{eq:cell}
+  H^\mathrm{pre}_{jmt}
+  = \sum_\ell \lambda_\ell\,
+    \overline{\FA}^{\ell,\mathrm{pre}}_{jmt}
+  + \bar\gamma_c + \alpha_{mt} + \epsilon_{jmt},
+\end{equation}
+where
+$H^\mathrm{pre}_{jmt} = N_c^{-1}\sum_{f \in \cFpre_c} \ind(\text{BNDES}_{fmt} > 0)$,
+$\overline{\FA}^{\ell,\mathrm{pre}}_{jmt} = N_c^{-1}\sum_{f \in \cFpre_c} \FA^\ell_{fmt}$,
+$\bar\gamma_c = N_c^{-1}\sum_{f \in \cFpre_c} \gamma_f$, and
+$\epsilon_{jmt} = N_c^{-1}\sum_{f \in \cFpre_c} u_{fmt}$.
+
+Proposition~2 claims that running OLS on~\eqref{eq:firm} (unweighted) and
+running $N_c$-weighted OLS on~\eqref{eq:cell} produce the \textbf{same}
+$\hat\lambda$.  This requires conditions C1--C6.  Below we explain C3, C5, and
+C6 in detail.
+
+\bigskip
+\hrule
+\bigskip
+
+%% ========================================================================
+\section{Condition C3: Firm Immobility}
+%% ========================================================================
+
+\begin{condition}[C3 --- Firm Immobility]
+Each firm $f$ belongs to exactly one cell $(j, m)$ across all years in the
+sample.  Formally:
+\[
+  \forall\, f:\quad
+  \bigl|\{(j, m) : \exists\, t \text{ with } (f, j, m, t) \in \text{sample}\}\bigr| = 1.
+\]
+\end{condition}
+
+\subsection{Intuitive Explanation}
+
+Imagine you sort kids into classrooms based on their neighborhood and favorite
+subject.  Each kid has a ``personal talent score'' ($\gamma_f$) that stays with
+them forever.
+
+If every kid stays in the same classroom for the whole school, you can compute
+each classroom's ``average talent'' and use it as a single classroom label.  No
+information leaks between classrooms.
+
+But suppose Alice moves from Classroom~A to Classroom~B halfway through the
+year.  Alice's talent score is \emph{shared} between both classrooms.  The
+per-kid regression knows this: it tracks Alice across both rooms and uses data
+from \emph{both} rooms to estimate her talent.  But when you compute classroom
+averages, each classroom computes its own average independently---Classroom~A
+doesn't know that Alice also contributed to Classroom~B's average.  The
+per-kid regression and the classroom-average regression ``see'' different
+patterns, so they give different answers.
+
+\subsection{Mathematical Explanation}
+
+In the firm-level regression, $\gamma_f$ is a single parameter estimated using
+\emph{all} observations of firm~$f$, regardless of which cells they belong to.
+The Frisch--Waugh--Lovell (FWL) projector $M_\mathrm{firm}$ absorbs
+$\{\gamma_f, \alpha_{mt}\}$ by projecting onto the orthogonal complement of the
+column space of the fixed-effect design matrix $[D_f \,|\, D_{mt}]$.
+
+\paragraph{When C3 is violated.}
+Suppose firm $f$ operates in two cells, $c_1 = (j_1, m_1)$ and
+$c_2 = (j_2, m_2)$.  Then $\gamma_f$ enters the normal equations for
+\emph{both} cells, creating a \textbf{cross-cell link}.  When estimating
+$\hat\gamma_f$, OLS uses firm~$f$'s observations from both $c_1$ and $c_2$.
+This means the projected residual $\tilde{X}_{fmt}$ for an observation in $c_1$
+depends on data from $c_2$.
+
+After cell-averaging, the cell FEs are:
+\[
+  \bar\gamma_{c_1}
+  = \frac{1}{N_{c_1}}\sum_{f' \in \cFpre_{c_1}} \gamma_{f'},
+  \qquad
+  \bar\gamma_{c_2}
+  = \frac{1}{N_{c_2}}\sum_{f' \in \cFpre_{c_2}} \gamma_{f'}.
+\]
+Both contain $\gamma_f$ (since $f \in \cFpre_{c_1} \cap \cFpre_{c_2}$), so
+they are \emph{not independent}.  However, the cell-level FWL projector
+$M_\mathrm{cell}$ treats $\bar\gamma_{c_1}$ and $\bar\gamma_{c_2}$ as
+\textbf{separate, independent parameters}: each cell's FE indicator column
+$D_c$ is disjoint from every other cell's.  It does not ``know'' that
+$\bar\gamma_{c_1}$ and $\bar\gamma_{c_2}$ share a component
+$\gamma_f / N_{c_1}$ and $\gamma_f / N_{c_2}$, respectively.
+
+As a result:
+\[
+  M_\mathrm{firm} \neq \text{``cell-averaged version of } M_\mathrm{cell}\text{''},
+\]
+which means the projected cell means differ between the two approaches:
+\[
+  \frac{1}{N_c}\sum_{f \in c} \widetilde{X}^{\,\mathrm{firm}}_{fmt}
+  \;\neq\;
+  \widetilde{\bar{X}}^{\,\mathrm{cell}}_{ct},
+\]
+and the normal equations no longer coincide even with $N_c$-weighting.
+
+\paragraph{When C3 holds.}
+If every firm belongs to exactly one cell, then $D_f$ is \emph{nested within}
+$D_c$: all of firm~$f$'s observations lie in a single cell.  The firm FE
+becomes a within-cell parameter.  Cross-cell links vanish, and the between-cell
+components of the two projections agree.
+
+\begin{example}
+In the data, about 20\% of firms (accounting for 36\% of observations) operate
+in more than one $(j, m)$ cell.  These multi-cell firms create exactly the
+cross-cell links described above.
+\end{example}
+
+\bigskip
+\hrule
+\bigskip
+
+%% ========================================================================
+\section{Condition C5: Fixed Cell Composition Within Regime}
+%% ========================================================================
+
+\begin{condition}[C5 --- Fixed Cell Composition Within Regime]
+Within each support regime (election cycle) $e$, the set of firms in each cell
+is constant across all years $t$ of that regime:
+\[
+  \forall\, c = (j, m, e),\;\forall\, t, t' \in \text{years}(e):\quad
+  \cFpre_c(t) = \cFpre_c(t').
+\]
+Equivalently, within each regime, every firm is present in \textbf{all} years of
+the regime (a balanced panel within each regime).
+\end{condition}
+
+\subsection{Intuitive Explanation}
+
+Imagine each classroom has a team roster that is supposed to be fixed for the
+whole school year (one election cycle).  The classroom gets \emph{one name
+tag}---the cell FE $\bar\gamma_c$---for the entire year.
+
+But what if some kids join in March and others drop out in October?  The
+classroom's ``average talent'' in September is different from its ``average
+talent'' in February, because the team changed.  Yet we only have \emph{one}
+name tag trying to represent the whole year.  It captures a sort of
+``average of the averages,'' but it cannot track the month-to-month shifts.
+
+The per-kid regression has no such problem: each kid has their own personal tag
+that stays constant regardless of what other kids do.  Kids entering or leaving
+the classroom doesn't confuse anything.
+
+So if the team roster shifts within a year, the one-tag-per-classroom approach
+cannot keep up, and the answers diverge.
+
+\subsection{Mathematical Explanation}
+
+From the averaging identity, the cell-level ``firm FE'' at time $t$ is:
+\[
+  \bar\gamma_c(t)
+  = \frac{1}{|\cFpre_c(t)|}\sum_{f \in \cFpre_c(t)} \gamma_f,
+\]
+where $\cFpre_c(t)$ is the set of firms present in cell $c$ at time $t$.
+
+\paragraph{When C5 holds.}
+$\cFpre_c(t) = \cFpre_c$ is constant within regime $e$, so
+$\bar\gamma_c(t) = \bar\gamma_c$ is a time-invariant constant (within the
+regime).  A single FE per $(j, m, e)$ triple absorbs it perfectly.
+
+\paragraph{When C5 is violated.}
+If firms enter or exit within the regime, $\bar\gamma_c(t)$ varies by year.
+The aggregated regression absorbs a single parameter $\delta_c$ per $(j, m, e)$
+cell---effectively the OLS ``best constant approximation'' to
+$\bar\gamma_c(t)$.  The residual
+\[
+  \eta_{ct} \equiv \bar\gamma_c(t) - \delta_c
+\]
+is time-varying and ends up in the error term $\epsilon_{ct}$.  If $\eta_{ct}$
+correlates with $\overline{\FA}^{\ell,\mathrm{pre}}_{jmt}$ (which it may,
+since both depend on \emph{which firms are present} at time $t$), the cell-level
+OLS estimate $\hat\lambda^\mathrm{cell}$ is biased \emph{relative to}
+$\hat\lambda^\mathrm{firm}$.
+
+\begin{example}
+Suppose cell $c$ has firms $\{A, B\}$ in year~1 and $\{A, B, C\}$ in year~2
+(firm~$C$ enters in year~2).  Then:
+\begin{align*}
+  \bar\gamma_c(1) &= \tfrac{1}{2}(\gamma_A + \gamma_B), \\
+  \bar\gamma_c(2) &= \tfrac{1}{3}(\gamma_A + \gamma_B + \gamma_C).
+\end{align*}
+The cell FE $\delta_c$ can absorb at most one of these, not both.  The leftover
+$\eta_{c1}$ or $\eta_{c2}$ contaminates the error term.
+
+Meanwhile, $\overline{\FA}_{c}(t)$ also shifts: in year~2, firm~$C$'s party
+exposure enters the cell mean.  If firm~$C$ happens to be politically connected
+(high $\FA$) \emph{and} has high $\gamma_C$ (unobservably productive), then
+$\eta_{c2} > 0$ and $\overline{\FA}_{c}(2)$ is inflated, creating a spurious
+positive correlation.
+
+In the firm-level regression, each $\gamma_f$ is absorbed individually, so
+firm~$C$'s entry creates no bias.
+\end{example}
+
+\bigskip
+\hrule
+\bigskip
+
+%% ========================================================================
+\section{Condition C6: No Within-Cell Regressor Heterogeneity}
+%% ========================================================================
+
+\begin{condition}[C6 --- No Within-Cell Regressor Heterogeneity After FE
+Projection]
+After absorbing fixed effects, the projected regressors are constant within
+each cell-year:
+\[
+  \tilde{X}_{fmt} = \tilde{\bar{X}}_{ct}
+  \quad \forall\, f \in \cFpre_c,\;\forall\, t,
+\]
+where tildes denote FE-projected residuals and
+$\tilde{\bar{X}}_{ct} = N_c^{-1}\sum_{f \in c} \tilde{X}_{fmt}$.
+
+Equivalently: \emph{within-cell, between-firm variation in the projected
+$\FA^\ell$ regressors is zero.}
+\end{condition}
+
+\subsection{Intuitive Explanation}
+
+Imagine two kids in the same classroom: Alice studies 5~hours and scores~90;
+Bob studies 1~hour and scores~60.  The classroom average is ``3~hours studied,
+75~points scored.''
+
+The per-kid regression sees the \emph{within-classroom} pattern: the kid who
+studied more scored more.  It uses this Alice-versus-Bob contrast to learn that
+studying helps.
+
+The classroom-average regression only sees \emph{one data point} for this
+classroom: (3~hours, 75~points).  It cannot look \emph{inside} the classroom.
+The within-classroom variation---the Alice-vs-Bob difference---is invisible to
+it.
+
+If both kids studied the same amount (say, both 3~hours, but Alice scored~90
+and Bob scored~60 for other reasons), then the classroom average captures
+\emph{all} the study-hour information perfectly---there is nothing hidden
+inside.  Only then do the two approaches give the same answer.
+
+This is why the synthetic test (which forces all ``kids'' in the same classroom
+to have the same ``study hours'') works perfectly at $10^{-15}$ precision, but
+real data (where firms in the same sector-municipality cell have different party
+exposures) never will.
+
+\subsection{Mathematical Explanation}
+
+After absorbing fixed effects via FWL, the firm-level OLS normal equation is:
+\begin{equation}\label{eq:firm_normal}
+  \sum_c \sum_{f \in c}
+  \tilde{X}_{fmt}'\bigl(\tilde{Y}_{fmt} - \tilde{X}_{fmt}\,\lambda\bigr) = 0.
+\end{equation}
+
+Decompose each observation into its cell-year mean and within-cell deviation:
+\[
+  \tilde{X}_{fmt}
+  = \underbrace{\tilde{\bar{X}}_{ct}}_{\text{between-cell}}
+  + \underbrace{(\tilde{X}_{fmt} - \tilde{\bar{X}}_{ct})}_{\text{within-cell}},
+  \qquad
+  \tilde{Y}_{fmt}
+  = \tilde{\bar{Y}}_{ct}
+  + (\tilde{Y}_{fmt} - \tilde{\bar{Y}}_{ct}).
+\]
+
+Substituting into~\eqref{eq:firm_normal} and expanding (using the fact that
+within-cell deviations sum to zero), the normal equation splits into two
+orthogonal components:
+\begin{equation}\label{eq:decomp}
+  \underbrace{
+    \sum_c N_c\, \tilde{\bar{X}}_{ct}'
+    \bigl(\tilde{\bar{Y}}_{ct} - \tilde{\bar{X}}_{ct}\,\lambda\bigr)
+  }_{\displaystyle B(\lambda)\;\text{--- between-cell}}
+  \;+\;
+  \underbrace{
+    \sum_c \sum_{f \in c}
+    (\tilde{X}_{fmt} - \tilde{\bar{X}}_{ct})'
+    \bigl(
+      (\tilde{Y}_{fmt} - \tilde{\bar{Y}}_{ct})
+      - (\tilde{X}_{fmt} - \tilde{\bar{X}}_{ct})\,\lambda
+    \bigr)
+  }_{\displaystyle W(\lambda)\;\text{--- within-cell}}
+  = 0.
+\end{equation}
+
+The $N_c$-weighted cell-level OLS normal equation is \textbf{only the
+between-cell part}:
+\begin{equation}\label{eq:cell_normal}
+  B(\lambda) = \sum_c N_c\, \tilde{\bar{X}}_{ct}'
+  \bigl(\tilde{\bar{Y}}_{ct} - \tilde{\bar{X}}_{ct}\,\lambda\bigr) = 0.
+\end{equation}
+
+For both estimators to yield the same $\hat\lambda$, we need
+\[
+  B(\hat\lambda) + W(\hat\lambda) = 0
+  \quad\text{and}\quad
+  B(\hat\lambda) = 0
+  \quad\Longrightarrow\quad
+  W(\hat\lambda) = 0.
+\]
+
+\paragraph{When does $W(\hat\lambda) = 0$?}
+
+Define the within-cell cross-product matrices:
+\begin{align}
+  W_{XX} &= \sum_c \sum_{f \in c}
+    (\tilde{X}_{fmt} - \tilde{\bar{X}}_{ct})
+    (\tilde{X}_{fmt} - \tilde{\bar{X}}_{ct})', \label{eq:Wxx} \\
+  W_{XY} &= \sum_c \sum_{f \in c}
+    (\tilde{X}_{fmt} - \tilde{\bar{X}}_{ct})
+    (\tilde{Y}_{fmt} - \tilde{\bar{Y}}_{ct}). \label{eq:Wxy}
+\end{align}
+
+The within-cell normal equation $W(\lambda) = 0$ can be written as
+$W_{XY} - W_{XX}\,\lambda = 0$.  This vanishes for all $\lambda$ if and only if
+$W_{XX} = 0$ and $W_{XY} = 0$.  And $W_{XX} = 0$ requires:
+\[
+  \tilde{X}_{fmt} = \tilde{\bar{X}}_{ct}
+  \quad\forall\, f \in c, \;\forall\, t.
+\]
+That is: after FE projection, every firm in the same cell-year must have the
+\textbf{same} projected $\FA^\ell$ value.  In other words, there must be
+\emph{zero within-cell variation} in the projected regressors.
+
+\paragraph{Why this fails on real data.}
+
+The $\FA^\ell_{fmt}$ instrument is the product of a firm-specific baseline party
+exposure $\omega_{fp}$ and a municipality-level alignment indicator
+$\mathrm{Align}^\ell_{mpt}$:
+\[
+  \FA^\ell_{fmt} = \sum_p \omega_{fp,0}\, \mathrm{Align}^\ell_{mpt}.
+\]
+The alignment term $\mathrm{Align}^\ell_{mpt}$ is common to all firms in the
+same $(m, t)$, but the baseline exposure $\omega_{fp,0}$ varies across firms.
+Firms in the same cell $(j, m, t)$ have different owners affiliated with
+different parties, so $\omega_{fp,0}$ differs across $f$ within the cell.
+
+After the firm FE projection (which removes each firm's time-mean), the
+projected regressor is:
+\[
+  \tilde{\FA}^\ell_{fmt}
+  = \FA^\ell_{fmt} - \bar{\FA}^\ell_{f\cdot}
+  - \bar{\FA}^\ell_{\cdot mt} + \bar{\FA}^\ell_{\cdot\cdot},
+\]
+where $\bar{\FA}^\ell_{f\cdot}$ is firm $f$'s time-mean.  Since
+$\omega_{fp,0}$ varies across firms, $\bar{\FA}^\ell_{f\cdot}$ also varies
+across firms in the same cell, so $\tilde{\FA}^\ell_{fmt}$ differs across
+firms within the cell.  Therefore $W_{XX} \neq 0$.
+
+\paragraph{Magnitude of the gap.}
+
+The firm-level $\hat\lambda^\mathrm{firm}$ solves
+$B(\lambda) + W(\lambda) = 0$, while the cell-level
+$\hat\lambda^\mathrm{cell}$ solves $B(\lambda) = 0$.  Using standard
+between/within decomposition algebra:
+\begin{align}
+  \hat\lambda^\mathrm{firm}
+  &= (B_{XX} + W_{XX})^{-1}(B_{XY} + W_{XY}), \label{eq:firm_est} \\
+  \hat\lambda^\mathrm{cell}
+  &= B_{XX}^{-1}\, B_{XY}, \label{eq:cell_est}
+\end{align}
+where $B_{XX} = \sum_c N_c\,\tilde{\bar{X}}_{ct}\tilde{\bar{X}}_{ct}'$ and
+$B_{XY} = \sum_c N_c\,\tilde{\bar{X}}_{ct}\tilde{\bar{Y}}_{ct}$.
+
+The gap is:
+\[
+  \hat\lambda^\mathrm{firm} - \hat\lambda^\mathrm{cell}
+  = (B_{XX} + W_{XX})^{-1}(B_{XY} + W_{XY}) - B_{XX}^{-1} B_{XY}.
+\]
+This is zero if and only if $W_{XX} = 0$ and $W_{XY} = 0$.  On real data,
+$W_{XX} / (B_{XX} + W_{XX})$ measures the \emph{share of total variation that
+is within-cell}.  The larger this share, the larger the potential gap.
+
+\begin{remark}[Why synthetic data achieves machine precision]
+In the synthetic benchmark, $\FA^\ell_{fmt}$ is constructed to be constant
+within each cell-year: $\FA^\ell_{fmt} = \FA^\ell_{ct}$ for all $f \in c$.
+This forces $W_{XX} = 0$ and $W_{XY} = 0$, so
+$\hat\lambda^\mathrm{firm} = \hat\lambda^\mathrm{cell}$ at machine precision
+($\sim 10^{-15}$).
+\end{remark}
+
+\begin{remark}[C6 is the irreducible gap]
+Conditions C1--C5 can all be enforced on real data (by reweighting, restricting
+to single-cell firms, balancing the panel, using the correct FE, and disabling
+singleton removal).  Condition~C6 \textbf{cannot} be enforced on real data
+without modifying the instruments themselves, because within-cell heterogeneity
+in $\omega_{fp,0}$ is an intrinsic feature of the data.  The residual gap after
+enforcing C1--C5 (the ``Silver tier'' gap) is entirely attributable to~C6.
+\end{remark}
+
+\bigskip
+\hrule
+\bigskip
+
+%% ========================================================================
+\section{Summary}
+%% ========================================================================
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{c p{3.5cm} p{4.5cm} p{3.5cm}}
+\hline
+\textbf{\#} & \textbf{Condition} & \textbf{What breaks without it} & \textbf{Enforceable on real data?} \\
+\hline
+C3 & Firm immobility (one cell per firm) &
+  Firm FE creates cross-cell links that the cell-level projector ignores &
+  Yes --- restrict to single-cell firms (drops $\sim$20\% of firms) \\[4pt]
+C5 & Fixed composition within regime &
+  Cell FE $\bar\gamma_c(t)$ becomes time-varying; single cell FE $\delta_c$
+  leaves a correlated residual &
+  Yes --- balance panel within regime (drops $\sim$40\% of single-cell obs) \\[4pt]
+C6 & No within-cell regressor heterogeneity &
+  Firm-level OLS uses within-cell variation ($W_{XX}, W_{XY}$) that cell-level
+  OLS cannot see &
+  \textbf{No} --- inherent to real data \\
+\hline
+\end{tabular}
+\end{center}
+
+\end{document}

@@ -1,0 +1,900 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{itemize items}[circle]
+
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{appendixnumberbeamer}
+\usepackage{hyperref}
+
+\newcommand*{\bkmtranslateto}{\languagename}
+\newcommand*{\bkmtranslate}[1]{%
+  \ifcsname tr@@@\bkmtranslateto @#1\endcsname
+    \csname tr@@@\bkmtranslateto @#1\endcsname
+  \else
+    #1%
+  \fi
+}
+\pdfstringdefDisableCommands{%
+  \let\translate\bkmtranslate
+}
+
+\newcommand{\iotaVec}{\mathbf{1}}
+\newcommand{\Align}{\mathrm{Align}}
+\newcommand{\FA}{\mathrm{FA}}
+\newcommand{\EC}{\mathrm{EC}}
+
+\newcommand{\firmdir}{../BNDES/output/firm_reg_tables}
+\newcommand{\sectordirmain}{../BNDES/output/muni_reg_tables_grouped}
+
+\definecolor{darkblue}{RGB}{0,51,102}
+\definecolor{alertred}{RGB}{180,30,30}
+\definecolor{notegreen}{RGB}{0,100,50}
+
+\setbeamercolor{frametitle}{fg=white}
+\setbeamercolor{title}{fg=white}
+\setbeamercolor{structure}{fg=darkblue}
+
+\newcommand{\ArtifactPlaceholder}[2]{%
+  \fcolorbox{darkblue}{gray!10}{%
+    \parbox{0.9\linewidth}{%
+      \centering
+      \small
+      \textbf{Pending artifact}\\[3pt]
+      \texttt{\detokenize{#1}}\\[6pt]
+      #2
+    }%
+  }%
+}
+
+\newcommand{\OptionalInputTable}[2]{%
+  \IfFileExists{#1}{\input{#1}}{\ArtifactPlaceholder{#1}{#2}}%
+}
+
+\title{Testing Industrial Policymakers:\\Evidence from Brazil's BNDES}
+\subtitle{Firm First-Stage Results}
+\author{}
+\date{March 17, 2026}
+
+\begin{document}
+
+% ===========================================================================
+\begin{frame}
+\titlepage
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Research Question}
+
+\textbf{Is the sector-level allocation of BNDES lending across municipalities GDP-optimal?}
+
+\bigskip
+
+\begin{itemize}
+    \item BNDES disburses $\sim$3\% of GDP annually in subsidized industrial lending
+    \item Existing literature (Lane 2025, Juh\'asz 2018) shows IP ``works'' for targeted sectors
+    \item \textbf{But}: does the policymaker target the \emph{right} sectors?
+    \item We derive and test the \textbf{first-order condition for optimality}: at an interior optimum, marginal reallocations across sectors have zero effect on GDP
+\end{itemize}
+
+\bigskip
+
+\textbf{Contribution}: Move from ``does IP work?'' to ``is IP \emph{optimal}?''
+--- and if not, identify which sectors are over/under-supported
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Theory: Local Optimality Test}
+
+Sector shares $s_m \in \Delta^{J-1}$, municipal output $Y_m = Y_m(s_m)$.
+
+\medskip
+
+\textbf{Directional derivative condition} --- at any interior optimum:
+\begin{equation*}
+    \frac{dY_m}{d\varepsilon}\bigg|_{\varepsilon=0}
+    = \nabla_{s_m} Y_m \cdot v_m = 0
+    \quad\text{for all } v_m \perp \iotaVec
+\end{equation*}
+
+\textbf{Empirical projection} (within-simplex, $\iotaVec'\Delta s_{mt}=0$):
+\begin{equation*}
+    \Delta Y_{m,t+h} = \beta' \Delta s_{mt} + u_{m,t+h}
+\end{equation*}
+
+\textbf{Null hypothesis (optimality)}:
+\begin{equation*}
+    H_0: \quad \beta = \mathbf{0}
+\end{equation*}
+
+\begin{itemize}
+    \item Model-free: valid under any smooth objective
+    \item $\hat\beta_j > 0$: sector $j$ under-supported $\implies$ tilt more toward $j$
+    \item $\hat\beta_j < 0$: sector $j$ over-supported
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Definitions: Firm-Level Instrument}
+
+\textbf{Baseline party exposure} of firm $f$ to party $p$ (4-year pre-election average):
+\begin{equation*}
+    \omega_{fp,\tau} \equiv \frac{1}{|T_\tau|}\sum_{s \in T_\tau} \frac{L_{f,p,s}}{L_{f,s}},
+    \qquad \sum_p \omega_{fp,\tau} \leq 1
+\end{equation*}
+where $L_{fp}$ = owners affiliated to party $p$; $L_f$ = total owners (affiliated + unaffiliated).
+
+\smallskip
+
+\textbf{Political alignment}: $\Align^\ell_{mpt} = 1$ if party $p$ holds office $\ell \in \{$mayor, governor, president$\}$ in the jurisdiction of municipality $m$ at time $t$. Spread across the full 4-year term.
+
+\smallskip
+
+\textbf{Firm-level levels instrument} (shift $\times$ share):
+\begin{equation*}
+    \FA^\ell_{fmt} \equiv \sum_p \omega_{fp,\tau} \cdot \Align^\ell_{mpt}
+\end{equation*}
+
+\textbf{Firm-level changes instrument} (turnover only, not spread):
+\begin{equation*}
+    \Delta\FA^\ell_{fmt} \equiv \sum_p \omega_{fp,\tau} \cdot \Delta\Align^\ell_{mpt}
+\end{equation*}
+
+\smallskip
+
+{\footnotesize The sector-level instrument $Z^\ell_{jmt} = \sum_p w_{jmp,\tau} \Align^\ell_{mpt}$ is the owner-count-weighted aggregation of $\FA^\ell_{fmt}$ within each $(j,m)$ cell. See \hyperlink{slide:aggregation}{\textcolor{darkblue}{Aggregation slide}} for details.}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Estimation Strategy: Four Margins}
+
+\textbf{Firm first stage} (firm $\times$ municipality $\times$ year):
+\begin{equation*}
+    \mathbf{1}(\text{BNDES}_{fmt} > 0) = \sum_\ell \lambda_\ell\, \FA^\ell_{fmt}
+    + \gamma_f + \alpha_{mt} + u_{fmt}
+\end{equation*}
+
+\vspace{-6pt}
+{\small FE: firm + muni$\times$year. Clustering: firm + muni. Employment-weighted (main), unweighted (robustness).}
+
+\medskip
+
+\textbf{Four margins} (levels $\times$ extensive/intensive; changes $\times$ extensive/intensive):
+
+\smallskip
+
+\begin{center}
+\footnotesize
+\begin{tabular}{l >{\centering\arraybackslash}p{5.5cm} >{\centering\arraybackslash}p{5.5cm}}
+\toprule
+& \textbf{Extensive} $\mathbf{1}(\text{BNDES}>0)$ & \textbf{Intensive} $\log(\text{BNDES})$ \\
+\midrule
+\textbf{Levels}  & $\FA^\ell \to \mathbf{1}(\text{BNDES}>0)$     & $\FA^\ell \to \log(\text{BNDES})$ \\
+                 & Does alignment open access?                      & Does alignment increase loan size? \\[4pt]
+\textbf{Changes} & $\Delta\FA^\ell \to \Delta\mathbf{1}(\text{BNDES}>0)$ & $\Delta\FA^\ell \to \Delta\log(\text{BNDES})$ \\
+                 & Does turnover shift access?                      & Does turnover shift loan size? \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+Nine instrument combos per margin: M, G, P, M+G, M+P, M+G+P, plus three interaction specs (M+G+MxG, M+G+P+MxG, M+G+P+MxP).
+
+\end{frame}
+
+% ===========================================================================
+% FIRM FIRST STAGE: MAIN TABLES (FC-1 to FC-4)
+% ===========================================================================
+
+\begin{frame}{FC-1: Levels, Extensive Margin (Coalition)}
+\hypertarget{slide:fc1}{}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/firm__main__levels__extensive__coalition__cycle_specific__unweighted__all_firms__pooled_count.tex}{Table pending --- run script 51.}
+\end{center}
+
+\medskip
+\begin{itemize}
+    \item \textbf{Governor strongest single tier}: $0.011^{***}$, $F = 6.7$
+    \item Mayor marginally significant ($0.009^{*}$, $F = 3.7$); president negative ($-0.013^{**}$, $F = 6.1$)
+    \item M+G+P combined: all three jointly significant ($F = 5.1$)
+    \item 39.5M observations, $R^2 = 0.450$ (firm + muni$\times$year FE absorb most variation)
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{FC-2: Levels, Intensive Margin (Coalition)}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/firm__main__levels__intensive__coalition__cycle_specific__unweighted__all_firms__pooled_count.tex}{Table pending --- run script 51.}
+\end{center}
+
+\medskip
+\begin{itemize}
+    \item \textbf{No significant effects} on loan size conditional on access
+    \item Sample: 408K firm-muni-years with BNDES $> 0$ (1\% of full panel)
+    \item All $F < 1.5$; coefficients imprecise (SEs $\sim 0.10$--$0.13$)
+    \item \textcolor{alertred}{Alignment operates through the extensive margin, not loan size}
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{FC-3: Changes, Extensive Margin (Coalition)}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/firm__main__changes__extensive__coalition__cycle_specific__unweighted__all_firms__pooled_count.tex}{Table pending --- run script 51.}
+\end{center}
+
+\medskip
+\begin{itemize}
+    \item Governor turnover: $0.018^{*}$ ($F = 3.3$); president turnover: $-0.022^{**}$ ($F = 4.9$)
+    \item Mayor turnover: no effect ($F = 0.1$) --- consistent with mayor operating through levels
+    \item President negative sign: presidential turnover \emph{reduces} access for aligned firms?
+    \item 32.9M observations (panel in first differences, loses first year)
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{FC-4: Changes, Intensive Margin (Coalition)}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/firm__main__changes__intensive__coalition__cycle_specific__unweighted__all_firms__pooled_count.tex}{Table pending --- run script 51.}
+\end{center}
+
+\medskip
+\begin{itemize}
+    \item \textbf{No significant effects} on changes in loan size
+    \item Sample: 129K firm-muni-years with BNDES $> 0$ in both $t$ and $t-1$
+    \item Confirms: alignment channel is about \textbf{access}, not amount conditional on access
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Margin Decomposition: Summary}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{l >{\centering\arraybackslash}p{2.5cm} >{\centering\arraybackslash}p{2.5cm} >{\centering\arraybackslash}p{2.5cm} >{\centering\arraybackslash}p{2.5cm}}
+\toprule
+& \multicolumn{2}{c}{\textbf{Levels}} & \multicolumn{2}{c}{\textbf{Changes}} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+\textbf{Tier} & Extensive & Intensive & Extensive & Intensive \\
+\midrule
+Mayor    & $0.009^{*}$   & $-0.005$  & $0.001$      & $-0.060$  \\
+         & $F = 3.7$     & $F = 0.0$ & $F = 0.1$    & $F = 0.1$ \\[4pt]
+Governor & $0.011^{***}$ & $0.134$   & $0.018^{*}$  & $0.398$   \\
+         & $F = 6.7$     & $F = 1.1$ & $F = 3.3$    & $F = 1.5$ \\[4pt]
+President & $-0.013^{**}$ & $0.151$  & $-0.022^{**}$ & $0.195$  \\
+         & $F = 6.1$     & $F = 1.5$ & $F = 4.9$    & $F = 0.6$ \\
+\midrule
+$N$      & 39.5M         & 408K      & 32.9M        & 129K      \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+\begin{itemize}
+    \item \textbf{Extensive margin is the active channel} across all tiers
+    \item Intensive margin: zero signal (small samples, alignment doesn't predict loan size)
+    \item Governor and president drive the extensive margin; mayor weaker
+    \item President sign is \textbf{negative}: presidential alignment \emph{reduces} firm BNDES access
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Interpreting the President's Negative Sign}
+
+\textbf{Puzzle}: Presidential coalition alignment $\to$ \emph{lower} probability of firm BNDES access.
+
+\medskip
+
+\textbf{Possible explanations}:
+\begin{enumerate}
+    \item \textbf{Crowd-out}: presidential alignment captures national-level credit that \emph{substitutes} for BNDES indirect lending (direct BNDES lines, Exim, cards)
+    \item \textbf{Reallocation}: aligned presidents channel BNDES through direct operations rather than indirect (bank-intermediated) lending in our data
+    \item \textbf{Compositional}: aligned firms tend to be in sectors already served by other credit channels
+    \item \textbf{Measurement}: presidential alignment varies only nationally --- muni$\times$year FE absorbs the aggregate effect, leaving only cross-firm residual variation
+\end{enumerate}
+
+\medskip
+
+\textcolor{notegreen}{\textbf{Implication for sector instruments}}: if presidential alignment operates through channels outside indirect BNDES, the president-tier instrument may violate exclusion --- motivates using \textbf{mayor + governor only} in the sector first stage.
+
+\end{frame}
+
+% ===========================================================================
+% INTERACTION INSTRUMENTS (FC-9)
+% ===========================================================================
+
+\begin{frame}{FC-9a: Interaction Instruments, Levels Extensive}
+\hypertarget{slide:fc9a}{}
+\begin{center}
+\scriptsize
+\OptionalInputTable{\firmdir/firm__interaction__levels__extensive__coalition__cycle_specific__unweighted__all_firms__pooled_count.tex}{Table pending --- run script 51 (interaction tables).}
+\end{center}
+
+\medskip
+\begin{itemize}
+    \item Combos: M+G+MxG, M+G+P+MxG, M+G+P+MxP
+    \item $\FA^{\text{M}\times\text{G}}$: positive ($0.011$, $p = 0.10$) --- joint mayor-governor alignment provides an additional boost
+    \item $\FA^{\text{M}\times\text{P}}$ (in M+G+P+MxP): insignificant ($-0.004$)
+    \item Single-tier coefficients attenuate when interactions are included (mayor drops to $0.005$--$0.010$)
+    \item Joint $F$-stats: 2.8--3.9 --- interactions do not substantially improve instrument strength
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{FC-9b: Interaction Instruments, Levels Intensive}
+\begin{center}
+\scriptsize
+\OptionalInputTable{\firmdir/firm__interaction__levels__intensive__coalition__cycle_specific__unweighted__all_firms__pooled_count.tex}{Table pending --- run script 51 (interaction tables).}
+\end{center}
+
+\medskip
+\begin{itemize}
+    \item $\FA^{\text{M}\times\text{G}}$ intensive: $-0.481^{***}$ ($p < 0.01$) --- \textbf{strong negative effect} on loan size for jointly aligned firms
+    \item Intensive margin shows interaction effects even though single tiers are insignificant
+    \item Interpretation: joint local alignment may spread the same credit across more firms (access up, per-firm amount down)
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{FC-9c: Interaction Instruments, Changes Extensive}
+\begin{center}
+\scriptsize
+\OptionalInputTable{\firmdir/firm__interaction__changes__extensive__coalition__cycle_specific__unweighted__all_firms__pooled_count.tex}{Table pending --- run script 51 (interaction tables).}
+\end{center}
+
+\medskip
+\begin{itemize}
+    \item Governor turnover remains significant in MxG combo ($0.023^{*}$)
+    \item President turnover remains negative and significant ($-0.018$ to $-0.028$) across interaction specs
+    \item $\FA^{\text{M}\times\text{P}}$ turnover (in M+G+P+MxP): $0.016^{**}$ --- partially offsets the negative president single-tier effect
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{FC-9d: Interaction Instruments, Changes Intensive}
+\begin{center}
+\scriptsize
+\OptionalInputTable{\firmdir/firm__interaction__changes__intensive__coalition__cycle_specific__unweighted__all_firms__pooled_count.tex}{Table pending --- run script 51 (interaction tables).}
+\end{center}
+
+\medskip
+\begin{itemize}
+    \item No significant interaction effects on changes in loan size
+    \item Consistent with the single-tier finding: intensive margin is not the active channel
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Interaction Instruments: Summary}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{l >{\centering\arraybackslash}p{3cm} >{\centering\arraybackslash}p{3cm} >{\centering\arraybackslash}p{3cm}}
+\toprule
+\textbf{Interaction} & \textbf{Levels Extensive} & \textbf{Levels Intensive} & \textbf{Changes Extensive} \\
+\midrule
+$\text{M} \times \text{G}$     & $0.011$ ($p = 0.10$) & $-0.481^{***}$        & $-0.010$                    \\
+ & \footnotesize{(M+G+MxG)} & \footnotesize{(M+G+MxG)} & \footnotesize{(M+G+MxG)} \\[2pt]
+$\text{M} \times \text{P}$     & $-0.004$             & $-0.048$              & $0.016^{**}$                \\
+ & \footnotesize{(M+G+P+MxP)} & \footnotesize{(M+G+P+MxP)} & \footnotesize{(M+G+P+MxP)} \\
+\midrule
+\multicolumn{4}{l}{\textit{Best joint $F$ (interaction spec)}} \\
+& 3.9 (M+G+P+MxG) & 2.7 (M+G+MxG) & 2.6 (M+G+P+MxP) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+\begin{itemize}
+    \item MxG has opposite signs across margins: $+$ extensive, $-$ intensive --- ``spreading'' credit to more firms at lower amounts
+    \item MxP turnover is positive: joint mayor-president transitions \emph{increase} access, partially offsetting the negative president effect
+    \item Interactions do not improve overall instrument strength ($F < 10$)
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+% PARTY ALIGNMENT
+% ===========================================================================
+
+\begin{frame}{FC-5a: Party Alignment, Levels Extensive}
+\hypertarget{slide:fc5}{}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/firm__main__levels__extensive__party__cycle_specific__unweighted__all_firms__pooled_count.tex}{Table pending --- run script 51.}
+\end{center}
+
+\smallskip
+\begin{itemize}
+    \item Mayor party alignment: $0.021^{*}$ ($F = 3.2$) --- \textbf{larger coefficient} than coalition ($0.009$)
+    \item Governor and president: insignificant under party alignment
+    \item Party alignment is narrower (exact party match vs.\ broad coalition); mayor dominates at local level
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Coalition vs.\ Party: Comparison (Levels Extensive)}
+\hypertarget{slide:coalvsparty}{}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{lcccccc}
+\toprule
+& \multicolumn{3}{c}{\textbf{Coalition}} & \multicolumn{3}{c}{\textbf{Party}} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7}
+& Coef & SE & $F$ & Coef & SE & $F$ \\
+\midrule
+Mayor     & $0.009^{*}$    & $(0.005)$ & 3.7 & $0.021^{*}$   & $(0.012)$ & 3.2 \\
+Governor  & $0.011^{***}$  & $(0.004)$ & 6.7 & $0.011$       & $(0.008)$ & 2.1 \\
+President & $-0.013^{**}$  & $(0.005)$ & 6.1 & $-0.000$      & $(0.012)$ & 0.0 \\[4pt]
+\textbf{M+G+P}:   & & & 5.1 & & & 1.2 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+\begin{itemize}
+    \item \textbf{Coalition}: stronger joint $F$ (5.1), governor leads
+    \item \textbf{Party}: mayor 2$\times$ larger but noisier; governor/president drop out
+    \item President sign disappears under party --- consistent with crowd-out (coalition captures broad political networks beyond the party)
+    \item \textcolor{alertred}{Take-away}: coalition preferred for instrument strength; party useful as robustness
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+% ROBUSTNESS
+% ===========================================================================
+
+\begin{frame}{Robustness: Summary Across Specifications (Levels Extensive)}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{l >{\centering\arraybackslash}p{1.8cm} >{\centering\arraybackslash}p{1.8cm} >{\centering\arraybackslash}p{1.8cm} >{\centering\arraybackslash}p{1.8cm} >{\centering\arraybackslash}p{1.8cm}}
+\toprule
+\textbf{Spec} & \textbf{Mayor} & \textbf{Governor} & \textbf{President} & \textbf{Best $F$} & $N$ \\
+\midrule
+\textbf{Main} (FC-1)       & $0.009^{*}$  & $0.011^{***}$ & $-0.013^{**}$  & 6.7 (G) & 39.5M \\[2pt]
+Party (FC-5a)               & $0.021^{*}$  & $0.011$       & $-0.000$       & 3.2 (M) & 39.5M \\[2pt]
+2002-fixed (FC-6a)          & $0.014$      & $0.009$       & $-0.024^{**}$  & 6.6 (P) & 39.5M \\[2pt]
+Unweighted (FC-7a)          & $0.002^{***}$ & $0.003^{***}$ & $0.000$       & \textbf{91.6} (G) & 43.2M \\[2pt]
+Single-muni (FC-8a)         & $0.003$      & $0.009^{***}$ & $-0.003$       & 9.9 (G) & 34.4M \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+\begin{itemize}
+    \item Governor most robust: significant in 4/5 specifications
+    \item \textbf{Unweighted}: $F = 91.6$ for governor --- small firms drive the clearest signal
+    \item Single-muni: governor dominant ($F = 9.9$); 2002-fixed: president leads ($F = 6.6$)
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{FC-6a: 2002-Fixed Baseline (Levels Extensive)}
+\hypertarget{slide:fc6}{}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/firm__main__levels__extensive__coalition__2002_fixed__unweighted__all_firms__pooled_count.tex}{Table pending --- run script 51.}
+\end{center}
+
+\smallskip
+\begin{itemize}
+    \item Using first-year baselines: clearly predetermined, no feedback from treatment
+    \item \textbf{President becomes the strong instrument}: $-0.024^{**}$ ($F = 6.6$)
+    \item Mayor and governor lose significance --- cycle-specific weights more precise for local tiers
+\end{itemize}
+\hfill\hyperlink{slide:fc1}{\beamerreturnbutton{Back to FC-1}}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{FC-7a: Unweighted (Levels Extensive)}
+\hypertarget{slide:fc7}{}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/firm__main__levels__extensive__coalition__cycle_specific__unweighted__all_firms__pooled_count.tex}{Table pending --- run script 51.}
+\end{center}
+
+\smallskip
+\begin{itemize}
+    \item \textbf{Massive $F$-statistics}: mayor $F = 49.7$, governor $F = 91.6$, M+G $F = 59.8$
+    \item Coefficients small ($0.002$--$0.003$) but extremely precise (SEs $< 0.001$)
+    \item Small firms drive the result; employment weighting down-weights the clearest signal
+\end{itemize}
+\hfill\hyperlink{slide:fc1}{\beamerreturnbutton{Back to FC-1}}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{FC-8a: Single-Municipality Firms (Levels Extensive)}
+\hypertarget{slide:fc8}{}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/firm__main__levels__extensive__coalition__cycle_specific__unweighted__single_muni__pooled_count.tex}{Table pending --- run script 51.}
+\end{center}
+
+\smallskip
+\begin{itemize}
+    \item Firms in a single municipality: cleaner firm-to-municipality mapping
+    \item Governor: $0.009^{***}$ ($F = 9.9$) --- nearly reaches $F = 10$ threshold
+    \item Mayor insignificant: multi-muni firms may drive the mayor channel
+\end{itemize}
+\hfill\hyperlink{slide:fc1}{\beamerreturnbutton{Back to FC-1}}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Robustness: Changes Extensive Across Specifications}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{l >{\centering\arraybackslash}p{1.8cm} >{\centering\arraybackslash}p{1.8cm} >{\centering\arraybackslash}p{1.8cm} >{\centering\arraybackslash}p{1.8cm}}
+\toprule
+\textbf{Spec} & \textbf{Mayor} & \textbf{Governor} & \textbf{President} & \textbf{Best $F$} \\
+\midrule
+\textbf{Main} (FC-3)       & $0.001$      & $0.018^{*}$  & $-0.022^{**}$  & 4.9 (P) \\[2pt]
+Party (FC-5b)               & $-0.005$     & $-0.011$     & $-0.016$       & 0.8 (G) \\[2pt]
+2002-fixed (FC-6b)          & $0.010$      & $0.005$      & $-0.035^{***}$ & 6.7 (P) \\[2pt]
+Unweighted (FC-7b)          & $0.000$      & $-0.001$     & $-0.003^{***}$ & \textbf{16.4} (P) \\[2pt]
+Single-muni (FC-8b)         & $0.004$      & $0.007$      & $-0.016$       & 2.4 (P) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+\begin{itemize}
+    \item \textbf{President dominates changes}: negative and significant across main, 2002-fixed, and unweighted ($F = 16.4$)
+    \item Governor significant only in main spec; mayor never significant in changes
+    \item Party alignment produces no signal --- coalition captures broader political networks that shift at transitions
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[allowframebreaks]{Key Takeaways}
+
+\textbf{Extensive margin confirmed as the active channel}:
+\begin{itemize}
+    \item Political alignment predicts whether a firm gets BNDES credit, not how much
+    \item Effect is robust across levels and changes specifications
+    \item Intensive margin shows zero signal (neither levels nor changes)
+\end{itemize}
+
+\medskip
+
+\textbf{Which tiers matter}:
+\begin{itemize}
+    \item \textbf{Governor}: most robust across weighted specifications (significant in 4/5 levels specs)
+    \item \textbf{President}: negative sign, dominant in changes and 2002-fixed baselines
+    \item \textbf{Mayor}: weakest overall (marginally significant in main, drops in single-muni and changes)
+    \item Coalition alignment outperforms party alignment for joint instrument strength
+\end{itemize}
+
+\framebreak
+
+\textbf{Weighting matters}:
+\begin{itemize}
+    \item Unweighted $F$-stats are 10--20$\times$ larger --- alignment channel is strongest among small firms
+    \item Employment-weighted results are economically more relevant but statistically noisier
+\end{itemize}
+
+\medskip
+
+\textbf{Interaction instruments}:
+\begin{itemize}
+    \item MxG has opposite signs across margins ($+$ extensive, $-$ intensive): joint alignment spreads credit across more firms at lower amounts
+    \item MxP turnover interaction partially offsets the negative president single-tier effect
+    \item Interactions do not improve overall instrument strength ($F < 10$)
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[allowframebreaks]{Firm $\to$ Sector Aggregation: Three Key Differences}
+\hypertarget{slide:aggregation}{}
+
+Start from the unweighted firm extensive margin:
+\vspace{-6pt}
+\[
+  \mathbf{1}(\text{BNDES}_{fmt} > 0)
+  = \sum_{\ell} \lambda^{\text{ext}}_{\ell}\, \FA^{\ell}_{fmt}
+  + \gamma_{f} + \alpha_{mt} + u_{fmt}.
+\]
+\vspace{-6pt}
+Average over pre-election firm base $\mathcal{F}^{\mathrm{pre}}_{jme}$:
+\vspace{-6pt}
+\[
+  \underbrace{H^{\mathrm{pre}}_{jmt}}_{\text{share of pre-election firms w/ BNDES}}
+  = \sum_{\ell} \lambda^{\text{ext}}_{\ell}\,
+  \underbrace{\overline{\FA}^{\ell,\mathrm{pre}}_{jmt}}_{\text{avg firm instrument}}
+  + \bar{\gamma}_{jme} + \alpha_{mt} + \bar{u}_{jmt}.
+\]
+\vspace{-6pt}
+Compare with the sector first stage:
+\vspace{-6pt}
+\[
+  \underbrace{s_{jmt}}_{\text{BNDES value share}} = \sum_{\ell} \lambda_{\ell}\, Z^{\ell}_{jmt}
+  + \phi\,\EC_{jm,\tau} + \gamma_{jm} + \alpha_{jt} + u_{jmt}.
+\]
+
+\framebreak
+
+\textbf{Difference 1: Outcome object.}
+\begin{itemize}
+    \item Aggregated firm: $H^{\mathrm{pre}}_{jmt}$ = \textbf{head-count} share of pre-election firms receiving any credit (pure extensive margin)
+    \item Sector: $s_{jmt}$ = \textbf{value} share of BNDES credit flowing to sector $j$
+    \item Two sub-differences:
+    \begin{enumerate}
+        \item \textit{Firm base}: pre-election firms (fixed) vs.\ current-year firms (time-varying)
+        \item \textit{Margin}: pure extensive vs.\ extensive $+$ intensive ($s_{jmt}$ reflects how many firms \emph{and} how much each receives)
+    \end{enumerate}
+    \item Since firm results show zero intensive-margin signal, the mixing in $s_{jmt}$ may \textbf{not} attenuate much --- but many zeros add noise
+\end{itemize}
+
+\framebreak
+
+\textbf{Difference 2: Instrument weighting.}
+\begin{itemize}
+    \item Aggregated firm weights each firm equally: $\bar{\omega}_{jmp,\tau} = \frac{1}{N^{\mathrm{pre}}_{jme}} \sum_f \omega_{fp,\tau}$
+    \item Sector weights by baseline owner count: $w_{jmp,\tau} = \sum_f \frac{L_{f,\tau}}{N_{jm,\tau}} \omega_{fp,\tau}$
+    \item The two differ when party exposure $\omega_{fp,\tau}$ \textbf{covaries with firm size} $L_{f,\tau}$
+\end{itemize}
+
+\medskip
+
+\textbf{Difference 3: Fixed effects.}
+\begin{itemize}
+    \item Aggregated firm: $\bar{\gamma}_{jme}$ (cell avg of firm FE) $+$ muni$\times$year
+    \item Sector: muni$\times$sector FE $+$ sector$\times$year FE $+$ exposure control $\EC_{jm,\tau}$
+    \item Firm spec has \emph{finer} municipality conditioning but \emph{coarser} sector conditioning
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Why Might the Firm Signal Not Translate to the Sector Level?}
+
+\textbf{H1: Scale effect + cross-sector cancellation} \textcolor{notegreen}{(likely)}
+\begin{itemize}
+    \item Connected owners are spread across many sectors $\Rightarrow$ alignment raises BNDES in multiple sectors simultaneously
+    \item Firm regression detects this level effect, but $\sum_j \Delta s_{jmt} = 0$ by construction $\Rightarrow$ gains cancel in shares
+    \item Sector first stage only identifies \textbf{cross-sector reallocation}, not overall expansion
+\end{itemize}
+
+\medskip
+
+\textbf{H2: Jensen's inequality in instrument aggregation}
+\begin{itemize}
+    \item Firm: $\FA_{fmt} = \sum_p (L_{fp}/L_f) \cdot \Align_{mpt}$ --- sum of \textbf{ratios}; sector: $Z_{jmt}$ uses $\sum_f L_{fp}/\sum_f L_f$ --- \textbf{ratio of sums}
+    \item Small firms with high party share are overweighted in firm aggregation vs.\ sector instrument
+\end{itemize}
+
+\medskip
+
+\textbf{H3: Thin sector coverage within municipalities}
+\begin{itemize}
+    \item If few sectors have positive BNDES per muni-year, $s_{jmt}$ is mostly zeros
+    \item Cross-sector variation in $Z_{jmt}$ may be small, leaving little identifying variation after sector$\times$year FE
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Diagnostic Agenda: Firm-to-Sector Link}
+
+\textbf{Diagnostic 1: Cross-sector distribution of aligned firms}
+\begin{itemize}
+    \item Are newly aligned firms concentrated in specific sectors or spread evenly across all sectors within a municipality?
+    \item Compute Herfindahl of $L_{jmp}$ across sectors $j$ for each $(m, p)$: high HHI $\Rightarrow$ alignment shocks are sector-specific (good for identification); low HHI $\Rightarrow$ shocks are diffuse (shares won't move)
+\end{itemize}
+
+\bigskip
+
+\textbf{Diagnostic 2: Sector coverage within municipalities}
+\begin{itemize}
+    \item What share of the 10 sector groups has positive BNDES credit in a given municipality-year?
+    \item Distribution across municipalities and evolution over time
+    \item If most municipality-years have credit in only 2--3 sectors, $s_{jmt}$ has very limited cross-sector variation
+\end{itemize}
+
+\bigskip
+
+\textbf{Diagnostic 3: Instrument variation decomposition}
+\begin{itemize}
+    \item Within-muni-year variance of $Z_{jmt}$ across sectors (identifying variation under sector$\times$year FE)
+    \item Between-muni-year variance (absorbed by muni$\times$year FE)
+    \item If within-muni-year variation is small $\Rightarrow$ sector$\times$year FE absorbs most signal
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Implications for Sector First Stage}
+
+\textbf{Firm-level findings guide the sector instrument design}:
+
+\medskip
+
+\begin{enumerate}
+    \item \textbf{Extensive margin drives sector shares}: alignment shifts \emph{which firms} get BNDES, aggregating to shifts in $s_{jmt}$
+
+    \item \textbf{Governor + mayor preferred}: both show positive extensive-margin effects; president's negative sign and crowd-out concern suggest excluding it
+
+    \item \textbf{Coalition preferred over party}: stronger joint $F$, governor significant under coalition but not party
+
+    \item \textbf{Interactions add nuance but not strength}: joint $F$-stats do not improve over single-tier specs
+
+    \item \textbf{Cycle-specific baselines preferred}: 2002-fixed shifts which tier dominates, suggesting baseline recency matters
+\end{enumerate}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Next Steps}
+
+\textbf{Immediate --- diagnostics}:
+\begin{enumerate}
+    \item Sector coverage: what \% of sector groups have positive BNDES per muni-year?
+    \item Alignment concentration: Herfindahl of $L_{jmp}$ across sectors --- are aligned firms sector-specific or diffuse?
+    \item Instrument variation decomposition: within- vs.\ between-muni-year variance of $Z_{jmt}$
+\end{enumerate}
+
+\bigskip
+
+\textbf{Immediate --- estimation}:
+\begin{enumerate}
+    \item Run sector first stage with updated grouped sectors (10 groups)
+    \item Compare sector-level $F$-statistics across FE structures (sector$\times$year, muni$\times$year, year-only)
+    \item Sector second stage: reduced form and vector 2SLS
+\end{enumerate}
+
+\bigskip
+
+\textbf{Design decisions to resolve}:
+\begin{enumerate}
+    \item Should the president tier be included in the sector instrument? (negative sign, crowd-out concern)
+    \item Primary FE for sector first stage: sector$\times$year (most demanding) vs.\ muni$\times$year (strongest $F$ in previous results)
+    \item If aligned firms are diffuse across sectors (low HHI), can we redesign the instrument to exploit cross-municipality variation instead?
+\end{enumerate}
+
+\end{frame}
+
+% ===========================================================================
+% APPENDIX
+% ===========================================================================
+\appendix
+
+% ===========================================================================
+\begin{frame}{Appendix: FC-5b --- Party Alignment, Changes Extensive}
+\hypertarget{appendix:fc5b}{}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/firm__main__changes__extensive__party__cycle_specific__unweighted__all_firms__pooled_count.tex}{Table pending --- run script 51.}
+\end{center}
+
+\smallskip
+\begin{itemize}
+    \item No significant effects under party alignment changes
+    \item All $F < 1$; party-level variation is insufficient at inauguration years
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix: FC-6b --- 2002-Fixed Baseline, Changes Extensive}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/firm__main__changes__extensive__coalition__2002_fixed__unweighted__all_firms__pooled_count.tex}{Table pending --- run script 51.}
+\end{center}
+
+\smallskip
+\begin{itemize}
+    \item President: $-0.035^{***}$ ($F = 6.7$) --- strongest single-tier changes result (weighted)
+    \item Mayor and governor insignificant with 2002-fixed baselines
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix: FC-7b --- Unweighted, Changes Extensive}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/firm__main__changes__extensive__coalition__cycle_specific__unweighted__all_firms__pooled_count.tex}{Table pending --- run script 51.}
+\end{center}
+
+\smallskip
+\begin{itemize}
+    \item President unweighted: $-0.003^{***}$ ($F = 16.4$) --- passes Stock-Yogo $F > 10$
+    \item Mayor and governor: no signal even unweighted
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix: FC-8b --- Single-Municipality Firms, Changes Extensive}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/firm__main__changes__extensive__coalition__cycle_specific__unweighted__single_muni__pooled_count.tex}{Table pending --- run script 51.}
+\end{center}
+
+\smallskip
+\begin{itemize}
+    \item President: $-0.016$ ($F = 2.4$) --- direction consistent but loses significance
+    \item Single-muni firms show weaker changes results across all tiers
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix: Sector Group Definitions}
+
+\footnotesize
+\begin{center}
+\begin{tabular}{llp{7.5cm}}
+\toprule
+\textbf{Group} & \textbf{Label} & \textbf{CNAE Sections} \\
+\midrule
+Ag  & Agriculture               & A \\
+Mi  & Mining                    & B \\
+CL  & Light Manufacturing       & C (divisions 10--18: food, textiles, wood, paper, printing) \\
+CH  & Heavy Manufacturing       & C (divisions 19--25: petroleum, chemicals, metals, rubber) \\
+CA  & Advanced Manufacturing    & C (divisions 26--33: electronics, machinery, vehicles, equipment) \\
+UCo & Utilities \& Construction & D (electricity/gas), E (water/waste), F (construction) \\
+Tr  & Trade                     & G (wholesale and retail) \\
+Tp  & Transport                 & H (transport and storage) \\
+MS  & Market Services           & I, J, L, M--N (accommodation, information, real estate, professional/admin) \\
+PSO & Public, Social \& Other   & P (education), Q (health), R (arts), S (other services) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix: Data Sources}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{lll}
+\toprule
+\textbf{Source} & \textbf{Content} & \textbf{Coverage} \\
+\midrule
+BNDES portal & Loan-level disbursements & 2002--2024 \\
+RAIS (MTE) & Employer-employee, CNAE sector & 2002--2017 \\
+TSE / Colonnelli et al. & Party affiliation (firm owners) & 2002--2019 \\
+IBGE PIB Municipal & Municipality GDP & 2002--2017 \\
+IBGE Population & Municipality population & 1991--2025 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\bigskip
+
+\textbf{Geographic unit}: 5,570 municipalities \quad\textbf{Sample}: 2002--2017
+
+\medskip
+
+\textbf{Firm panel}: 39.5M firm$\times$municipality$\times$year observations (employment-weighted)\\
+\textbf{Firms with BNDES}: 408K obs ($\sim$1\% of panel)
+
+\end{frame}
+
+\end{document}

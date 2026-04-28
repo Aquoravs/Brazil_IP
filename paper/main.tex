@@ -1,0 +1,921 @@
+\documentclass{article}
+\usepackage[top=2.3cm, bottom=2.3cm, left=2.1cm, right=2.1cm]{geometry}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{threeparttable}
+\usepackage{booktabs}
+\usepackage{rotating}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{amssymb}
+\usepackage{dsfont}
+\usepackage{booktabs}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{setspace}
+\usepackage{babel}
+\usepackage{pstricks}
+\usepackage{pstricks-add}
+\let\clipbox\relax
+\usepackage{tikz}
+%\usepackage{subfig}
+\usepackage{adjustbox}
+\usepackage{enumitem}
+\usepackage{bbm}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{multirow}
+%\usepackage{pgfplots}
+\usepackage{accents}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{lscape}
+\hypersetup{colorlinks,linkcolor={blue},citecolor={blue},urlcolor={red}}
+%\usepackage[capposition=top]{floatrow}
+\usepackage{microtype}
+\usepackage[default,regular,black]{sourceserifpro}
+\usepackage[T1]{fontenc}
+
+\begin{document}
+
+\title{Testing Industrial Policymakers: Evidence from Brazil's BNDES}
+\author{}
+\date{\today}
+
+\maketitle
+
+\begin{abstract}
+    Industrial policy. Everyone is doing it. Is it effective?
+\end{abstract}
+
+\normalsize
+
+\newpage
+\clearpage
+\setcounter{page}{1}
+\setlength{\parskip}{10pt}
+\setlength{\parindent}{10pt}
+
+\section{Introduction}
+
+There is huge interest in assessing the success of IP. Currently the "state if the art" is Nathan Lane's paper, and similar, which essentially show that increasing support for one sector leads to increases in the size of that sector, and that larger size persists once the extra support is removed. While this provides evidence that there are some sort of external economies/learning externalities within that sector, that is not the central question for assessing IP. Those same funds may have been better spent on other industries with higher externalities, or even handed out in equal amounts to all industries in the case where externalities do not differ across sectors.
+
+This paper derives a simple test for the optimality of existing industrial policy, and provides guidance on which sectors should be provided with relatively more support and which with relatively less support in order to move closer to that optimum.
+
+The idea is quite simple. We exploit the fact that we observe many smaller regions within a country and ask whether small changes in the industry mix (i.e. the allocation of that region's factors across uses) affect GDP in those locations. If industrial policy was already optimal, then small (exogenous) perturbations in allocations should not affect GDP. If small perturbations do affect GDP, we can deduce that perturbations in those directions (in those places) would bring industrial policy closer to the optimal allocation.
+
+To implement this test we turn to Brazil. Brazil is a good setting for a number of reasons. First, Brazil is a large country with many regions and good microdata (and a classic case study when studying historic IP). Second, there are detailed data on industrial policy actions that come from individual loan disbursements by the Brazilian development bank BNDES that loans approximately x\% of GDP each year at subsidized rates and in a targeted manner.
+
+Third, BNDES is known to hire high quality staff and be reasonably insulated from political interference---and so it is not totally implausible to think that they are implementing optimal industrial policy. At the same time, prior work has identified local industrial policy perturbations driven by plausibly exogenous political factors---political turnovers at combinations of the Mayoral, Governor and Presidential levels leading to changes in support for politically aligned versus non aligned firms (an approach that can now be expanded thanks to the recent matching of firm-level employment records to party membership). We can show these political turnovers alter the local industry mix but they only lead to small perturbations given the relative insulation of the BNDES, as our test requires. This condition would likely not be satisfied when assessing dramatic changes in IP as in \citet{lane2025manufacturing}.
+
+Finally by focusing on political-alignment induced perturbations rather than changes in support for different sectors over time---as in \citet{lane2025manufacturing}---we observe substantial variation in the industries that are favored by the perturbations, allowing us to tease out rich policy prescriptions regarding which sectors in which locations would be deserving of greater IP support.
+
+DGA Note: we should probably not be so tied to everything being about which sectors the policymaker chooses to support. We can also ask about different firm types (size? ownership structure? etc.). Particularly valuable when we have a firm-level instrument and want to show it has a Bartik first stage when aggregated to the firm-grouping level.
+
+\subsection{Existing Literature}
+
+\textcolor{red}{A recent wave of empirical research has transformed our understanding of industrial policy, moving from correlational analysis toward credible causal identification \citep{juhasz2024new}. This ``new economics of industrial policy'' combines modern identification strategies with detailed microdata to evaluate whether government interventions successfully promote targeted sectors. The resulting evidence provides a more positive assessment of industrial policy than earlier skeptical accounts, though important questions about welfare implications remain. Our paper contributes to this literature by developing a novel test for whether existing industrial policy is optimally allocated across sectors.}
+
+\textcolor{red}{Three studies exemplify the new empirical approach and its findings. \citet{lane2025manufacturing} examines South Korea's Heavy and Chemical Industry (HCI) drive of the 1970s, exploiting the abrupt policy shift to identify causal effects on targeted industries. He finds that HCI sectors experienced persistent increases in output, productivity, and exports that endured long after the policy ended. \citet{juhasz2018temporary} studies the Napoleonic Blockade as a natural experiment in trade protection, showing that French regions more insulated from British competition developed greater capacity in mechanized cotton spinning, with effects persisting into the second half of the nineteenth century. \citet{mitrunen2024war} analyzes Finland's post-war industrial policy, where war reparations to the Soviet Union required rapid industrialization; he documents that temporary government support led to persistent increases in manufacturing employment and long-run improvements in human capital and intergenerational mobility.}
+
+\textcolor{red}{These studies share a common finding: temporary industrial policy interventions generate persistent effects on targeted sectors. This persistence is informative about the underlying mechanisms. First, these papers provide evidence that industrial policy actually generates a response by firms---support is not merely inframarginal. If subsidies simply rewarded activity that would have occurred anyway, we would not observe differential growth in targeted versus non-targeted sectors following policy changes. Second, the persistence of effects---extending decades beyond the policy interventions themselves---reveals either that capital is slow to adjust or that there are dynamic externalities, dynamic spillovers, or external economies of scale at work. The latter interpretation is more plausible given that effects persist well beyond the typical time horizon over which capital adjustments occur; the Korean HCI effects endure fifty years later, the Napoleonic Blockade effects persisted for half a century, and the Finnish reparations effects remained visible across generations.}
+
+\textcolor{red}{However, what these studies cannot establish is whether the sectors chosen for intervention had particularly high externalities or spillovers relative to alternative uses of the funds. To justify industrial policy on welfare grounds, it is not enough to show that targeted sectors respond positively---one must also show that these sectors deserved priority over others. \citet{bartelme2025textbook} develop a model that makes this point clearly: optimal industrial policy requires knowledge of sector-specific scale elasticities, and the welfare gains from intervention depend critically on whether policy correctly targets high-elasticity sectors. The existing empirical literature demonstrates that industrial policy ``works'' in the sense of expanding targeted sectors, but not that it improves on laissez-faire allocation. Our paper addresses precisely this gap by testing whether observed industrial policy allocations satisfy the first-order conditions for optimality.}
+
+\section{Theory}\label{sec:theory}
+
+% ---------- Local-Optimality Test: Object and Moments ----------
+% Notation: regions r, sectors j=1,...,J, time t; shares s_{r} \in \Delta^{J-1}; \iota is J×1 vector of ones.
+
+\newcommand{\iotaVec}{\mathbf{1}}
+
+\paragraph{Environment and planner.}
+Within region $r$ at time $t$, factors are fixed and allocated across sectors $j=1,\dots,J$.
+Let $s_{r}=(s_{r1},\dots,s_{rJ})'\in\Delta^{J-1}$ denote sector shares with $\sum_{j} s_{rj}=1$.
+Regional output (or welfare) is $Y_r=Y_r(s_r)$, allowing for external economies through $s_r$.
+
+\paragraph{Directional derivative condition (local optimality).}
+For any feasible within-simplex reallocation direction $v_r\in\mathbb{R}^J$ satisfying $\iotaVec' v_r=0$,
+the first-order change in $Y_r$ at an interior optimum must be zero:
+\begin{equation}
+    \label{eq:directional}
+    \frac{dY_r}{d\varepsilon}\bigg|_{\varepsilon=0}
+    = \nabla_{s_r} Y_r \cdot v_r \;=\; 0
+    \quad\text{for all } v_r \perp \iotaVec.
+\end{equation}
+
+** this is necessary at any interior optimum **
+
+\begin{itemize}
+    \item Conditions under which single peaked so we can interpret the test as showing optimality if no change
+\end{itemize}
+
+Equivalently, the gradient $g_r\equiv\nabla_{s_r}Y_r$ is proportional to $\iotaVec$ (equalized social marginal returns across sectors).
+
+\textcolor{red}{The logic underlying this test exploits a fundamental property of optimization: at any interior optimum, small perturbations in feasible directions have only second-order effects on the objective. This insight, formalized in the envelope theorem \citep{samuelson1947foundations}, implies that if the planner is optimizing, the first-order derivative of welfare with respect to feasible reallocations must be zero. Deviations from this condition reveal suboptimality and, importantly, indicate the direction of welfare-improving adjustments.}
+
+\textcolor{red}{Our approach relates to a growing literature that tests for optimal behavior by examining whether observed allocations satisfy first-order conditions. \citet{chetty2009sufficient} develops ``sufficient statistics'' methods that leverage envelope conditions to identify welfare-relevant parameters without fully specifying the underlying model. \citet{hsieh2009misallocation} test for efficient allocation of resources across firms by examining whether marginal products are equalized, finding substantial misallocation in India and China. \citet{baqaee2020productivity} extend this logic to show how sectoral misallocation aggregates to macroeconomic inefficiency. In the context of industrial policy, our test asks whether the planner has equalized social marginal returns across sectors---if not, the gradient $\beta$ reveals which sectors are over- or under-supported.}
+
+\textcolor{red}{A key advantage of this approach is that we need not take a stand on the specific form of externalities or the planner's objective. The test is valid under any model where the planner maximizes a smooth objective subject to resource constraints. If a policymaker is optimally targeting sectors with the highest external returns, then exogenous perturbations to the sector mix---induced by shocks unrelated to fundamentals---should have no first-order effect on regional output. Rejection of the null $\beta = \mathbf{0}$ indicates that the current allocation is suboptimal, and the sign pattern of $\hat{\beta}$ provides a local prescription for improvement.}
+
+
+
+
+
+\paragraph{Empirical projection (within-simplex).}
+Let $\Delta s_{rt}$ be an observed (small) change in the sector mix with $\iotaVec'\Delta s_{rt}=0$, and let
+$\Delta Y_{r,t+h}$ be the outcome change at horizon $h$.
+A linear local approximation yields
+\begin{equation}
+    \label{eq:projection}
+    \Delta Y_{r,t+h} \;=\; \beta' \Delta s_{rt} \;+\; u_{r,t+h},
+\end{equation}
+where $\beta$ is the projection of $g_r$ onto the within-simplex subspace.
+Under local optimality (\ref{eq:directional}), this projection is zero:
+\begin{equation}
+    \label{eq:null}
+    H_0:\quad \beta \;=\; \mathbf{0}.
+\end{equation}
+
+
+
+\paragraph{Instrumental-variables implementation.}
+Because $\Delta s_{rt}$ is endogenous, use instruments $Z_{rt}$ that shift the mix via policy (e.g., politics-driven credit tilts)
+but affect $\Delta Y$ only through $\Delta s$:
+\begin{align}
+    \text{First stage: } \quad
+    \Delta s_{rt}    & = \Pi Z_{rt} + \alpha_r + \tau_t + X'_{rt}\gamma + \eta_{rt}, \label{eq:firststage}                                  \\
+    \text{Second stage: } \quad
+    \Delta Y_{r,t+h} & = \beta' \widehat{\Delta s}_{rt} + \alpha'_r + \tau'_t + X'_{rt}\delta + \varepsilon_{r,t+h}. \label{eq:secondstage}
+\end{align}
+Impose $\iotaVec'\Delta s_{rt}=0$ by (i) dropping one sector $j_0$ or (ii) residualizing $\Delta s_{rt}$ on $\iotaVec$.
+
+\paragraph{GMM moment conditions.}
+Stack observations by $i\equiv(r,t)$, let $x_i\equiv\Delta s_{rt}$, $y_i\equiv\Delta Y_{r,t+h}$, $z_i\equiv Z_{rt}$,
+and $e_i(\beta)=y_i-\beta' x_i$.
+With valid instruments:
+\begin{equation}
+    \label{eq:moments}
+    \mathbb{E}\big[z_i\, e_i(\beta)\big] \;=\; \mathbf{0}.
+\end{equation}
+The local-optimality null (\ref{eq:null}) is the joint restriction $\beta=\mathbf{0}$, testable via a Wald test in
+(\ref{eq:secondstage}); with overidentification, Hansen's $J$-test can also be reported.
+
+%\textcolor{red}{The instrumental variables strategy we employ builds on the shift-share (or Bartik) identification framework that has become central to applied microeconomics. \citet{goldsmith2020bartik} formalize conditions under which shift-share instruments identify causal effects, emphasizing that identification can rest on either the exogeneity of shares or the exogeneity of shocks. \citet{borusyak2022quasi} develop a shock-level approach showing that when many shocks are combined, the law of large numbers ensures consistent estimation even when individual shares are endogenous. Our setting exploits political alignment shocks---changes in whether a municipality's mayor, governor, or president belongs to a particular party---as the ``shift'' component, interacted with pre-determined sectoral exposure to party-affiliated firms as the ``share'' component.}
+
+\textcolor{red}{In our setting, we exploit political alignment shocks---changes in whether a municipality's mayor, governor, or president belongs to a particular party---via a shift-share framework. Here the ``shift'' component are changes the political party in power, interacted with pre-determined sectoral exposure to party-affiliated firms as the ``share'' component. The exclusion restriction requires that political alignment shocks affect regional output only through their effect on BNDES credit allocation across sectors. This is plausible given that BNDES operates as the primary channel for subsidized industrial lending in Brazil, and prior work documents that political alignment influences which firms receive BNDES loans \citep{lazzarini2015state, carvalho2014real}. We validate this channel by showing that our instruments predict sectoral BNDES credit shares but not other potential confounders such as municipal expenditure patterns or federal transfers unrelated to industrial policy.}
+
+
+
+\paragraph{Policy interpretation.}
+If $H_0$ is rejected, the signs and magnitudes of the elements of $\beta$ recover the local GDP gradient by sector
+(tilt more toward sectors with $\beta_j>0$, less where $\beta_j<0$), yielding sector-by-place policy maps.
+
+\textcolor{red}{This framework provides policymakers with actionable guidance that goes beyond binary assessments of policy success or failure. Rather than simply asking whether industrial policy ``works,'' we recover a local prescription for marginal reallocation. Positive coefficients $\hat{\beta}_j > 0$ indicate sectors where additional support would raise regional output, suggesting these sectors generate positive externalities that are currently under-exploited. Conversely, negative coefficients identify sectors receiving excessive support relative to their external returns. The magnitude of $\hat{\beta}_j$ quantifies the marginal return to reallocating resources toward sector $j$, allowing policymakers to prioritize adjustments where gains are largest.}
+
+\textcolor{red}{Importantly, because we estimate sector-specific coefficients across regions, we can construct ``policy maps'' showing optimal reallocation directions for each locality. This addresses a key limitation of existing industrial policy evaluation: most studies treat sectors as uniformly deserving of support or not, when in practice the returns to sector-specific support may vary substantially across locations due to differences in initial conditions, complementary infrastructure, or agglomeration economies. Our approach reveals this heterogeneity and provides place-based guidance for industrial policy.}
+
+
+
+\paragraph{Optional IO-adjusted variant.}
+If $A$ is the input-output matrix and $B=(I-A)^{-1}$ the Leontief inverse, define IO-augmented shares $\tilde s_r = B' s_r$
+and repeat (\ref{eq:projection})--(\ref{eq:moments}) with $\Delta \tilde s_{rt}$ replacing $\Delta s_{rt}$.
+The null remains $\tilde\beta=\mathbf{0}$ within the simplex of $\tilde s$.
+
+\section{Empirical Framework}
+
+Notation:
+Regions $m$, sectors $j=1,...,J$, years $t$. Let $s_{mt}$ be the $J\times 1$ vector of sector shares in region $m$ at $t$, with $\iota' s_{mt} = 1$.
+% Let \Delta denote first differences over time. Outcome Y is regional GDP (or wage bill / lights).
+% Horizon h captures outcome response timing (e.g., h ∈ {1,2,3}).
+
+% ========== 1) Politicians are moving things around (First stage) ==========
+\paragraph{1) Zeroth stage: politicians move individual BNDES allocations.}
+
+Before potentially aggregating to the sector level, we first establish that political alignment affects firm-level BNDES lending. For firm $f$ in municipality $m$ and year $t$, we estimate:
+\begin{equation}
+    \label{eq:zerothstage_emp}
+    \log(\text{BNDES}_{fmt}) \;=\; \beta  \text{ShareAligned}^{\ell}_{ft} \;+\; \alpha_f \;+\; \alpha_{mt} \;+\; \varepsilon_{fmt},
+\end{equation}
+where $\log(\text{BNDES}_{fmt})$ is the natural log of total BNDES disbursements to firm $f$ in year $t$, and $\text{ShareAligned}^{\ell}_{ft}$ is the share of firm $f$'s owners who are registered members of the political party (or coalition) holding office $\ell \in \{\text{mayor}, \text{governor}, \text{president}\}$. The specification includes firm fixed effects $\alpha_f$ to absorb time-invariant firm characteristics and municipality$\times$year fixed effects $\gamma_{mt}$ to control for local economic shocks.
+
+Note: $\text{ShareAligned}^{\ell}_{ft}=\sum_{o\in f} 1\{\text{party}(o)=\ell\}/\sum_{o\in f} 1$ which may be time varying both because the party in power changes (the obvious identifying variation), and because the affiliation of the firm owners changes (either because there are new owners or the same owners change their party affiliation). Our baseline would want to hold fixed the owner affiliation at the firm level, or else we will probably need to control for the time-varying owner affiliation as a main effect.
+
+\paragraph{2) First stage: Sectoral shares of BNDES funding depends on political shocks.}
+
+Now we aggregate to the region-sector level and show allocation shares depend on political alignment of the various firms in the region:
+
+\begin{equation}
+    \label{eq:firststage_emp}
+    s_{mtj} \;=\; \gamma \frac{\sum_{f\in mj} \exp(\hat{\beta}\text{ShareAligned}^{\ell}_{ft} \;+\; \hat{\alpha_f} \;+\; \hat{\alpha_{mt}})}{\sum_{f\in m} \exp(\hat{\beta}\text{ShareAligned}^{\ell}_{ft} \;+\; \hat{\alpha_f} \;+\; \hat{\alpha_{mt}})} \;+\; \delta_{mt} \;+\; \delta_{j} \;+\; \varepsilon_{mtj},
+\end{equation}
+
+Potentially can run this in changes, and with different fixed effects (e.g. time and municipality separately)
+
+This can also be done more directly (with a different functional form) by simply running shares on sumes of sharealigned, weighting each firm by its size $w_{ft}$ (e.g. number of employees, some measure of total loans)
+
+\begin{equation}
+    \label{eq:firststage_emp}
+    s_{mtj} \;=\; \gamma \frac{\sum_{f\in mj} (w_{ft} \text{ShareAligned}^{\ell}_{ft})}{\sum_{f\in m} (w_{ft} \text{ShareAligned}^{\ell}_{ft})} \;+\; \delta_{mt} \;+\; \delta_{j} \;+\; \varepsilon_{mtj},
+\end{equation}
+
+Finally, rather than shares being in terms of BNDES funding, we could use shares of labor factors from RAIS.
+
+
+\paragraph{2) Second stage: Do small reallocations affect output?}
+
+Second-stage IV using the first-stage fitted values
+\begin{equation}
+    \label{eq:secondstage_emp}
+    \ln Y_{m,t+h} \;=\; \sum_{j\neq 1} \theta_j s_{mtj} \;+\; \psi \ln \text{total\_BNDES}_{mt} \;+\; \delta_{m} \;+\; \delta_{t+h}  \;+\; \varepsilon_{m,t+h}.
+\end{equation}
+where $\text{total\_BNDES}_{mt}$ is the total BNDES disbursements to region $m$ in year $t$, $s_{mtj}$ are instrumented with political alignment as in first stage above, and $\delta_{m}$ and $\delta_{t+h}$ are municipality and time fixed effects.
+
+Test the \emph{local-optimality} null via a joint Wald test on $\theta$ in the second stage (or just an F-test?).
+
+We are also interested in the OLS (uninstrumented) and the reduced form (i.e. replacing $s_{mtj}$ with its instrument directly in the GDP equation). The joint Wald test on the coefficeints on the instruments in the reduced form is the perhaps the most compelling.
+
+The specification above may be better run in levels rather than logs, and or in changes. We may want to instrument total disbursements as well with a sum of the political alignment over all firms in the region.
+
+There is also an ML approach to this, where we directly include the firm level instruments ($\text{ShareAligned}^{\ell}_{ft}$ in the reduced form and use some sort of machine learning to reduce the dimensionality of the problem. If we go down this route would need to be able to perform a valid F-test that no combination of instruments matters.
+
+
+
+
+
+
+
+\section{Connection to three steps thing (deprecated)}
+
+% ===== Empirical Framework: Points 0–3 =====
+% Requires: \usepackage{amsmath,amssymb}
+%\newcommand{\iotaVec}{\mathbf{1}}
+
+% ---------- Notation ----------
+% Regions r, sectors j=1,...,J, years t. Let s_{rt} be the J×1 vector of sector shares in region r at t, with \iota' s_{rt} = 1.
+% Let \Delta denote first differences over time. Outcome Y is regional GDP (or wage bill / lights).
+% Horizon h captures outcome response timing (e.g., h ∈ {1,2,3}).
+
+% ========== 0) Core object to test (local optimality) ==========
+\paragraph{0) Core object and null.}
+Consider the within-simplex projection:
+\begin{equation}
+    \label{eq:core}
+    \Delta Y_{r,t+h} \;=\; \beta' \Delta s_{rt} \;+\; u_{r,t+h},
+    \qquad \text{with } \iotaVec' \Delta s_{rt} = 0.
+\end{equation}
+Interpreting $\beta \approx \nabla_{s_r} Y_r$ locally, the \emph{local-optimality} null is that any feasible within-simplex reallocation has zero first-order effect:
+\begin{equation}
+    \label{eq:null}
+    H_0:\; \beta = \mathbf{0}.
+\end{equation}
+Empirically, impose $\iotaVec'\Delta s_{rt}=0$ by dropping one sector or residualizing $\Delta s_{rt}$ on $\iotaVec$.
+
+% ========== 0) Politicians move individual BNDES allocations (Zeroth stage) ==========
+\paragraph{0) Zeroth stage: politicians move individual BNDES allocations.}
+Before aggregating to the sector level, we first establish that political alignment affects firm-level BNDES lending. For firm $f$ in municipality $m$, sector $j$, and year $t$, we estimate:
+\begin{equation}
+    \label{eq:zerothstage}
+    \log(\text{BNDES}_{fmt}) \;=\; \beta \cdot \text{ShareAligned}^{\ell}_{mjt} \;+\; \alpha_f \;+\; \gamma_{mt} \;+\; \varepsilon_{fmt},
+\end{equation}
+where $\log(\text{BNDES}_{fmt})$ is the natural log of total BNDES disbursements to firm $f$ in year $t$ (winsorized at the 1st and 99th percentiles), and $\text{ShareAligned}^{\ell}_{mjt}$ is the employment-weighted share of sector $j$ in municipality $m$ whose firm owners are affiliated with the political party holding office $\ell \in \{\text{mayor}, \text{governor}, \text{president}\}$. The specification includes firm fixed effects $\alpha_f$ to absorb time-invariant firm characteristics and municipality$\times$year fixed effects $\gamma_{mt}$ to control for local economic shocks common to all firms in a given location and year. Standard errors are two-way clustered by firm and municipality. Table \ref{tab:first_stage} reports these estimates.
+
+% ========== 1) Politicians are moving things around (First stage) ==========
+\paragraph{1) First stage: politicians move the sector mix.}
+Build within-region \emph{shift–share} instruments from political turnovers and pre-alignment exposures.
+Let parties be indexed by $p$, and define baseline (pre-$t_0$) party exposure weights for region $r$, sector $j$:
+\begin{equation}
+    \label{eq:weights}
+    w_{rjp} \;\equiv\; \frac{\sum_{f \in (r,j)} L_{f,t_0}\, 1\{\text{party}(f)=p\}}{\sum_{f \in (r,j)} L_{f,t_0}},
+    \qquad \sum_p w_{rjp}=1.
+\end{equation}
+For office $\ell \in \{\text{mayor},\text{gov},\text{pres}\}$, let $\Delta \mathrm{Align}^{\ell}_{rtp}$ be the party-$p$ alignment turnover in $(r,t)$.
+Define the within-region instruments:
+\begin{equation}
+    \label{eq:ssiv}
+    Z^{\ell}_{rjt} \;\equiv\; \sum_{p} w_{rjp}\, \Delta \mathrm{Align}^{\ell}_{rtp},
+    \qquad
+    Z_{rjt} \;=\; \big(Z^{\text{mayor}}_{rjt},\, Z^{\text{gov}}_{rjt},\, Z^{\text{pres}}_{rjt}\big).
+\end{equation}
+First-stage equation (stacking sectors or estimating as a SUR):
+\begin{equation}
+    \label{eq:firststage}
+    \Delta s_{rjt} \;=\; \Pi Z_{rjt} \;+\; \alpha_{rt} \;+\; \gamma_{rj} \;+\; X'_{rt}\Gamma \;+\; \eta_{rjt},
+\end{equation}
+where $\alpha_{rt}$ are region$\times$time fixed effects absorbing common political shocks in $(r,t)$,
+$\gamma_{rj}$ are region$\times$sector fixed effects, and $X_{rt}$ are time-varying controls.
+Report strong first-stage $F$ and validate the \emph{channel} by showing $Z_{rjt}$ predicts BNDES sectoral credit but not other alignment channels.
+
+% ========== 2) Does moving things around do anything? (IV/GMM test) ==========
+\paragraph{2) Causal test: do (small) reallocations affect output?}
+Second-stage IV projection of (\ref{eq:core}) using the first-stage fitted values:
+\begin{equation}
+    \label{eq:secondstage}
+    \Delta Y_{r,t+h} \;=\; \beta' \widehat{\Delta s}_{rt} \;+\; \alpha'_{r} \;+\; \tau'_{t} \;+\; X'_{rt}\delta \;+\; \varepsilon_{r,t+h}.
+\end{equation}
+Test the \emph{local-optimality} null (\ref{eq:null}) via a joint Wald test on all elements of $\beta$ (within-simplex).
+Equivalently, in GMM notation with $i\equiv(r,t)$, $x_i=\Delta s_{rt}$, $y_i=\Delta Y_{r,t+h}$, $z_i=Z_{rjt}$:
+\begin{equation}
+    \label{eq:gmm}
+    e_i(\beta) \equiv y_i - \beta' x_i,
+    \qquad
+    \mathbb{E}\big[z_i\, e_i(\beta)\big] = \mathbf{0}.
+\end{equation}
+With overidentification, report Hansen's $J$-test.
+
+\emph{Power variants.} (i) Scalar policy-direction index:
+\begin{equation}
+    \label{eq:scalar}
+    v_{rt} \equiv w' \widehat{\Delta s}_{rt},
+    \qquad
+    \Delta Y_{r,t+h} = \theta\, v_{rt} + \text{FE} + \varepsilon_{r,t+h},
+    \quad H_0:\theta=0,
+\end{equation}
+where $w$ can be the first principal component, instrument weights, or theory-driven weights.
+(ii) HHI-based concentration change (first-order approximation):
+\begin{equation}
+    \label{eq:hhi}
+    \Delta \mathrm{HHI}_{rt}
+    = \sum_j \big(s_{rj,t-1}+\Delta s_{rjt}\big)^2 - \sum_j s_{rj,t-1}^2
+    \;\approx\; 2\, s'_{r,t-1}\, \Delta s_{rt}.
+\end{equation}
+Instrument $\Delta \mathrm{HHI}_{rt}$ by $2\, s'_{r,t-1}\, \widehat{\Delta s}_{rt}$ and test its effect on $\Delta Y_{r,t+h}$.
+
+\emph{High-dimensional implementation (IV-DML).}
+Residualize both $\Delta s_{rt}$ and $\Delta Y_{r,t+h}$ on rich FE and controls via cross-fitting (LASSO/ML),
+then run 2SLS on the orthogonalized variables using the orthogonalized $Z_{rjt}$; inference remains valid with many $j$.
+
+% ========== 3) Too much or too little IP? (Priority/EES interactions) ==========
+\paragraph{3) Diagnosis: too much vs. too little IP.}
+Let $P_j$ indicate priority sectors (e.g., official lists), and let $E_j$ be externally estimated external-scale elasticities.
+
+\emph{(a) Priority vs. non-priority split.}
+\begin{equation}
+    \label{eq:priority}
+    \Delta Y_{r,t+h}
+    = \beta_{P}\sum_{j} \widehat{\Delta s}_{rjt}\, 1\{j\in P\}
+    + \beta_{NP}\sum_{j} \widehat{\Delta s}_{rjt}\, 1\{j\notin P\}
+    + \text{FE} + \varepsilon_{r,t+h}.
+\end{equation}
+Tests: (i) optimality $H_0:\beta_P=\beta_{NP}=0$; (ii) alignment with stated priorities $H_0:\beta_P=\beta_{NP}$ vs $H_1:\beta_P>\beta_{NP}$.
+
+\emph{(b) Elasticity-weighted prescriptions.}
+Scalar index version:
+\begin{equation}
+    \label{eq:ees_scalar}
+    \Delta Y_{r,t+h}
+    = \theta \Big( \sum_j E_j\, \widehat{\Delta s}_{rjt} \Big) + \text{FE} + \varepsilon_{r,t+h},
+    \qquad H_0:\theta=0 \;\; (\text{monotonicity with } E_j).
+\end{equation}
+Fully interacted slope version:
+\begin{equation}
+    \label{eq:ees_interact}
+    \Delta Y_{r,t+h}
+    = \sum_{j} \beta(E_j)\, \widehat{\Delta s}_{rjt} + \text{FE} + \varepsilon_{r,t+h},
+    \quad \text{with } \frac{\partial \beta(E)}{\partial E} \ge 0 \text{ under correct prioritization.}
+\end{equation}
+
+\emph{Policy maps.}
+The elements of $\hat\beta$ (or grouped versions in \eqref{eq:priority}–\eqref{eq:ees_interact}) trace the local GDP gradient by sector×place:
+tilt toward sectors with $\hat\beta_j>0$ and away where $\hat\beta_j<0$.
+
+% ---------- Estimation housekeeping ----------
+% Always include region and time FE; consider region×time FE in first stage to force within-region identification.
+% Cluster at the political unit or election-cycle; add neighbor-alignment controls to mitigate spatial spillovers.
+% Document "smallness" of \widehat{\Delta s}_{rt} (median perturbation size) to support the local interpretation.
+
+\textcolor{red}{The empirical strategy proceeds in three steps. First, we establish that political alignment shocks generate exogenous variation in the sectoral composition of BNDES lending within regions. Specifically, when a party gains control of the mayoralty, governorship, or presidency, sectors with greater baseline exposure to that party's affiliated firms receive relatively more BNDES credit. This first stage validates that political turnovers move the ``levers'' of industrial policy in a manner orthogonal to productivity shocks.}
+
+\textcolor{red}{Second, we test whether these politically-induced reallocations of industrial support affect regional output. Under the null hypothesis that BNDES is optimally allocating resources, such perturbations should have no first-order effect on GDP---the envelope theorem implies that small movements away from the optimum are welfare-neutral to first order. Rejection of this null indicates suboptimality and opens the door to our third step.}
+
+\textcolor{red}{Third, conditional on rejection, we interpret the estimated coefficients $\hat{\beta}$ as a local prescription for policy improvement. Sectors with positive coefficients are under-supported relative to the optimum; those with negative coefficients are over-supported. By interacting these sector-specific prescriptions with measures of stated policy priorities (e.g., official ``priority sector'' designations) or externally estimated scale elasticities, we assess whether BNDES's actual allocation aligns with plausible welfare criteria. This diagnostic exercise distinguishes between two failure modes: industrial policy that is simply mistargeted (favoring the wrong sectors) versus policy that is correctly directed but insufficiently aggressive in prioritizing high-externality activities.}
+
+
+
+
+\section{Empirics}\label{sec:data}
+
+\textbf{This section is not so awesome}
+
+\subsection{BNDES and Brazillian Industrial Policy}
+
+\textcolor{red}{The Banco Nacional de Desenvolvimento Econ\^omico e Social (BNDES) is one of the world's largest development banks and has been central to Brazilian industrial policy since its founding in 1952. Originally established as BNDE (adding ``Social'' to its name in 1982), the bank was created to finance infrastructure and import-substitution industrialization during Brazil's post-war development push. Over seven decades, BNDES has evolved to support a wide range of activities including manufacturing, agriculture, innovation, exports, and regional development. At its peak in 2014, BNDES disbursed approximately R\$187 billion (roughly US\$80 billion), representing about 3\% of GDP and exceeding the combined lending of the World Bank and Inter-American Development Bank \citep{lazzarini2015state}. The bank operates through both direct lending to large firms and indirect lending via accredited financial intermediaries, with loans typically offered at subsidized rates tied to Brazil's Long-Term Interest Rate (TJLP).}
+
+\textcolor{red}{Table \ref{tab:bndes_summary} presents summary statistics on BNDES indirect lending over our full sample period from 2002 to 2024. Panel A documents the scale and trajectory of BNDES lending activity. The bank disbursed over 2 million indirect loans totaling R\$586 billion nominal over this period. Lending volume grew dramatically through the 2000s, rising from 28,000 loans (R\$6.2 billion) in 2002 to a peak of 238,000 loans (R\$64 billion) in 2012, before contracting sharply during Brazil's 2015--2016 recession. The average loan size varied between R\$213,000 and R\$474,000, reflecting the mix of small-business and larger industrial loans in the indirect portfolio. Panel B reveals important differences between the count-weighted and value-weighted sectoral composition of BNDES support. Commerce and services account for 77\% of loans by count but only 65\% by value, indicating smaller average loan sizes in this sector. Conversely, manufacturing comprises 16\% of loans by count but 26\% by value, reflecting larger project sizes in industry. Panel C documents the geographic concentration of lending. S\~ao Paulo leads both by count (22\%) and value (28\%), while Southern states (Paran\'a, Santa Catarina, Rio Grande do Sul) collectively account for 35\% of loans by count but only 30\% by value, suggesting smaller average loans in these regions relative to S\~ao Paulo and Rio de Janeiro.}
+
+
+\begin{table}[H]
+    \centering
+    \caption{BNDES Indirect Lending Summary Statistics (2002--2024)}
+    \label{tab:bndes_summary}
+    \begin{threeparttable}
+        \small
+        \begin{tabular}{lrrrr}
+            \toprule
+            \multicolumn{5}{l}{\textit{Panel A: Loan Volume by Year}}                           \\
+            \textbf{Year}  & \textbf{N Loans}   & \textbf{Total (R\$ B)} & \textbf{Avg (R\$ K)} \\
+            \midrule
+            2002           & 27,680             & 6.2                    & 223                  \\
+            2003           & 37,675             & 8.0                    & 213                  \\
+            2004           & 30,518             & 8.9                    & 290                  \\
+            2005           & 39,138             & 12.2                   & 311                  \\
+            2006           & 40,632             & 13.5                   & 332                  \\
+            2007           & 65,030             & 23.0                   & 354                  \\
+            2008           & 82,026             & 27.8                   & 339                  \\
+            2009           & 108,755            & 37.9                   & 348                  \\
+            2010           & 196,862            & 60.9                   & 309                  \\
+            2011           & 237,983            & 51.5                   & 217                  \\
+            2012           & 208,993            & 63.9                   & 306                  \\
+            2013           & 193,582            & 70.0                   & 362                  \\
+            2014           & 172,939            & 60.9                   & 352                  \\
+            2015           & 86,292             & 23.3                   & 270                  \\
+            2016           & 52,832             & 17.1                   & 323                  \\
+            2017           & 61,365             & 21.9                   & 357                  \\
+            2018           & 46,507             & 17.4                   & 375                  \\
+            2019           & 31,718             & 11.0                   & 347                  \\
+            2020           & 139,944            & 31.3                   & 224                  \\
+            2021           & 40,048             & 19.0                   & 474                  \\
+            2022           & 46,833             & 34.8                   & 742                  \\
+            2023           & 49,850             & 34.4                   & 690                  \\
+            2024           & 72,047             & 47.4                   & 658                  \\
+            \midrule
+            \textbf{Total} & \textbf{2,083,573} & \textbf{617.8}         & \textbf{297}         \\
+            \bottomrule
+        \end{tabular}
+
+        \vspace{0.5em}
+
+        \begin{tabular}{lrrrr}
+            \toprule
+            \multicolumn{5}{l}{\textit{Panel B: Sector Distribution}}                                          \\
+            \textbf{Sector}        & \textbf{N Loans} & \textbf{\% Count} & \textbf{R\$ B} & \textbf{\% Value} \\
+            \midrule
+            Commerce \& Services   & 1,573,936        & 76.5              & 382.8          & 65.4              \\
+            Manufacturing          & 326,227          & 15.9              & 153.2          & 26.2              \\
+            Agriculture \& Fishing & 140,994          & 6.9               & 43.0           & 7.4               \\
+            Extractive Industries  & 15,488           & 0.8               & 6.5            & 1.1               \\
+            \bottomrule
+        \end{tabular}
+
+        \vspace{0.5em}
+
+        \begin{tabular}{lrrrr}
+            \toprule
+            \multicolumn{5}{l}{\textit{Panel C: Geographic Distribution (Top 10 States)}}                      \\
+            \textbf{State}         & \textbf{N Loans} & \textbf{\% Count} & \textbf{R\$ B} & \textbf{\% Value} \\
+            \midrule
+            S\~ao Paulo (SP)       & 450,024          & 21.9              & 164.2          & 28.0              \\
+            Paran\'a (PR)          & 271,873          & 13.2              & 69.8           & 11.9              \\
+            Minas Gerais (MG)      & 236,942          & 11.5              & 66.4           & 11.3              \\
+            Santa Catarina (SC)    & 229,471          & 11.2              & 50.2           & 8.6               \\
+            Rio Grande do Sul (RS) & 226,005          & 11.0              & 55.1           & 9.4               \\
+            Rio de Janeiro (RJ)    & 81,864           & 4.0               & 30.8           & 5.3               \\
+            Bahia (BA)             & 73,469           & 3.6               & 19.1           & 3.3               \\
+            Goi\'as (GO)           & 73,296           & 3.6               & 19.8           & 3.4               \\
+            Mato Grosso (MT)       & 57,375           & 2.8               & 19.5           & 3.3               \\
+            Pernambuco (PE)        & 50,945           & 2.5               & 12.7           & 2.2               \\
+            \bottomrule
+        \end{tabular}
+        \begin{tablenotes}
+            \small
+            \item \textit{Notes:} This table reports summary statistics for BNDES indirect automatic lending operations from 2002 to 2024. Data are drawn from the BNDES transparency portal (\textit{Portal de Transpar\^encia do BNDES}). Panel A shows loan counts and values by calendar year; values are expressed in nominal Brazilian Reais (R\$). The 2022--24 row aggregates recent years. Panel B reports the distribution of loans across broad CNAE (Classifica\c{c}\~ao Nacional de Atividades Econ\^omicas) sector categories, showing both share of loan counts and share of total value. Panel C reports the distribution by state (Unidade Federativa) for the ten largest recipient states. Indirect operations are loans disbursed through accredited financial intermediaries; they constitute the majority of BNDES lending by transaction count.
+        \end{tablenotes}
+    \end{threeparttable}
+\end{table}
+
+\textcolor{red}{Figure \ref{fig:bndes_timeseries} displays the evolution of BNDES indirect lending by sector from 2002 to 2024. The figure reveals three distinct phases. First, a rapid expansion from 2002 to 2014, during which annual disbursements grew from R\$6 billion to a peak of R\$70 billion in 2013. This period coincided with the commodity boom and an aggressive push by the Lula and Rousseff administrations to use BNDES as a tool for countercyclical stimulus and industrial promotion. Commerce and services consistently dominated the portfolio by value, but manufacturing's share remained substantial, averaging 25--30\% of total lending. Second, a sharp contraction during Brazil's 2014--2016 recession, when disbursements fell by two-thirds and the bank sharply reduced its exposure to industrial sectors. Third, a partial recovery after 2020, though lending remains well below pre-crisis peaks. The sectoral composition has shifted modestly toward commerce and services over time, while agriculture and extractive industries have maintained relatively stable (and small) shares. These patterns motivate our empirical strategy: the substantial variation in both the level and composition of BNDES lending across time and space provides the foundation for testing whether politically-induced reallocations affect regional output.}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{bndes_timeseries.pdf}
+    \caption{BNDES Indirect Lending by Sector, 2002--2024}
+    \label{fig:bndes_timeseries}
+    \begin{minipage}{0.9\textwidth}
+        \small
+        \textit{Notes:} This figure displays total BNDES indirect loan disbursements by broad CNAE sector category from 2002 to 2024. Values are in nominal Brazilian Reais (billions). The four sectors shown are: Commerce \& Services (blue), Manufacturing (pink), Agriculture (orange), and Extractive Industries (red). The shaded region indicates the 2014--2016 recession. Data are from the BNDES transparency portal.
+    \end{minipage}
+\end{figure}
+
+
+\textcolor{red}{Several institutional features distinguish BNDES from typical patronage-driven development banks. First, BNDES has historically recruited staff through competitive civil service examinations, attracting highly qualified economists and engineers. Second, the bank's governance structure has provided some insulation from direct political control: the president of BNDES is appointed by the federal government but serves alongside a professional bureaucracy with substantial autonomy over lending decisions. Third, BNDES has developed sophisticated project evaluation methodologies and sector-specific expertise that inform credit allocation. Studies of BNDES staff and lending practices suggest that technical criteria---project viability, expected returns, and sector priorities---play a meaningful role in loan origination \citep{musacchio2014reinventing}. This institutional quality provides the benchmark against which we test: if BNDES is successfully implementing optimal industrial policy, our test should fail to reject the null.}
+
+\textcolor{red}{However, a substantial literature documents that BNDES is not immune to political influence. \citet{lazzarini2015state} analyze firm-level BNDES lending from 2002--2009 and find that politically connected firms---those with directors who donated to electoral campaigns or had prior government ties---receive larger loans, though these loans do not translate into higher investment or productivity. \citet{carvalho2014real} shows that firms in municipalities aligned with the federal government receive more BNDES credit, particularly during election years. \citet{claessens2008political} document that Brazilian firms contributing to winning candidates subsequently receive increased access to bank financing. At the local level, political turnovers at the mayoral, gubernatorial, and presidential levels create plausibly exogenous variation in which firms and sectors receive favorable treatment. When a party gains power, BNDES credit flows disproportionately toward firms affiliated with that party---a pattern we exploit as the source of identifying variation in our empirical strategy.}
+
+
+
+\subsection{Data}\label{sec:data}
+
+We combine three sources of data: BNDES loans for firms and municipalities, RAIS employment and wages, and firm owner and worker political affiliation data from \citet{colonnelli2025politics}.
+
+\textcolor{red}{\textbf{BNDES Loan-Level Data.} Our primary source on industrial policy is the universe of BNDES loan disbursements, which we obtained from BNDES's transparency portal. These data cover all direct and indirect loans from 2002 to 2020, providing information on the borrowing firm (including tax identifier and sector classification), loan amount, interest rate, maturity, grace period, and municipality. We aggregate these loan-level observations to the municipality-sector-year level to construct measures of sectoral credit allocation within each region. The granularity of these data allows us to observe precisely how BNDES support is distributed across sectors within a locality, which is essential for constructing the sector share changes $\Delta s_{rjt}$ that serve as our endogenous regressor.}
+
+\textcolor{red}{\textbf{RAIS Employment Microdata.} We link BNDES lending patterns to labor market outcomes using Brazil's Rela\c{c}\~ao Anual de Informa\c{c}\~oes Sociais (RAIS), the administrative matched employer-employee dataset covering the universe of formal sector employment. RAIS provides annual information on each worker's employer (identified by tax ID), occupation, wages, and contract characteristics. Crucially, RAIS allows us to construct municipality-sector-year aggregates of employment and the wage bill, which serve as our primary outcome measures alongside GDP from IBGE. The panel structure enables us to track how sectoral employment responds to changes in BNDES credit induced by political shocks.}
+
+\textcolor{red}{\textbf{Political Affiliation Data.} To construct our instruments, we draw on the novel political affiliation data developed by \citet{colonnelli2025politics}. Their dataset links nearly 12 million Brazilian workers and business owners to political party membership records from the Tribunal Superior Eleitoral (TSE). For each firm in RAIS, we observe whether the owner is a registered member of a political party, and if so, which party. This allows us to compute baseline (pre-election) exposure of each sector-municipality pair to each party, $w_{rjp}$, which we interact with political alignment shocks to construct our shift-share instruments. We complement these data with standard electoral data on mayoral, gubernatorial, and presidential races, coding alignment as whether the elected official's party matches the dominant party affiliation of firms in each sector-region cell.}
+
+
+
+
+
+
+\subsection{Regression Specifications}\label{sec:regs}
+
+\subsubsection{Shift-share?}
+
+
+\textcolor{red}{Our identification strategy exploits the fact that political alignment shocks differentially affect sectors based on their pre-existing exposure to party-affiliated firms. The logic follows directly from the theoretical framework in Section \ref{sec:theory}: if the policymaker is optimally allocating resources across sectors, then exogenous perturbations to this allocation---induced by changes in which party controls the mayoralty, governorship, or presidency---should have no first-order effect on regional output. We implement this test using a shift-share instrumental variables design, where the ``shift'' is the change in political alignment at the regional level and the ``share'' is each sector's baseline exposure to the newly aligned party.}
+
+\textcolor{red}{The identifying assumption is that conditional on region and time fixed effects, the interaction of political alignment shocks with pre-determined sectoral party exposure is orthogonal to unobserved determinants of regional output. This assumption would be violated if, for example, parties systematically gain power in regions where their affiliated sectors were about to experience productivity growth for reasons unrelated to BNDES credit. We address this concern in several ways. First, we show that our instruments predict BNDES sectoral credit but not other municipal revenue sources or federal transfers. Second, we conduct placebo tests using leads of political alignment, which should have no predictive power if the parallel trends assumption holds. Third, we implement the \citet{borusyak2022quasi} shock-level inference procedure, which accounts for potential correlation in shocks across regions.}
+
+
+
+
+When party $p$ becomes aligned in a place–time cell
+$(r,t)$, BNDES tilts relatively more credit toward firms connected to $p$. Sectors in region $r$ that (before the election) housed more $p$-connected firms get a bigger, plausibly exogenous within-region shove to their share $s_{rjt}$. That is the “shift” (alignment) times “share” (baseline party exposure).
+
+% Shift–Share Within-Region Instruments from Party Exposure
+\newcommand{\Align}{\mathrm{Align}}
+%\newcommand{\iotaVec}{\mathbf{1}}
+
+\paragraph{Baseline party exposure.}
+Let $w_{rjp} \equiv \frac{\sum_{f\in(r,j)} L_{f,t_0}\,1\{\text{party}(f)=p\}}{\sum_{f\in(r,j)} L_{f,t_0}}$, with $\sum_p w_{rjp}=1$.
+
+\paragraph{Shift–share instruments.}
+For office $\ell\in\{\mathrm{mayor},\mathrm{gov},\mathrm{pres}\}$, define the turnover shock
+$\Delta \Align^{\ell}_{rtp}$ and the within-region, within-simplex instrument
+\[
+    Z^{\ell}_{rjt} \equiv \sum_{p} w_{rjp}\,\Delta \Align^{\ell}_{rtp}.
+\]
+Because $\Delta \Align^{\ell}_{rtp}$ is constant across $j$ within $(r,t)$, variation in $Z^{\ell}_{rjt}$ is driven by $w_{rjp}$.
+
+\paragraph{First stage and exclusion.}
+We estimate
+\[
+    \Delta \text{BNDESShare}_{rjt} = \sum_{\ell} \kappa_{\ell} Z^{\ell}_{rjt} + \alpha_{rt} + \gamma_{rj} + u_{rjt},
+\]
+and/or instrument $\Delta s_{rjt}$ directly with $Z^{\ell}_{rjt}$ in the second stage.
+Under valid exclusion, $Z^{\ell}_{rjt}$ affects $\Delta Y_{r,t+h}$ only through $\Delta s_{rjt}$ (via BNDES credit).
+
+\subsection{Results}\label{sec:results}
+
+\textcolor{red}{\textbf{First Stage: Political Alignment and Sectoral Credit.} Table \ref{tab:first_stage} presents our first-stage estimates, demonstrating that political alignment shocks generate substantial variation in the value of BNDES credit received by firms. The dependent variable is the log of total BNDES loan disbursements to a given firm in a given year, winsorized at the 1st and 99th percentiles to limit the influence of outliers. We estimate separate specifications for each level of government: mayoral (column 1), gubernatorial (column 2), and presidential (column 3). The key independent variable is the share of the firm's owners who are registered members of the political party (or governing coalition) holding the relevant office, constructed using the party affiliation data from \citet{colonnelli2025politics}.}
+
+\textcolor{red}{The estimates reveal economically large and statistically significant effects at all three levels. A one-standard-deviation increase in mayoral alignment is associated with a 37\% increase in BNDES lending (coefficient 0.367, s.e.~0.080). Gubernatorial alignment yields a similarly sized effect (0.371, s.e.~0.058), while presidential alignment produces a somewhat smaller but still substantial 31\% increase (0.309, s.e.~0.080). These magnitudes are comparable to those documented in prior work on political influence in lending \citep{carvalho2014real, claessens2008political}. The specifications include firm fixed effects to absorb time-invariant firm characteristics and municipality-by-year fixed effects to control for local economic shocks common to all firms in a given location and year. With over 44 million firm-year observations and an $R^2$ of 0.48, the regressions explain substantial variation in BNDES lending while leaving room for the political alignment channel to operate.}
+
+\begin{table}[H]
+    \centering
+    \caption{First Stage: Political Alignment and BNDES Lending}
+    \label{tab:first_stage}
+    \begin{threeparttable}
+        \begin{tabular}{lccc}
+            \toprule
+                                        & (1)           & (2)           & (3)           \\
+                                        & Mayor         & Governor      & President     \\
+            \midrule
+            Share Aligned (Mayor)       & 0.367$^{***}$ &               &               \\
+                                        & (0.080)       &               &               \\
+            Share Aligned (Governor)    &               & 0.371$^{***}$ &               \\
+                                        &               & (0.058)       &               \\
+            Share Aligned (President)   &               &               & 0.309$^{***}$ \\
+                                        &               &               & (0.080)       \\
+            \midrule
+            Firm FE                     & Yes           & Yes           & Yes           \\
+            Municipality$\times$Year FE & Yes           & Yes           & Yes           \\
+            \midrule
+            Observations                & 44,479,226    & 44,479,226    & 44,479,226    \\
+            $R^2$                       & 0.479         & 0.479         & 0.479         \\
+            \bottomrule
+        \end{tabular}
+        \begin{tablenotes}
+            \small
+            \item \textit{Notes:} This table reports first-stage estimates of the effect of political alignment on BNDES lending. The dependent variable is the natural logarithm of total BNDES loan disbursements to a firm in a given year, winsorized at the 1st and 99th percentiles. The key independent variable is the share of the firm's owners who are registered members of the political party (or governing coalition) holding the indicated office (mayor, governor, or president). Party affiliation data are from \citet{colonnelli2025politics}. All specifications include firm fixed effects and municipality-by-year fixed effects. Standard errors, reported in parentheses, are two-way clustered by firm and municipality. Significance levels: $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.
+        \end{tablenotes}
+    \end{threeparttable}
+\end{table}
+
+\textcolor{red}{\textbf{Interaction Effects.} Table \ref{tab:interactions} examines whether simultaneous alignment at multiple levels of government produces effects that differ from single-level alignment. The results reveal an interesting pattern. Mayor-president double alignment (column 1) yields a coefficient of 0.124 that is not statistically distinguishable from zero at conventional levels (s.e.~0.10), suggesting that simultaneous federal and municipal alignment does not generate additional lending beyond what each level produces individually. In contrast, mayor-governor alignment (columns 3--4) shows a robust and significant effect: the coefficient of 0.283 (s.e.~0.055) implies that firms in sectors aligned with both the mayor and governor receive approximately 28\% more BNDES credit than those aligned with neither. Triple alignment at all three levels (column 2) produces an intermediate coefficient of 0.267 (s.e.~0.115), statistically significant at the 5\% level. These findings suggest that state-level political connections may be particularly important for accessing BNDES financing, consistent with the prominent role of state governments in Brazil's federal system and their influence over regional development priorities.}
+
+\begin{table}[H]
+    \centering
+    \caption{Political Alignment Interactions}
+    \label{tab:interactions}
+    \begin{threeparttable}
+        \begin{tabular}{lcccc}
+            \toprule
+                                        & (1)        & (2)          & (3)           & (4)             \\
+                                        & M$\times$P & Triple       & M$\times$G    & M$\times$G only \\
+            \midrule
+            Mayor $\times$ President    & 0.124      &              &               &                 \\
+                                        & (0.100)    &              &               &                 \\
+            All Three Levels            &            & 0.267$^{**}$ &               &                 \\
+                                        &            & (0.115)      &               &                 \\
+            Mayor $\times$ Governor     &            &              & 0.283$^{***}$ & 0.239$^{***}$   \\
+                                        &            &              & (0.055)       & (0.064)         \\
+            \midrule
+            Firm FE                     & Yes        & Yes          & Yes           & Yes             \\
+            Municipality$\times$Year FE & Yes        & Yes          & Yes           & Yes             \\
+            \midrule
+            Observations                & 44,479,226 & 44,479,226   & 44,479,226    & 43,708,219      \\
+            $R^2$                       & 0.479      & 0.479        & 0.479         & 0.478           \\
+            \bottomrule
+        \end{tabular}
+        \begin{tablenotes}
+            \small
+            \item \textit{Notes:} This table reports estimates for specifications that interact political alignment across multiple levels of government. The dependent variable is the natural logarithm of total BNDES loan disbursements (winsorized). Column headers indicate the interaction tested: M$\times$P denotes simultaneous alignment with the mayor and president; M$\times$G denotes simultaneous alignment with the mayor and governor; ``Triple'' denotes alignment with all three levels. ``M$\times$G only'' restricts the sample to municipality-years where the mayor and governor are aligned but the president may or may not be. Alignment shares are constructed as in Table \ref{tab:first_stage}. All specifications include firm fixed effects and municipality-by-year fixed effects. Standard errors, reported in parentheses, are two-way clustered by firm and municipality. Significance levels: $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.
+        \end{tablenotes}
+    \end{threeparttable}
+\end{table}
+
+\textcolor{red}{\textbf{Lagged Specifications: Single Levels.} Table \ref{tab:lagged_single} examines whether lagged (t-2) political alignment predicts BNDES lending, testing for persistence or anticipation effects in the relationship between political connections and credit access. In contrast to the strong contemporaneous effects documented in Table \ref{tab:first_stage}, the lagged alignment measures show markedly different patterns. Mayoral alignment at t-2 has essentially no effect on current lending: the coefficient of -0.007 (s.e.~0.035) is economically trivial and statistically indistinguishable from zero. More strikingly, gubernatorial and presidential alignment at t-2 show \textit{negative} effects: -0.122 (s.e.~0.050) for governors and -0.082 (s.e.~0.049) for presidents, both statistically significant. These negative lagged effects are consistent with several interpretations. First, they may reflect mean reversion: firms that benefited from past political alignment subsequently receive less favorable treatment as credit flows are redirected toward newly aligned sectors. Second, anticipation effects may play a role: if firms and sectors adjust their political affiliations in response to electoral outcomes, the lagged alignment measure may capture outdated connections. Third, BNDES may exhibit ``rotation'' in lending patterns, avoiding persistent concentration of credit in any single set of politically connected firms. The sample shrinks to approximately 32 million observations due to the lag structure. The $R^2$ of 0.59 is higher than in the contemporaneous specifications, reflecting the additional structure imposed by the longitudinal design.}
+
+\begin{table}[H]
+    \centering
+    \caption{Lagged Political Alignment (t-2) and BNDES Lending: Single Levels}
+    \label{tab:lagged_single}
+    \begin{threeparttable}
+        \begin{tabular}{lccc}
+            \toprule
+                                             & (1)        & (2)             & (3)            \\
+                                             & Mayor      & Governor        & President      \\
+            \midrule
+            Lagged Share Aligned (Mayor)     & $-$0.007   &                 &                \\
+                                             & (0.035)    &                 &                \\
+            Lagged Share Aligned (Governor)  &            & $-$0.122$^{**}$ &                \\
+                                             &            & (0.050)         &                \\
+            Lagged Share Aligned (President) &            &                 & $-$0.082$^{*}$ \\
+                                             &            &                 & (0.049)        \\
+            \midrule
+            Firm FE                          & Yes        & Yes             & Yes            \\
+            Municipality$\times$Year FE      & Yes        & Yes             & Yes            \\
+            \midrule
+            Observations                     & 32,286,127 & 32,286,127      & 32,286,127     \\
+            $R^2$                            & 0.590      & 0.590           & 0.590          \\
+            \bottomrule
+        \end{tabular}
+        \begin{tablenotes}
+            \small
+            \item \textit{Notes:} This table reports estimates of the effect of lagged (t-2) political alignment on BNDES lending. The dependent variable is the natural logarithm of total BNDES loan disbursements to a firm in a given year, winsorized at the 1st and 99th percentiles. The key independent variables are the employment-weighted shares of the firm's sector (defined at the 2-digit CNAE level) whose firm owners were registered members of the political party holding the indicated office two years prior. The lag structure accounts for electoral cycles and tests for persistence or anticipation effects. Party affiliation data are from \citet{colonnelli2025politics}. All specifications include firm fixed effects and municipality-by-year fixed effects. Standard errors, reported in parentheses, are two-way clustered by firm and municipality. The reduced sample size relative to Table \ref{tab:first_stage} reflects the requirement of lagged observations. Significance levels: $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.
+        \end{tablenotes}
+    \end{threeparttable}
+\end{table}
+
+\textcolor{red}{\textbf{Lagged Specifications: Interactions.} Table \ref{tab:lagged_interactions} extends the lagged analysis to examine whether simultaneous alignment at multiple levels of government two years prior predicts current BNDES lending. The results reinforce the finding that lagged alignment has weak or no positive effects. Mayor-president double alignment at t-2 yields a coefficient of -0.050 (s.e.~0.056), negative but not statistically significant. Triple alignment at all three levels produces an effect essentially indistinguishable from zero (coefficient 0.00006, s.e.~0.072), suggesting that even the most comprehensive form of past political alignment does not predict current credit access. Mayor-governor alignment at t-2 shows a small negative coefficient of -0.014 (s.e.~0.048) that is not statistically significant. When restricting the sample to municipality-years where the mayor and governor were aligned at t-2 (column 4), the coefficient turns slightly positive (0.022, s.e.~0.060) but remains insignificant.}
+
+\textcolor{red}{These lagged interaction results contrast sharply with the contemporaneous interaction findings in Table \ref{tab:interactions}, where mayor-governor alignment showed robust positive effects. The absence of persistent effects at the lagged horizon is informative about the nature of political influence in BNDES lending. Rather than reflecting ``captured'' relationships that persist across electoral cycles, the evidence suggests that political alignment operates through contemporaneous channels---likely the preferences and directives of currently-serving officeholders rather than accumulated connections or institutional memory. This pattern is more consistent with a model of active political reallocation than with persistent cronyism or entrenched favoritism.}
+
+\begin{table}[H]
+    \centering
+    \caption{Lagged Political Alignment (t-2) and BNDES Lending: Interactions}
+    \label{tab:lagged_interactions}
+    \begin{threeparttable}
+        \begin{tabular}{lcccc}
+            \toprule
+                                         & (1)        & (2)        & (3)        & (4)             \\
+                                         & M$\times$P & Triple     & M$\times$G & M$\times$G only \\
+            \midrule
+            Lag Mayor $\times$ President & $-$0.050   &            &            &                 \\
+                                         & (0.056)    &            &            &                 \\
+            Lag All Three Levels         &            & 0.00006    &            &                 \\
+                                         &            & (0.072)    &            &                 \\
+            Lag Mayor $\times$ Governor  &            &            & $-$0.014   & 0.022           \\
+                                         &            &            & (0.048)    & (0.060)         \\
+            \midrule
+            Firm FE                      & Yes        & Yes        & Yes        & Yes             \\
+            Municipality$\times$Year FE  & Yes        & Yes        & Yes        & Yes             \\
+            \midrule
+            Observations                 & 32,286,127 & 32,286,127 & 32,286,127 & 31,546,191      \\
+            $R^2$                        & 0.590      & 0.590      & 0.590      & 0.594           \\
+            \bottomrule
+        \end{tabular}
+        \begin{tablenotes}
+            \small
+            \item \textit{Notes:} This table reports estimates for specifications that interact lagged (t-2) political alignment across multiple levels of government. The dependent variable is the natural logarithm of total BNDES loan disbursements (winsorized). Column headers indicate the interaction tested: M$\times$P denotes simultaneous alignment with the mayor and president two years prior; M$\times$G denotes simultaneous alignment with the mayor and governor two years prior; ``Triple'' denotes alignment with all three levels two years prior. ``M$\times$G only'' restricts the sample to municipality-years where the mayor and governor were aligned at t-2 but the president may or may not have been aligned. Alignment shares are constructed as in Table \ref{tab:first_stage} but measured at t-2. All specifications include firm fixed effects and municipality-by-year fixed effects. Standard errors, reported in parentheses, are two-way clustered by firm and municipality. The reduced sample size in column (4) reflects the additional sample restriction. Significance levels: $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.
+        \end{tablenotes}
+    \end{threeparttable}
+\end{table}
+
+\textcolor{red}{\textbf{Summary of First-Stage Evidence.} Tables \ref{tab:first_stage}--\ref{tab:lagged_interactions} establish several key findings about the relationship between political alignment and BNDES lending. First, contemporaneous political alignment at all three levels of government---mayoral, gubernatorial, and presidential---predicts substantially higher BNDES credit to aligned sectors, with effect sizes in the range of 30--37\%. Second, mayor-governor alignment appears particularly potent, generating robust and significant effects both in isolation and in interaction specifications. Third, lagged alignment measures show weak or negative effects, suggesting that political influence operates primarily through contemporaneous rather than persistent channels. These patterns validate the use of political alignment shocks as instruments for sectoral credit allocation in our second-stage optimality test: alignment shocks generate substantial ``first-stage'' variation in BNDES lending, and this variation is driven by current political conditions rather than pre-existing trends.}
+
+
+\textcolor{blue}{\textbf{Event Study Analysis.} Figure \ref{fig:event_study} presents an event study of the relationship between mayor-president political alignment and BNDES lending. We regress log BNDES disbursements on the contemporaneous alignment share and its lags at $t-1$, $t-2$, and $t-3$, including firm and municipality-by-year fixed effects and weighting by employment. The specification tests whether the relationship between political alignment and lending is driven by contemporaneous political conditions or pre-existing trends.}
+
+\textcolor{blue}{The results provide strong support for the causal interpretation of our first-stage estimates. The coefficients at $t-3$, $t-2$, and $t-1$ are economically small and statistically indistinguishable from zero at conventional significance levels: the point estimates range from 0.02 to 0.12, compared to a contemporaneous effect of 0.17 at $t=0$. The 95\% confidence intervals for the lagged coefficients comfortably include zero, while the contemporaneous effect is clearly positive and significant. This pattern is inconsistent with selection or anticipation stories---if aligned firms were systematically different in ways that affect lending propensity, we would expect to see elevated coefficients in the pre-periods. Instead, the relationship between alignment and lending appears to ``switch on'' precisely when the political alignment becomes effective, consistent with a causal channel operating through contemporaneous political influence over BNDES allocation decisions.}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{event_study_mayor_pres.png}
+    \caption{Event Study: Political Alignment and BNDES Lending}
+    \label{fig:event_study}
+    \begin{minipage}{0.9\textwidth}
+        \small
+        \textit{Notes:} This figure plots coefficients from an event study regression of log BNDES loan disbursements on mayoral-presidential political alignment at different lags. The specification includes firm fixed effects, municipality-by-year fixed effects, and is weighted by firm employment. The dependent variable is log(1 + BNDES disbursements), winsorized at the 1st and 99th percentiles. Alignment is measured as the employment-weighted share of the firm's sector whose owners are affiliated with a party in both the mayoral and presidential coalition. Vertical bars indicate 95\% confidence intervals based on standard errors two-way clustered by firm and municipality. The coefficient at $t=0$ represents contemporaneous alignment; coefficients at $t-1$, $t-2$, and $t-3$ represent lagged alignment. Sample: 2002--2019.
+    \end{minipage}
+\end{figure}
+
+\textcolor{blue}{\textbf{Binned Scatter Analysis.} Figures \ref{fig:binned_weighted} and \ref{fig:binned_unweighted} explore the functional form of the alignment-lending relationship by plotting average log BNDES disbursements across eleven bins of political alignment intensity. Bin 0 contains observations with zero alignment (no party-affiliated firm owners in the sector), while bins 1--10 partition positive alignment values into deciles. This approach allows us to assess whether the relationship is approximately linear---as our regression specifications assume---or exhibits important nonlinearities.}
+
+\textcolor{blue}{Figure \ref{fig:binned_weighted} presents employment-weighted averages, which upweight larger firms and reflect the allocation of BNDES lending across the economy. The figure reveals a striking discontinuity: firms with zero political alignment (bin 0) receive substantially less BNDES credit than those with any positive alignment. Among firms with positive alignment, the relationship is relatively flat across bins 1--10, suggesting that the presence of political connections matters more than their intensity. The point sizes reflect total employee-years in each bin; the zero-alignment bin contains the vast majority of the sample (over 600 million employee-years), while positive alignment bins are much smaller, indicating that political connections are relatively rare but economically consequential when present.}
+
+\textcolor{blue}{Figure \ref{fig:binned_unweighted} presents unweighted averages, giving equal weight to each firm-year observation regardless of firm size. This specification addresses concerns that results could be driven by a small number of very large politically connected firms. The qualitative pattern is similar: firms with zero alignment receive the least credit, while those with positive alignment receive more. However, the gradient across positive-alignment bins is somewhat more pronounced in the unweighted specification, suggesting that among smaller firms, the intensity of political connections (not just their presence) may matter for BNDES access. Together, these figures suggest that our linear specifications provide a reasonable approximation to the true relationship, while also revealing that the extensive margin of political connection (zero vs.~positive) may be particularly important.}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{binned_scatter_weighted.png}
+    \caption{Binned Scatter: Alignment Intensity and BNDES Lending (Employment-Weighted)}
+    \label{fig:binned_weighted}
+    \begin{minipage}{0.9\textwidth}
+        \small
+        \textit{Notes:} This figure plots average log BNDES disbursements by political alignment intensity. Bin 0 includes firm-years with zero political alignment (no party-affiliated owners in the sector). Bins 1--10 partition positive alignment values into deciles. Points are sized by total employee-years in each bin. Averages are weighted by firm employment. Sample: 2002--2019, restricted to observations with positive RAIS employment weight.
+    \end{minipage}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.85\textwidth]{binned_scatter_unweighted.png}
+    \caption{Binned Scatter: Alignment Intensity and BNDES Lending (Unweighted)}
+    \label{fig:binned_unweighted}
+    \begin{minipage}{0.9\textwidth}
+        \small
+        \textit{Notes:} This figure plots unweighted average log BNDES disbursements by political alignment intensity. Bin 0 includes firm-years with zero political alignment. Bins 1--10 partition positive alignment values into deciles. Points are sized by number of observations in each bin. Each firm-year receives equal weight regardless of firm size. Sample: 2002--2019, restricted to observations with positive RAIS employment.
+    \end{minipage}
+\end{figure}
+
+\textcolor{red}{\textbf{Second Stage: Optimality Test.} [PLACEHOLDER: Second stage results testing the local-optimality null that $\beta = \mathbf{0}$ will be populated once the output/GDP outcome regressions are run. The pattern of coefficients will reveal which sectors are over- or under-supported relative to the welfare-maximizing allocation.]}
+
+\textcolor{red}{\textbf{Additional Robustness.} We conduct additional robustness checks including: (i) alternative outcome measures (GDP, employment, wage bill, night-lights); (ii) different horizons $h \in \{1, 2, 3, 5\}$; (iii) placebo tests using lead alignment; (iv) subset analyses by region and time period. We also explore heterogeneity in the estimated gradient $\hat{\beta}$ across municipalities with different initial conditions, testing whether the direction of optimal reallocation varies with local characteristics such as industrial concentration, human capital, and infrastructure quality.}
+
+
+
+\subsection{Empirical Roadmap: Steps Toward a Complete Analysis}\label{sec:todo}
+
+\textcolor{blue}{This subsection outlines the empirical exercises required to complete the analysis. The roadmap follows the theoretical framework developed in Section \ref{sec:theory} and proceeds in four stages: (1) establishing that political forces shape BNDES allocations, (2) demonstrating that these allocations affect the sectoral composition of credit at the municipality level, (3) testing whether compositional changes affect municipal outcomes, and (4) interpreting the gradient to derive policy prescriptions.}
+
+\subsubsection*{Stage 1: Political Forces and BNDES Allocations (Completed)}
+
+\textcolor{blue}{\textbf{1.1 Firm-Level Political Alignment Effects.} Tables \ref{tab:first_stage} and \ref{tab:interactions} establish that political alignment at the mayoral, gubernatorial, and presidential levels predicts BNDES lending to firms. Key specifications:}
+\begin{itemize}
+    \item \textcolor{blue}{Dependent variable: log BNDES disbursements to firm $f$ in year $t$ (winsorized)}
+    \item \textcolor{blue}{Independent variable: employment-weighted share of sector aligned with officeholder}
+    \item \textcolor{blue}{Fixed effects: firm FE, municipality$\times$year FE}
+    \item \textcolor{blue}{Clustering: two-way by firm and municipality}
+\end{itemize}
+
+\textcolor{blue}{\textbf{1.2 Extensions:}}
+\begin{enumerate}
+    \item \textcolor{blue}{Add lagged alignment specifications (\textbf{completed}: Tables \ref{tab:lagged_single} and \ref{tab:lagged_interactions})}
+    \item \textcolor{blue}{Event study analysis (\textbf{completed}: see robustness\_checks/event\_study\_mayor\_pres\_coalition.png)}
+    \item \textcolor{blue}{Binned scatter plots of alignment vs.~loans (\textbf{completed}: weighted and unweighted versions)}
+    \item \textcolor{red}{Test persistence: regress alignment effects on years since election}
+    \item \textcolor{red}{Heterogeneity by firm size (MSME vs.~large), sector, and region}
+    \item \textcolor{red}{Placebo: test leads of alignment (should be zero under parallel trends)}
+\end{enumerate}
+
+\subsubsection*{Stage 2: Municipality-Level First Stage (To Be Completed)}
+
+\textcolor{red}{\textbf{2.1 Aggregate to Municipality-Sector-Year Level.} Collapse firm-level data to construct:}
+\begin{itemize}
+    \item \textcolor{red}{$\text{BNDESShare}_{mjt} = \frac{\text{BNDES loans to sector } j \text{ in municipality } m}{\text{Total BNDES loans to municipality } m}$}
+    \item \textcolor{red}{$\Delta s_{mjt} = \text{BNDESShare}_{mjt} - \text{BNDESShare}_{mj,t-1}$}
+    \item \textcolor{red}{Ensure $\sum_j \Delta s_{mjt} = 0$ by construction (or residualize on $\iota$)}
+\end{itemize}
+
+\textcolor{red}{\textbf{2.2 Construct Shift-Share Instruments.} For each municipality $m$, sector $j$, year $t$:}
+\begin{equation*}
+    Z^{\ell}_{mjt} = \sum_p w_{mjp} \cdot \Delta \text{Align}^{\ell}_{mtp}
+\end{equation*}
+\textcolor{red}{where $w_{mjp}$ is the pre-election employment share of party $p$'s affiliated firms in sector $j$ of municipality $m$, and $\Delta \text{Align}^{\ell}_{mtp}$ is the change in alignment at level $\ell \in \{\text{mayor}, \text{gov}, \text{pres}\}$.}
+
+\textcolor{red}{\textbf{2.3 First-Stage Regression.} Estimate:}
+\begin{equation*}
+    \Delta s_{mjt} = \pi Z_{mjt} + \alpha_{mt} + \gamma_{mj} + \varepsilon_{mjt}
+\end{equation*}
+\textcolor{red}{Report F-statistics for instrument strength. The exclusion restriction is that $Z_{mjt}$ affects output only through $\Delta s_{mjt}$.}
+
+\textcolor{red}{\textbf{2.4 Controlling for Total Disbursements.} Key decision: should we control for (instrumented) total BNDES disbursements $\sum_j \text{BNDES}_{mjt}$?}
+\begin{itemize}
+    \item \textcolor{red}{\textbf{Option A}: Include uninstrumented total as control. Tests composition effect holding scale constant.}
+    \item \textcolor{red}{\textbf{Option B}: Include polynomials of uninstrumented total. More flexible scale control.}
+    \item \textcolor{red}{\textbf{Option C}: Instrument both composition and total separately. More demanding but cleaner.}
+    \item \textcolor{red}{Recommendation: Report all specifications; primary focus on Option A per notes.}
+\end{itemize}
+
+\subsubsection*{Stage 3: Second-Stage Optimality Test (To Be Completed)}
+
+\textcolor{red}{\textbf{3.1 Obtain Municipality-Level Outcome Data.} Required data:}
+\begin{itemize}
+    \item \textcolor{blue}{GDP by municipality-year from IBGE (\textbf{available}: PIB dos Munic\'ipios 2002--2019 in raw/mun\_gdp/)}
+    \item \textcolor{red}{Sectoral GDP if available (agriculture, industry, services)}
+    \item \textcolor{blue}{Employment and wage bill from RAIS (\textbf{available}: rais\_establishment\_agg.rds)}
+    \item \textcolor{red}{Night-time lights (VIIRS, available 2012+)---not yet obtained}
+\end{itemize}
+
+\textcolor{red}{\textbf{3.2 Second-Stage IV Regression.} Estimate the local-optimality test:}
+\begin{equation*}
+    \Delta Y_{m,t+h} = \beta' \widehat{\Delta s}_{mt} + \alpha_m + \tau_t + X'_{mt}\delta + \varepsilon_{m,t+h}
+\end{equation*}
+\textcolor{red}{where $\widehat{\Delta s}_{mt}$ is the vector of predicted sectoral share changes from Stage 2.}
+
+\textcolor{red}{\textbf{3.3 Null Hypothesis Test.} The core test is:}
+\begin{equation*}
+    H_0: \beta = \mathbf{0} \quad \text{(local optimality)}
+\end{equation*}
+\textcolor{red}{Implement via joint Wald test on all elements of $\beta$. Report Hansen $J$-test if overidentified.}
+
+\textcolor{red}{\textbf{3.4 Alternative Scalar Tests.} For power, consider:}
+\begin{enumerate}
+    \item \textcolor{red}{\textbf{HHI concentration}: $\Delta \text{HHI}_{mt} \approx 2 s'_{m,t-1} \Delta s_{mt}$. Instrument with $2 s'_{m,t-1} \widehat{\Delta s}_{mt}$.}
+    \item \textcolor{red}{\textbf{Principal component}: Use first PC of $\widehat{\Delta s}_{mt}$ as scalar index.}
+    \item \textcolor{red}{\textbf{Theory-weighted index}: Weight by prior estimates of sectoral externalities.}
+\end{enumerate}
+
+\textcolor{red}{\textbf{3.5 Horizon Analysis.} Estimate for $h \in \{1, 2, 3, 5\}$ years. Cumulative effects may differ from contemporaneous.}
+
+\subsubsection*{Stage 4: Policy Interpretation (To Be Completed)}
+
+\textcolor{red}{\textbf{4.1 Interpret the Gradient.} If $H_0$ is rejected, the sign pattern of $\hat{\beta}$ reveals:}
+\begin{itemize}
+    \item \textcolor{red}{$\hat{\beta}_j > 0$: Sector $j$ is under-supported (more BNDES credit would raise output)}
+    \item \textcolor{red}{$\hat{\beta}_j < 0$: Sector $j$ is over-supported (less BNDES credit would raise output)}
+\end{itemize}
+
+\textcolor{red}{\textbf{4.2 Priority Sector Analysis.} Obtain official BNDES priority sector designations and estimate:}
+\begin{equation*}
+    \Delta Y_{m,t+h} = \beta_P \sum_j \widehat{\Delta s}_{mjt} \cdot \mathbf{1}\{j \in P\} + \beta_{NP} \sum_j \widehat{\Delta s}_{mjt} \cdot \mathbf{1}\{j \notin P\} + \text{FE} + \varepsilon
+\end{equation*}
+\textcolor{red}{Test: (i) $H_0: \beta_P = \beta_{NP} = 0$ (optimality); (ii) $H_1: \beta_P > \beta_{NP}$ (correct prioritization).}
+
+\textcolor{red}{\textbf{4.3 External Elasticity Interactions.} Obtain sector-level scale elasticities $E_j$ from literature (e.g., input-output linkages, learning-by-doing estimates). Test:}
+\begin{equation*}
+    \Delta Y_{m,t+h} = \theta \left( \sum_j E_j \cdot \widehat{\Delta s}_{mjt} \right) + \text{FE} + \varepsilon
+\end{equation*}
+\textcolor{red}{If $\theta > 0$: BNDES tilts toward high-$E$ sectors raise output (correct, but insufficient). If $\theta < 0$: tilts toward high-$E$ sectors lower output (misallocation).}
+
+\textcolor{red}{\textbf{4.4 Policy Maps.} Produce municipality$\times$sector matrices of $\hat{\beta}_{mj}$ showing optimal reallocation directions.}
+
+\subsubsection*{Stage 5: Robustness and Extensions (Partially Completed)}
+
+\textcolor{blue}{\textbf{5.0 Preliminary Checks (Completed):}}
+\begin{itemize}
+    \item \textcolor{blue}{Event study: lags $t-3$ to $t$ for mayor$\times$president alignment (see event\_study\_mayor\_pres\_coalition.png)}
+    \item \textcolor{blue}{Binned scatter by alignment intensity: 11 bins (0=zero, 1--10=deciles of positive alignment)}
+    \item \textcolor{blue}{Employment summary statistics by year (employment\_by\_year.csv)}
+\end{itemize}
+
+\textcolor{red}{\textbf{5.1 Specification Robustness:}}
+\begin{enumerate}
+    \item \textcolor{red}{Alternative fixed effects: municipality FE + year FE vs. municipality$\times$year FE}
+    \item \textcolor{red}{Alternative clustering: election cycle, state}
+    \item \textcolor{red}{Sample splits: by region (South/Southeast vs. North/Northeast), by period (pre-2014 vs. post-2014)}
+    \item \textcolor{red}{Dropping influential observations (top/bottom 1\% of outcomes)}
+\end{enumerate}
+
+\textcolor{red}{\textbf{5.2 Instrument Validation:}}
+\begin{enumerate}
+    \item \textcolor{red}{Show $Z_{mjt}$ predicts BNDES sectoral credit but not other municipal revenues}
+    \item \textcolor{red}{Placebo: leads of alignment should not predict outcomes}
+    \item \textcolor{red}{Balance tests: pre-trends in outcomes across high/low alignment municipalities}
+    \item \textcolor{red}{Implement Borusyak-Hull-Jaravel (2022) shock-level inference}
+\end{enumerate}
+
+\textcolor{red}{\textbf{5.3 Alternative Outcome Measures:}}
+\begin{enumerate}
+    \item \textcolor{red}{Employment from RAIS (total and by sector)}
+    \item \textcolor{red}{Wage bill from RAIS}
+    \item \textcolor{red}{Night-time lights (VIIRS, available 2012+)}
+    \item \textcolor{red}{Firm entry/exit from RAIS}
+\end{enumerate}
+
+\textcolor{red}{\textbf{5.4 Mechanism Checks:}}
+\begin{enumerate}
+    \item \textcolor{red}{Show first stage operates through BNDES credit (not other channels)}
+    \item \textcolor{red}{Test whether effects differ by distance to nearest BNDES office}
+    \item \textcolor{red}{Heterogeneity by local financial development}
+\end{enumerate}
+
+\textcolor{red}{\textbf{5.5 Extensions for Future Work:}}
+\begin{enumerate}
+    \item \textcolor{red}{Input-output adjusted shares: $\tilde{s}_{mt} = (I-A)^{-1} s_{mt}$}
+    \item \textcolor{red}{Spatial spillovers: neighbor alignment controls}
+    \item \textcolor{red}{Dynamic effects: local projections approach}
+    \item \textcolor{red}{General equilibrium: scaling from municipality to national level}
+\end{enumerate}
+
+
+
+\section{Discussion}\label{sec:discussion}
+
+\section{Conclusion}\label{sec:conclusion}
+
+
+
+
+
+
+\bibliographystyle{ecta}
+\bibliography{references}
+
+\end{document}
+

@@ -1,0 +1,27 @@
+\sbox0{%
+\begin{tabular}[t]{lcccccc}
+\toprule
+\multicolumn{1}{c}{\textbf{ }} & \multicolumn{6}{c}{\textbf{Dep.~var: $\text{RAIS employment share}_{fmt,mt}$}} \\
+\cmidrule(l{3pt}r{3pt}){2-7}
+  & M & G & P & M+G & M+P & M+G+P\\
+\midrule
+$\widetilde{FA}^{\text{mayor}}_{\text{party}}$ & 0.002* &  &  & 0.002 & 0.001 & 0.001\\
+  & (0.001) &  &  & (0.001) & (0.001) & (0.001)\\
+$\widetilde{FA}^{\text{gov}}_{\text{party}}$ &  & 0.005*** &  & 0.005*** &  & -0.000\\
+  &  & (0.001) &  & (0.001) &  & (0.005)\\
+$\widetilde{FA}^{\text{pres}}_{\text{party}}$ &  &  & 0.025 &  & 0.025 & 0.025\\
+  &  &  & (0.019) &  & (0.019) & (0.020)\\
+\midrule
+$F$-statistic & 3.0 & \textbf{22.4} & 1.8 & \textbf{11.7} & 3.2 & 3.7\\
+Observations & 24,730,829 & 24,730,829 & 24,730,829 & 24,730,829 & 24,730,829 & 24,730,829\\
+$R^2$ & 0.965 & 0.965 & 0.965 & 0.965 & 0.965 & 0.965\\
+\bottomrule
+\end{tabular}
+}%
+\ifdim\wd0>\linewidth
+  \resizebox{\linewidth}{!}{\usebox0}%
+  \par\vspace{3pt}\parbox{\linewidth}{\raggedright\scriptsize Firm + muni $\times$ year FE. Party alignment. Cycle-specific baseline. Binary exposure (any-year). SEs clustered by firm + muni in parentheses. Weighted by pre-election baseline employment. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\else
+  \usebox0%
+  \par\vspace{3pt}\parbox{\wd0}{\raggedright\scriptsize Firm + muni $\times$ year FE. Party alignment. Cycle-specific baseline. Binary exposure (any-year). SEs clustered by firm + muni in parentheses. Weighted by pre-election baseline employment. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\fi

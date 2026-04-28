@@ -1,0 +1,27 @@
+\sbox0{%
+\begin{tabular}[t]{lcccccc}
+\toprule
+\multicolumn{1}{c}{\textbf{ }} & \multicolumn{6}{c}{\textbf{Dep.~var: $\log(\text{Employment}_{fmt})$}} \\
+\cmidrule(l{3pt}r{3pt}){2-7}
+  & M & G & P & M+G & M+P & M+G+P\\
+\midrule
+$FA^{\text{mayor}}_{\text{coal.}}$ & -0.020*** &  &  & -0.015*** & -0.014*** & -0.010***\\
+  & (0.003) &  &  & (0.003) & (0.003) & (0.003)\\
+$FA^{\text{gov}}_{\text{coal.}}$ &  & -0.041*** &  & -0.038*** &  & -0.031***\\
+  &  & (0.003) &  & (0.003) &  & (0.003)\\
+$FA^{\text{pres}}_{\text{coal.}}$ &  &  & -0.078*** &  & -0.076*** & -0.071***\\
+  &  &  & (0.005) &  & (0.005) & (0.005)\\
+\midrule
+$F$-statistic & \textbf{41.6} & \textbf{141.0} & \textbf{264.8} & \textbf{77.8} & \textbf{141.8} & \textbf{120.1}\\
+Observations & 39,534,589 & 39,534,589 & 39,534,589 & 39,534,589 & 39,534,589 & 39,534,589\\
+$R^2$ & 0.776 & 0.776 & 0.776 & 0.776 & 0.776 & 0.776\\
+\bottomrule
+\end{tabular}
+}%
+\ifdim\wd0>\linewidth
+  \resizebox{\linewidth}{!}{\usebox0}%
+  \par\vspace{3pt}\parbox{\linewidth}{\raggedright\scriptsize Firm + muni $\times$ year FE. Coalition alignment. 2002-fixed baseline. Pooled-count exposure. Sample: employment $> 0$. SEs clustered by firm + muni in parentheses. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\else
+  \usebox0%
+  \par\vspace{3pt}\parbox{\wd0}{\raggedright\scriptsize Firm + muni $\times$ year FE. Coalition alignment. 2002-fixed baseline. Pooled-count exposure. Sample: employment $> 0$. SEs clustered by firm + muni in parentheses. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\fi

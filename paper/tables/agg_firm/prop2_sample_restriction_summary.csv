@@ -1,0 +1,17 @@
+tier,alignment,exposure,weighting,n_firms,n_obs,n_munis,n_sectors
+bronze,coalition,pooled_count,unweighted,4105691,24157111,5572,10
+silver,coalition,pooled_count,unweighted,2745385,14144058,5569,9
+bronze,coalition,pooled_count,emp_weighted,3838147,22703715,5571,9
+silver,coalition,pooled_count,emp_weighted,2511881,13000619,5567,9
+bronze,coalition,binary,unweighted,4105691,24157111,5572,10
+silver,coalition,binary,unweighted,2745385,14144058,5569,9
+bronze,coalition,binary,emp_weighted,3838147,22703715,5571,9
+silver,coalition,binary,emp_weighted,2511881,13000619,5567,9
+bronze,party,pooled_count,unweighted,4105691,24157111,5572,10
+silver,party,pooled_count,unweighted,2745385,14144058,5569,9
+bronze,party,pooled_count,emp_weighted,3838147,22703715,5571,9
+silver,party,pooled_count,emp_weighted,2511881,13000619,5567,9
+bronze,party,binary,unweighted,4105691,24157111,5572,10
+silver,party,binary,unweighted,2745385,14144058,5569,9
+bronze,party,binary,emp_weighted,3838147,22703715,5571,9
+silver,party,binary,emp_weighted,2511881,13000619,5567,9

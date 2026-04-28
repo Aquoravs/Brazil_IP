@@ -1,0 +1,297 @@
+\documentclass[11pt]{article}
+\usepackage[top=2.3cm, bottom=2.3cm, left=2.1cm, right=2.1cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
+
+\title{Proposition 2 for the Reference Spec}
+\author{}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+This note answers two questions for the reference firm regression
+\begin{quote}
+\texttt{firm\_\_main\_\_levels\_\_extensive\_\_coalition\_\_cycle\_specific\_\_unweighted\_\_all\_firms\_\_pooled\_count}
+\end{quote}
+
+\begin{enumerate}
+  \item How can we show Proposition 2 really holds in the data?
+  \item Why does the simple regression on cell means still give different coefficients?
+\end{enumerate}
+
+All numbers below come from:
+\begin{itemize}
+  \item \path{BNDES/output/diagnostics/prop2_reference_spec_comparison.csv}
+  \item \path{BNDES/output/diagnostics/prop2_reference_spec_diagnostics.csv}
+  \item \path{BNDES/output/diagnostics/prop2_reference_spec_cell_fe.qs2}
+\end{itemize}
+
+\section*{Short Answer}
+
+Proposition 2 \textbf{does hold} if we start from the firm regression itself, keep the exact estimation sample that the firm regression used, save the fitted fixed effects, and aggregate the \textbf{firm sufficient statistics}.
+
+Proposition 2 \textbf{does not hold} if we replace that object with a simpler new regression on cell means. That simpler regression loses important within-cell variation.
+
+So there are really two different exercises:
+\begin{itemize}
+  \item \textbf{Exact aggregation test}: this is the right test of Proposition 2. It now works.
+  \item \textbf{Simple cell-mean regression}: this is only an approximation. On real data it still differs.
+\end{itemize}
+
+\section{The Two Samples: Group A and Group B}
+
+Define
+\[
+A = \{i: y_i \text{ and } x_i \text{ are observed}\},
+\]
+\[
+B = \{i \in A: i \text{ is actually used by the firm regression}\}.
+\]
+
+Here:
+\begin{itemize}
+  \item $|A| = 44{,}181{,}405$
+  \item $|B| = 43{,}184{,}682$
+  \item $|A \setminus B| = 996{,}723$
+\end{itemize}
+
+So the firm regression does \textbf{not} use all rows in $A$. It uses only $B$.
+
+This matters because the aggregate version must be built from $B$, not from $A$. If we aggregate $A$ but the firm regression used $B$, then the two sides are not even using the same data.
+
+The new script now fixes this directly:
+\begin{itemize}
+  \item fully kept firms: $5{,}464{,}381$
+  \item partially dropped firms: $121$
+  \item fully dropped firms: $996{,}453$
+  \item fully dropped singleton firms: $996{,}450$
+\end{itemize}
+
+In simple language: almost all dropped firms disappear completely from the firm regression, so they should also disappear from the aggregated version.
+
+\section{The Exact Firm Equation}
+
+On the used sample $B$, the firm regression is
+\[
+y_i = \beta x_i + FE_i + u_i,
+\]
+where:
+\begin{itemize}
+  \item $y_i = \mathbf{1}(\mathrm{BNDES}_{fmt} > 0)$
+  \item $x_i$ is one of \texttt{FA\_mayor\_coalition}, \texttt{FA\_gov\_coalition}, \texttt{FA\_pres\_coalition}
+  \item $FE_i$ is the fitted sum of the firm fixed effect and the municipality-year fixed effect
+\end{itemize}
+
+After estimating the firm regression, define
+\[
+y_i^* = y_i - \widehat{FE}_i.
+\]
+
+Then, with one regressor, the firm coefficient is
+\[
+\hat\beta_{\text{firm}} =
+\frac{\sum_{i \in B} x_i y_i^*}{\sum_{i \in B} x_i^2}.
+\]
+
+This is the key formula.
+
+\section{How to Show Proposition 2 Holds Exactly}
+
+Partition the used sample $B$ into cells $c = (j,m,t)$. For each cell define
+\[
+S_{xy,c} = \sum_{i \in B_c} x_i y_i^*,
+\qquad
+S_{xx,c} = \sum_{i \in B_c} x_i^2.
+\]
+
+Then
+\[
+\hat\beta_{\text{firm}} =
+\frac{\sum_c S_{xy,c}}{\sum_c S_{xx,c}}.
+\]
+
+This is just regrouping the same firm sums by cell. Nothing is approximated.
+
+This is the exact way to show Proposition 2 holds in code:
+\begin{enumerate}
+  \item Run the firm regression.
+  \item Save the exact used sample $B$.
+  \item Save the fitted fixed effects $\widehat{FE}_i$.
+  \item Compute $y_i^* = y_i - \widehat{FE}_i$.
+  \item Aggregate $S_{xy,c}$ and $S_{xx,c}$ by cell.
+  \item Rebuild $\hat\beta$ from those cell sums.
+\end{enumerate}
+
+That is exactly what the new script does.
+
+\subsection*{Result}
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+Tier & Firm beta & Exact beta from cell sums & Exact gap \\
+\midrule
+Mayor & \texttt{0.002176} & \texttt{0.002176} & \texttt{-2.20e-11} \\
+Governor & \texttt{0.003404} & \texttt{0.003404} & \texttt{-6.56e-12} \\
+President & \texttt{0.000378} & \texttt{0.000378} & \texttt{1.86e-12} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The largest cell-level identity error is only \texttt{1.11e-16}.
+
+So this part is now clear:
+\begin{quote}
+If we carry the exact firm regression solution to the cell level, Proposition 2 holds for the reference spec.
+\end{quote}
+
+\section{Why the Simple Regression on Cell Means Still Fails}
+
+Now define cell means on the used sample $B$:
+\[
+\bar x_c = \frac{1}{N_c}\sum_{i \in B_c} x_i,
+\qquad
+\bar y_c^* = \frac{1}{N_c}\sum_{i \in B_c} y_i^*.
+\]
+
+The simple aggregated regression uses
+\[
+\hat\beta_{\text{mean}} =
+\frac{\sum_c N_c \bar x_c \bar y_c^*}{\sum_c N_c \bar x_c^2}.
+\]
+
+This looks similar, but it is \textbf{not} the same object as the exact firm formula.
+
+The reason is:
+\[
+\sum_{i \in B_c} x_i^2
+=
+N_c \bar x_c^2
++
+\sum_{i \in B_c} (x_i - \bar x_c)^2,
+\]
+
+and
+\[
+\sum_{i \in B_c} x_i y_i^*
+=
+N_c \bar x_c \bar y_c^*
++
+\sum_{i \in B_c} (x_i - \bar x_c)(y_i^* - \bar y_c^*).
+\]
+
+So the simple mean regression drops two within-cell terms:
+\begin{itemize}
+  \item within-cell variance of $x$
+  \item within-cell covariance between $x$ and $y^*$
+\end{itemize}
+
+If those within-cell terms are small, the mean regression is close. If those terms are large, the mean regression is different.
+
+In this dataset they are large.
+
+\subsection*{Direct Evidence}
+
+The share of the exact denominator that comes from the dropped within-cell part is:
+\begin{itemize}
+  \item Mayor: \texttt{91.9\%}
+  \item Governor: \texttt{91.9\%}
+  \item President: \texttt{93.7\%}
+\end{itemize}
+
+This means most of the identifying variation is \textbf{inside} cells, not between cell means.
+
+That is why the simple mean regression still differs:
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+Tier & Firm beta & Mean-regression beta & Gap \\
+\midrule
+Mayor & \texttt{0.002176} & \texttt{0.001290} & \texttt{-0.000886} \\
+Governor & \texttt{0.003404} & \texttt{0.004397} & \texttt{0.000993} \\
+President & \texttt{0.000378} & \texttt{-0.006601} & \texttt{-0.006979} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+So the mean regression is not failing because Proposition 2 is false. It is failing because cell means are not enough to summarize the firm-level problem.
+
+\section{C1 to C6 in Simple Language}
+
+Below is the clean way to read the conditions from the plan.
+
+\subsection*{C1. Correct weighting}
+
+Plain language: a cell with 100 firms should count 100 times more than a cell with 1 firm.
+
+In the mean regression this means using weight \texttt{N\_c}.
+
+Status here: \textbf{enforced}.
+
+\subsection*{C2. Same sample}
+
+Plain language: the aggregated version must use the exact same firm rows as the firm regression.
+
+Here that means: aggregate $B$, not $A$.
+
+Status here: \textbf{enforced}.
+
+\subsection*{C3. Firm immobility / FE nesting}
+
+Plain language: if the same firm appears in more than one cell, then one simple cell fixed effect cannot play the role of that firm's fixed effect.
+
+Status here:
+\begin{itemize}
+  \item \textbf{not needed for the exact aggregation test}, because we keep the firm FE from the firm regression;
+  \item \textbf{still a problem for a separate simple cell FE regression}.
+\end{itemize}
+
+\subsection*{C4. Correct aggregated FE object}
+
+Plain language: the aggregated nuisance term must be the one implied by the firm regression, not a guessed simpler fixed effect.
+
+Status here: \textbf{enforced in the exact test}, because we use the saved fitted FE from the firm regression and average it to the cell level.
+
+\subsection*{C5. Fixed cell composition}
+
+Plain language: if the firms inside a cell change over time, then the average firm fixed effect of that cell also changes over time.
+
+Status here:
+\begin{itemize}
+  \item \textbf{not needed for the exact aggregation test}, because we work cell-year by cell-year using the saved firm solution;
+  \item \textbf{still a problem for a separate simple cell FE regression}.
+\end{itemize}
+
+\subsection*{C6. No within-cell regressor heterogeneity after FE removal}
+
+Plain language: once fixed effects are removed, firms inside the same cell should all have the same $x$ if cell means are supposed to be enough.
+
+Status here: \textbf{fails on real data}, and this is the main reason the simple mean regression is still different.
+
+\section{What Should Be Shown in the Paper or Presentation}
+
+The clearest presentation is:
+\begin{enumerate}
+  \item Show the firm regression.
+  \item Define $A$ and $B$, and state that the aggregation uses $B$.
+  \item Show the exact identity
+  \[
+  \hat\beta = \frac{\sum_c S_{xy,c}}{\sum_c S_{xx,c}}.
+  \]
+  \item Report that the exact cell-sum coefficient matches the firm coefficient up to machine precision.
+  \item Then show the mean-regression coefficient separately and explain that it differs because the dropped within-cell terms are large.
+\end{enumerate}
+
+That tells the full story very simply:
+\begin{quote}
+Proposition 2 holds exactly when we aggregate the firm regression itself. A new regression on cell means is only an approximation, and on real data that approximation is not exact because within-cell variation is large.
+\end{quote}
+
+\end{document}

@@ -1,0 +1,954 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{itemize items}[circle]
+
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{appendixnumberbeamer}
+\usepackage{hyperref}
+\usepackage{adjustbox}
+
+\newcommand*{\bkmtranslateto}{\languagename}
+\newcommand*{\bkmtranslate}[1]{%
+  \ifcsname tr@@@\bkmtranslateto @#1\endcsname
+    \csname tr@@@\bkmtranslateto @#1\endcsname
+  \else
+    #1%
+  \fi
+}
+\pdfstringdefDisableCommands{%
+  \let\translate\bkmtranslate
+}
+
+\newcommand{\iotaVec}{\mathbf{1}}
+\newcommand{\Align}{\mathrm{Align}}
+\newcommand{\FA}{\mathrm{FA}}
+\newcommand{\EC}{\mathrm{EC}}
+
+\newcommand{\firmdir}{../BNDES/output/firm_reg_tables}
+\newcommand{\aggdir}{../BNDES/output/agg_firm_reg_tables_grouped}
+\newcommand{\sectordirmain}{../BNDES/output/muni_reg_tables_grouped}
+\newcommand{\diagdir}{../BNDES/output/diagnostics}
+
+\definecolor{darkblue}{RGB}{0,51,102}
+\definecolor{alertred}{RGB}{180,30,30}
+\definecolor{notegreen}{RGB}{0,100,50}
+
+\setbeamercolor{frametitle}{fg=white}
+\setbeamercolor{title}{fg=white}
+\setbeamercolor{structure}{fg=darkblue}
+
+\newcommand{\ArtifactPlaceholder}[2]{%
+  \fcolorbox{darkblue}{gray!10}{%
+    \parbox{0.9\linewidth}{%
+      \centering
+      \small
+      \textbf{Pending artifact}\\[3pt]
+      \texttt{\detokenize{#1}}\\[6pt]
+      #2
+    }%
+  }%
+}
+
+\newcommand{\OptionalInputTable}[2]{%
+  \IfFileExists{#1}{\input{#1}}{\ArtifactPlaceholder{#1}{#2}}%
+}
+
+\title{Testing Industrial Policymakers:\\Evidence from Brazil's BNDES}
+\subtitle{First-Stage Pipeline \& Aggregation Diagnostics}
+\author{}
+\date{March 25, 2026}
+
+\begin{document}
+
+% ===========================================================================
+% PART I: SETUP & SPECIFICATION
+% ===========================================================================
+\begin{frame}
+\titlepage
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Research Design Overview}
+
+\textbf{Question}: Is the sector-level allocation of BNDES lending across municipalities GDP-optimal?
+
+\medskip
+
+\textbf{Three-step identification}:
+\begin{enumerate}
+    \item \textbf{Firm first stage} (micro validation): political alignment $\to$ firm BNDES access
+    \item \textbf{Sector aggregation}: firm instruments $\to$ sector-level credit reallocation
+    \item \textbf{Municipality second stage}: predicted reallocation $\to$ GDP per capita
+\end{enumerate}
+
+\medskip
+
+\textbf{This presentation}: steps 1 and 2 --- establishing (and diagnosing) the first stage
+
+\smallskip
+
+\begin{itemize}
+    \item Firm-level signal is \textbf{present}: alignment predicts BNDES access
+    \item Sector-level aggregation \textbf{destroys} the signal --- we diagnose why
+    \item Forward paths: coarser sectors, firm-level reallocation summaries, ungrouped CNAE
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=5]{Firm-Level Specification}
+
+\textbf{Unit}: firm $f$ $\times$ municipality $m$ $\times$ year $t$ \quad ($N = 39.5$M, 2002--2017)
+
+\smallskip
+
+\textbf{Dependent variable}: $\mathbf{1}(\text{BNDES}_{fmt} > 0)$ --- did firm $f$ receive any BNDES credit in muni $m$, year $t$? (extensive margin, LPM)
+
+\smallskip
+
+\textbf{Instruments} --- ``Fraction Aligned'' at government tier $\ell \in \{\text{Mayor, Governor, President}\}$:
+\begin{equation*}
+    \FA^\ell_{fmt} \;=\; \sum_{p} \omega_{fp,0} \;\cdot\; \Align^\ell_{mpt}
+\end{equation*}
+
+\vspace{-6pt}
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item $\omega_{fp,0}$: share of firm $f$'s owners affiliated with party $p$, averaged over the 4-year pre-election window (baseline exposure)
+    \item $\Align^\ell_{mpt}$: $=1$ if party $p$ is in the governing coalition at tier $\ell$ in muni $m$, year $t$
+    \item $\FA^\ell$: fraction of the firm's politically affiliated owners whose party is currently in power at tier $\ell$
+\end{itemize}
+
+\smallskip
+
+\textbf{Specification}:
+\begin{equation*}
+    \mathbf{1}(\text{BNDES}_{fmt} > 0) = \sum_\ell \beta_\ell \, \FA^\ell_{fmt} + \phi_f + \alpha_{mt} + \varepsilon_{fmt}
+\end{equation*}
+
+\vspace{-6pt}
+{\footnotesize FE: firm + muni$\times$year. Clustering: firm + muni. Weights (optional): employment.}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Aggregated Firm $\to$ Sector Specification}
+
+\textbf{Collapse} firm panel to \textbf{(sector group $j$, municipality $m$, year $t$)} cells:
+
+\smallskip
+
+\textbf{Outcome}: share of pre-election base firms with any BNDES
+\begin{equation*}
+    H^{\mathrm{pre}}_{jmt} = \frac{1}{N^{\mathrm{pre}}_{jme}} \sum_{f \in \mathcal{F}^{\mathrm{pre}}_{jme}} \mathbf{1}(\text{BNDES}_{fmt} > 0)
+\end{equation*}
+
+\vspace{-6pt}
+\textbf{Instruments}: simple average of firm-level $\FA$ within each cell
+\begin{equation*}
+    \overline{\FA}^\ell_{jmt} = \frac{1}{N^{\mathrm{pre}}_{jme}} \sum_{f \in \mathcal{F}^{\mathrm{pre}}_{jme}} \FA^\ell_{fmt}
+\end{equation*}
+
+\vspace{-6pt}
+\textbf{Specification}:
+\begin{equation*}
+    H^{\mathrm{pre}}_{jmt} = \sum_\ell \lambda_\ell\, \overline{\FA}^\ell_{jmt} + \phi_{jm} + \alpha_{mt} + u_{jmt}
+\end{equation*}
+
+\vspace{-4pt}
+{\footnotesize FE: muni$\times$sector + muni$\times$year. Clustering: muni + sector. Pre-election base $\mathcal{F}^{\mathrm{pre}}_{jme}$: firms with any non-zero $\FA$ instrument. This is the \emph{same} political signal as the firm spec, averaged within cells.}
+
+\end{frame}
+
+% ===========================================================================
+% PART II: FIRM-LEVEL RESULTS
+% ===========================================================================
+\begin{frame}[shrink=6]{Firm First-Stage: Pooled-Count Exposure (Script 51)}
+
+\begin{center}
+\tiny
+\OptionalInputTable{\firmdir/firm__main__levels__extensive__coalition__cycle_specific__unweighted__all_firms__pooled_count.tex}{Table pending --- run script 51 baseline.}
+\end{center}
+
+\smallskip
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item \textbf{Unweighted}, extensive-margin, levels specification with firm + muni$\times$year FE
+    \item $\omega_{fp,0}$: share of firm's owners affiliated with party $p$ (pooled count across pre-election period)
+    \item Employment weighted specification: \textbf{Mayor} $= 0.010^{*}$ ($F = 3.4$), \textbf{Governor} $= 0.013^{***}$ ($F = 6.9$), \textbf{President} $= -0.013^{**}$ ($F = 5.6$)
+    \item Joint M+G+P: $F = 4.8$ on 39.5M observations
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=6]{Firm First-Stage: Binary Exposure (Script 51)}
+
+\begin{center}
+\tiny
+\OptionalInputTable{\firmdir/firm__main__levels__extensive__coalition__cycle_specific__unweighted__all_firms__binary.tex}{Table pending --- run script 51 --exposure=binary.}
+\end{center}
+
+\smallskip
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item $\widetilde{\omega}_{fp,0} = \text{mean}(\mathbf{1}(L_{fp} > 0))$: any-party-contact indicator (binary exposure)
+    \item \textbf{President} $= -0.015^{***}$ ($F = 7.4$) is the \textbf{strongest single-tier instrument}
+    \item Mayor and governor \textbf{lose significance} --- binary exposure washes out party-share intensity
+    \item Joint M+P: $F = 5.4$; the president signal dominates under binary exposure
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=6]{Firm First-Stage: Intensive Margin (Script 51)}
+
+\begin{center}
+\small
+\begin{tabular}{l l >{\centering\arraybackslash}p{1.8cm} >{\centering\arraybackslash}p{1.8cm} >{\centering\arraybackslash}p{1.8cm} >{\centering\arraybackslash}p{1.9cm}}
+\toprule
+\textbf{Exposure} & \textbf{Sample} & \textbf{Mayor} & \textbf{Governor} & \textbf{President} & \textbf{Best $F$} \\
+\midrule
+Pooled-count & BNDES $> 0$ & $0.031^{*}$ & 0.029 & $0.065^{*}$ & 6.0 (P) \\[3pt]
+Binary & BNDES $> 0$ & 0.013 & $-0.000$ & $0.048^{*}$ & 4.7 (P) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item Intensive-margin sample is much smaller: 472,346 observations, conditional on positive BNDES
+    \item \textbf{President dominates} in both exposures; pooled-count is somewhat stronger ($0.065^{*}$, $F = 6.0$) than binary ($0.048^{*}$, $F = 4.7$)
+    \item Mayor is marginal only under pooled-count; governor is weak in both cases
+    \item Joint bundles do not improve on the president-only specification: pooled-count M+P $F = 4.1$, binary M+P $F = 2.4$
+\end{itemize}
+
+\medskip
+\centering
+\footnotesize Script 51, levels specification, coalition alignment, cycle-specific baseline, firm + muni$\times$year FE, clustered by firm + municipality.
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=5]{Firm First-Stage: Comparison Across Exposure and Weighting}
+
+\begin{center}
+\small
+\begin{tabular}{l l >{\centering\arraybackslash}p{1.5cm} >{\centering\arraybackslash}p{1.5cm} >{\centering\arraybackslash}p{1.5cm} >{\centering\arraybackslash}p{1.5cm}}
+\toprule
+\textbf{Exposure} & \textbf{Weighting} & \textbf{Mayor} & \textbf{Governor} & \textbf{President} & \textbf{Best $F$} \\
+\midrule
+Pooled-count & Emp-weighted & $0.010^{*}$ & $0.013^{***}$ & $-0.013^{**}$ & 6.9 (G) \\[3pt]
+Pooled-count & Unweighted & $0.002^{***}$ & $0.003^{***}$ & 0.000 & 38.0 (G) \\[3pt]
+Binary & Emp-weighted & -- & -- & -- & -- \\[3pt]
+Binary & Unweighted & 0.003 & 0.001 & $-0.015^{***}$ & 7.4 (P) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item \textbf{Pooled-count}: governor dominates; unweighted coefficients are smaller but more precise ($F \gg 10$)
+    \item \textbf{Binary}: president dominates; mayor/governor wash out
+    \item \textbf{Unweighted}: order-of-magnitude smaller coefficients but much higher $F$ (no employment noise)
+    \item Interaction bundles do not strengthen beyond single-tier baseline ($F = 3.7$)
+\end{itemize}
+
+\medskip
+\textcolor{alertred}{\textbf{Key question}}: Does this firm-level signal survive aggregation to the sector level?
+
+\end{frame}
+
+% ===========================================================================
+% PART III: AGGREGATED FIRST STAGE
+% ===========================================================================
+\begin{frame}[shrink=10]{Aggregated First Stage: Pooled-Count Coalition, Unweighted (Script 52)}
+\hypertarget{slide:agg1}{}
+\begin{center}
+\scriptsize
+\OptionalInputTable{\aggdir/agg_t1_coalition_levels.tex}{Table pending --- run script 52.}
+\end{center}
+
+\smallskip
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item \textbf{No coefficient reaches significance} at any conventional level
+    \item President has the largest point estimate ($0.010$--$0.011$) with $F = 2.3$ --- far from $F = 10$
+    \item Mayor and governor: $F < 1$; joint M+G+P: $F = 1.0$
+    \item \textcolor{alertred}{Firm-level signal does not survive aggregation}
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=10]{Aggregated First Stage: Binary Coalition, Unweighted}
+\begin{center}
+\scriptsize
+\OptionalInputTable{\aggdir/agg_t3_binary_coalition_levels.tex}{Table pending --- run script 52.}
+\end{center}
+
+\smallskip
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item Binary exposure \textbf{recovers significance}: Governor $F = 3.4$, President $F = 5.2$
+    \item Joint M+G+P: $F = 5.0$ --- strongest aggregated result across all pooled-count/binary variants
+    \item Binary party alignment even stronger: President $F = 12.9$ (unweighted)
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=10]{Aggregated First Stage: Pooled-Count Coalition, Emp-Weighted}
+\begin{center}
+\scriptsize
+\OptionalInputTable{\aggdir/agg_t5_coalition_levels_emp_weighted.tex}{Table pending --- run script 52.}
+\end{center}
+
+\smallskip
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item Employment-weighted aggregation further weakens signal: all $F < 1$
+    \item Mayor $F = 1.0$, Governor $F = 0.1$, President $F = 0.3$
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=10]{Aggregated First Stage: Binary Coalition, Emp-Weighted}
+\begin{center}
+\scriptsize
+\OptionalInputTable{\aggdir/agg_t7_binary_coalition_levels_emp_weighted.tex}{Table pending --- run script 52.}
+\end{center}
+
+\smallskip
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item Binary + emp-weighted: President $F = 8.3$, Governor $F = 3.6$
+    \item Joint M+G+P: $F = 5.6$ --- binary exposure partially rescues the signal even under employment weighting
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=5]{Aggregated First Stage: Full Summary Across Exposure $\times$ Weighting}
+
+\begin{center}
+\scriptsize
+\begin{tabular}{l l l >{\centering\arraybackslash}p{0.8cm} >{\centering\arraybackslash}p{0.8cm} >{\centering\arraybackslash}p{0.8cm} >{\centering\arraybackslash}p{0.8cm} >{\centering\arraybackslash}p{0.8cm} >{\centering\arraybackslash}p{0.9cm}}
+\toprule
+\textbf{Exposure} & \textbf{Alignment} & \textbf{Weighting} & \textbf{M} $F$ & \textbf{G} $F$ & \textbf{P} $F$ & \textbf{M+G} & \textbf{M+P} & \textbf{M+G+P} \\
+\midrule
+Pooled & Coalition & Unweighted & 0.6 & 0.8 & 2.3 & 0.4 & 1.5 & 1.0 \\
+Pooled & Party     & Unweighted & 0.0 & 2.3 & 0.0 & 1.2 & 0.0 & 0.8 \\
+Pooled & Coalition & Emp-wt.    & 1.0 & 0.1 & 0.3 & 0.7 & 0.5 & 0.4 \\
+Pooled & Party     & Emp-wt.    & 1.8 & 0.2 & 5.7 & 1.0 & 4.6 & 4.1 \\
+\midrule
+Binary & Coalition & Unweighted & 0.3 & 3.4 & \textbf{5.2} & 4.5 & 4.2 & \textbf{5.0} \\
+Binary & Party     & Unweighted & 0.2 & 2.8 & \textbf{12.9} & 1.7 & \textbf{6.7} & 4.5 \\
+Binary & Coalition & Emp-wt.    & 1.5 & 3.6 & \textbf{8.3} & 1.8 & \textbf{6.4} & \textbf{5.6} \\
+Binary & Party     & Emp-wt.    & 1.8 & 2.9 & \textbf{18.8} & 1.7 & \textbf{9.9} & \textbf{9.5} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item \textbf{Binary exposure is systematically stronger}: best $F = 18.8$ (binary party, emp-wt., president)
+    \item \textbf{President tier dominates} under binary exposure; governor under pooled-count
+    \item Pooled-count instruments are uniformly weak at the aggregated level ($F < 5.7$)
+    \item Bold values exceed Stock-Yogo $F = 5$ threshold; binary party emp-weighted exceeds $F = 10$
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=8]{Aggregated First Stage: Party Alignment (Unweighted)}
+\begin{center}
+\scriptsize
+\OptionalInputTable{\aggdir/agg_t2_party_levels.tex}{Table pending --- run script 52.}
+\end{center}
+
+\smallskip
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item Governor: largest point estimate ($0.005$--$0.006$, $F = 2.3$)
+    \item Mayor: essentially zero ($0.001$, $F = 0.0$); President: negative but tiny ($-0.002$, $F = 0.0$)
+    \item Party alignment performs similarly poorly to coalition at the aggregated level (pooled-count)
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=5]{Comparison: Firm vs.\ Aggregated First Stage}
+
+\begin{center}
+\scriptsize
+\begin{tabular}{l >{\centering\arraybackslash}p{1.3cm} >{\centering\arraybackslash}p{0.7cm} >{\centering\arraybackslash}p{1.3cm} >{\centering\arraybackslash}p{0.7cm} >{\centering\arraybackslash}p{1.3cm} >{\centering\arraybackslash}p{0.7cm} >{\centering\arraybackslash}p{1.3cm} >{\centering\arraybackslash}p{0.7cm}}
+\toprule
+& \multicolumn{4}{c}{\textbf{Pooled-count exposure}} & \multicolumn{4}{c}{\textbf{Binary exposure}} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9}
+& \multicolumn{2}{c}{Firm} & \multicolumn{2}{c}{Agg.} & \multicolumn{2}{c}{Firm} & \multicolumn{2}{c}{Agg.} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9}
+\textbf{Tier} & Coef & $F$ & Coef & $F$ & Coef & $F$ & Coef & $F$ \\
+\midrule
+Mayor     & $0.010^{*}$    & 3.4  & 0.003  & 0.6  & 0.003         & 0.8  & ---   & 0.3 \\
+Governor  & $0.013^{***}$  & 6.9  & 0.004  & 0.8  & 0.001         & 0.1  & ---   & 3.4 \\
+President & $-0.013^{**}$  & 5.6  & 0.010  & 2.3  & $-0.015^{***}$ & 7.4  & ---   & \textbf{5.2} \\
+M+G+P     & ---            & 4.8  & ---    & 1.0  & ---           & 4.1  & ---   & \textbf{5.0} \\
+\midrule
+$N$       & \multicolumn{2}{c}{39.5M} & \multicolumn{2}{c}{293K} & \multicolumn{2}{c}{39.5M} & \multicolumn{2}{c}{293K} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item \textbf{Pooled-count}: firm signal attenuates 70--90\% at aggregation; president sign flips
+    \item \textbf{Binary}: president signal \textbf{survives} aggregation ($F = 5.2$); joint M+G+P even improves ($F = 5.0$)
+    \item Binary exposure is less noisy in thin cells because it does not depend on party-share intensity
+\end{itemize}
+
+\medskip
+\centering
+\textcolor{alertred}{\textbf{Why does pooled-count signal disappear?}} $\longrightarrow$ systematic diagnostics follow
+
+\end{frame}
+
+% ===========================================================================
+% PART IV: DIAGNOSTIC EVIDENCE
+% ===========================================================================
+\begin{frame}[shrink=8]{Diagnostic \#1: Cell Sparsity (Dominant Driver)}
+
+Most (sector, muni, year) cells have very few pre-election firms:
+
+\smallskip
+
+\begin{columns}[T]
+\begin{column}{0.45\textwidth}
+\centering
+\scriptsize
+\begin{tabular}{l r r}
+\toprule
+\textbf{Firms/cell} & \textbf{Cells} & \textbf{Share} \\
+\midrule
+1       & 111,385 & 36.7\% \\
+2       & 49,584  & 16.3\% \\
+3--5    & 62,502  & 20.6\% \\
+6--10   & 34,493  & 11.4\% \\
+11--50  & 37,826  & 12.5\% \\
+50+     & 7,644   & 2.5\% \\
+\bottomrule
+\end{tabular}
+\end{column}
+\begin{column}{0.5\textwidth}
+\centering
+\scriptsize
+\textbf{Restricting to dense cells recovers the signal}:
+
+\smallskip
+\begin{tabular}{l r r r}
+\toprule
+\textbf{Min $N$} & \textbf{Cells} & \textbf{Coal.\ $F$} & \textbf{Party $F$} \\
+\midrule
+All     & 293K  & 1.02 & 0.84 \\
+$\geq 5$  & 74K   & 0.97 & 1.05 \\
+$\geq 10$ & 35K   & 1.38 & 0.89 \\
+$\geq 20$ & 15.5K & 2.96 & 1.35 \\
+$\geq 50$ & 4.6K  & \textbf{6.89} & 0.77 \\
+\bottomrule
+\end{tabular}
+\end{column}
+\end{columns}
+
+\medskip
+
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item 53\% of cells have $\leq 2$ pre-election firms --- $H^{\mathrm{pre}}_{jmt}$ takes values $\{0, 0.5, 1\}$ for half the sample
+    \item Coalition $F$ monotonically rises to \textbf{6.89} at $N \geq 50$ --- but only 2.5\% of cells survive
+    \item The firm signal \emph{is there} in dense cells; thin cells destroy it
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=5]{Diagnostic \#2: Outcome Homogeneity Within Muni-Years}
+
+Even if instruments varied across sectors, the \textbf{outcome itself does not}:
+
+\smallskip
+
+\begin{center}
+\small
+\begin{tabular}{l r}
+\toprule
+\textbf{Statistic} & \textbf{Value} \\
+\midrule
+Median within-muni-year SD of $H^{\mathrm{pre}}_{jmt}$ across sectors & \textbf{0.000} \\
+Median within-muni-year range of $H^{\mathrm{pre}}_{jmt}$ & \textbf{0.000} \\
+75th percentile within-muni-year SD & 0.061 \\
+\midrule
+Muni-years with zero positive sector-group cells & \textbf{42.3\%} \\
+Muni-years with exactly one positive sector-group cell & \textbf{20.4\%} \\
+Muni-years with $\leq 1$ positive sector & \textbf{62.7\%} \\
+\midrule
+Mean share of active groups with positive BNDES & 17.4\% \\
+Median HHI of grouped BNDES shares (positive m.y.) & 0.670 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item In most muni-years, \textbf{all sectors have the same BNDES outcome} (all zero or all positive)
+    \item 62.7\% of muni-years have $\leq 1$ sector with positive BNDES --- \textbf{no cross-sector variation to explain}
+    \item Where BNDES is positive, it is highly concentrated: HHI $= 0.67$, top sector gets 79.9\%
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=8]{Diagnostic \#3: Limited Instrument Variation Across Sectors}
+
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\centering
+\scriptsize
+\textbf{Within-muni-year instrument variation}
+
+\smallskip
+\begin{tabular}{l r r}
+\toprule
+\textbf{Instrument} & \textbf{Med.\ SD} & \textbf{FE $R^2$} \\
+\midrule
+$\overline{\FA}^{\text{M}}_{\text{coal.}}$ & 0.224 & 0.718 \\
+$\overline{\FA}^{\text{G}}_{\text{coal.}}$ & 0.205 & 0.760 \\
+$\overline{\FA}^{\text{P}}_{\text{coal.}}$ & 0.142 & 0.737 \\
+\midrule
+$\overline{\FA}^{\text{M}}_{\text{party}}$ & 0.064 & 0.708 \\
+$\overline{\FA}^{\text{G}}_{\text{party}}$ & 0.057 & 0.709 \\
+$\overline{\FA}^{\text{P}}_{\text{party}}$ & 0.059 & 0.731 \\
+\bottomrule
+\end{tabular}
+\end{column}
+\begin{column}{0.48\textwidth}
+\centering
+\scriptsize
+\textbf{Alternative FE specifications}
+
+\smallskip
+\begin{tabular}{l r r}
+\toprule
+\textbf{FE structure} & \textbf{Coal.\ $F$} & \textbf{Party $F$} \\
+\midrule
+m$\times$j + m$\times$t & 1.02 & 0.84 \\
+m$\times$j + j$\times$t & 0.51 & 0.56 \\
+j + t (minimal) & 1.56 & 1.58 \\
+m$\times$j only & 0.98 & 3.79 \\
+\bottomrule
+\end{tabular}
+\end{column}
+\end{columns}
+
+\bigskip
+
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item Party instruments have very little cross-sector spread (SD $\approx 0.06$)
+    \item FE absorb 71--76\% of instrument variation --- but this is \textbf{not the binding constraint}
+    \item No FE combination recovers a strong first stage --- the problem is \textbf{structural}
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Diagnostic \#4: Sector Heterogeneity --- Two Sectors Carry All Signal}
+
+\begin{center}
+\small
+\begin{tabular}{l r r l}
+\toprule
+\textbf{Sector} & \textbf{Own $F$} & \textbf{Leave-one-out $F$} & \textbf{Interpretation} \\
+\midrule
+Tp (Transport)       & \textbf{20.4} & 0.37 & Dropping it kills pooled signal \\
+XX (Residual)        & \textbf{47.6} & 0.97 & Dropping it kills pooled signal \\
+CA (Adv.\ Manuf.)    & 3.2           & \textbf{5.2}  & Dropping it \emph{raises} pooled $F$ \\
+UCo (Utilities)      & 2.7           & 1.2  & \\
+Tr (Trade)           & 2.2           & 1.7  & \\
+MS (Market Svcs.)    & 1.4           & 1.2  & \\
+PSO (Public/Social)  & 0.4           & 1.0  & \\
+Ag (Agriculture)     & 0.7           & 1.0  & \\
+Mi (Mining)          & 0.1           & 1.0  & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item Only \textbf{Transport} ($F = 20.4$) and \textbf{Residual} ($F = 47.6$) show strong instruments
+    \item CA (Advanced Manufacturing) \textbf{actively dilutes} the pooled signal: its inclusion drops $F$ from 5.2 to 1.02
+    \item The remaining 6 sectors contribute pure noise ($F < 2.2$)
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=5]{Diagnostic Summary: Why Aggregation Fails}
+
+\begin{center}
+\small
+\begin{tabular}{r l p{6cm} r}
+\toprule
+\textbf{Rank} & \textbf{Hypothesis} & \textbf{Key evidence} & \textbf{Score} \\
+\midrule
+1 & \textbf{Cell sparsity} & 53\% of cells have $\leq 2$ firms; $F$ rises 1.0 $\to$ 6.9 at $N \geq 50$ & 5.87 \\[3pt]
+2 & FE absorption & FE absorb 73\% of instrument var.; even minimal FE give $F < 1.6$ & 0.74 \\[3pt]
+3 & Diffuse exposure & Median party-sector HHI $= 0.59$; within-m.y.\ outcome SD $= 0$ & 0.41 \\[3pt]
+4 & Aggregation form & Owner-weighted $F = 0.83$ (worse); raw vs.\ weighted $\rho = 0.94$ & $-0.18$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+\textbf{Bottom line} --- the collapse is driven by three structural features:
+\begin{enumerate}\setlength{\itemsep}{2pt}
+    \item \textbf{Thin cells}: most cells have 1--2 firms $\Rightarrow$ cell averages are extremely noisy
+    \item \textbf{Homogeneous outcomes}: 62.7\% of muni-years have $\leq 1$ sector with positive BNDES $\Rightarrow$ no cross-sector variation to explain
+    \item \textbf{Concentrated signal}: only Transport and Residual show instrument relevance; the other 7 sectors contribute noise
+\end{enumerate}
+
+\end{frame}
+
+% ===========================================================================
+% PART V: SECTOR SHIFT-SHARE FIRST STAGE
+% ===========================================================================
+\begin{frame}[shrink=6]{Sector First Stage: Baseline (Script 53)}
+
+\begin{center}
+\tiny
+\OptionalInputTable{\sectordirmain/sector__levels__owner_count__coalition__cycle_specific__mxj_jxt__ctrl.tex}{Table pending --- run script 53 with --specs=baseline.}
+\end{center}
+
+\smallskip
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item Sector-level shift-share instruments $Z^\ell_{jmt}$ (alignment $\times$ baseline sector-party exposure weights)
+    \item FE: muni$\times$sector + sector$\times$year; clustering: muni + sector
+    \item Owner-count, coalition, cycle-specific baseline --- all $F < 6$
+\end{itemize}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=5]{Sector First Stage: Full Specification Battery (Script 53)}
+
+\begin{center}
+\scriptsize
+\begin{tabular}{l l l l >{\centering\arraybackslash}p{1.5cm} >{\centering\arraybackslash}p{1.5cm}}
+\toprule
+\textbf{Instrument weight} & \textbf{Alignment} & \textbf{FE} & \textbf{Controls} & \textbf{$F$ range} & \textbf{Best $F$} \\
+\midrule
+\multicolumn{6}{l}{\textit{m$\times$j + j$\times$t FE (primary)}} \\[2pt]
+Owner-count  & Coalition & j$\times$t & No  & 0.0--5.9  & 5.9 \\
+Owner-count  & Party     & j$\times$t & No  & 0.0--0.1  & 0.1 \\
+Employment   & Coalition & j$\times$t & No  & 2.8--8.3  & \textbf{8.3} \\
+Employment   & Party     & j$\times$t & No  & 1.0--1.7  & 1.7 \\
+Equal-firm   & Coalition & j$\times$t & No  & 3.3--10.7 & \textbf{10.7} \\
+Equal-firm   & Party     & j$\times$t & No  & 0.0--2.1  & 2.1 \\
+Binary       & Coalition & j$\times$t & No  & 1.0--3.4  & 3.4 \\
+Binary       & Party     & j$\times$t & No  & 0.1--0.9  & 0.9 \\
+\midrule
+\multicolumn{6}{l}{\textit{m$\times$j + m$\times$t FE (robustness)}} \\[2pt]
+Owner-count  & Coalition & m$\times$t & No  & 0.0--2.3  & 2.3 \\
+Owner-count  & Party     & m$\times$t & No  & 0.0--1.4  & 1.4 \\
+Employment   & Coalition & m$\times$t & No  & 0.8--2.3  & 2.3 \\
+Employment   & Party     & m$\times$t & No  & 0.5--1.5  & 1.5 \\
+Equal-firm   & Coalition & m$\times$t & No  & 1.2--2.8  & 2.8 \\
+Equal-firm   & Party     & m$\times$t & No  & 0.1--1.5  & 1.5 \\
+Binary       & Coalition & m$\times$t & No  & 0.0--2.0  & 2.0 \\
+Binary       & Party     & m$\times$t & No  & 0.5--2.9  & 2.9 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\smallskip
+{\footnotesize $N = 795{,}456$. Levels specification ($s_{mjt}$), cycle-specific baseline. $F$: Wald test on all $Z$ instruments jointly. Best $F$ = max across 6 tier combos (M, G, P, M+G, M+P, All). Bold $\geq$ Stock-Yogo 5\% critical value.}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=5]{Sector First Stage: Key Findings Across Specifications}
+
+\begin{itemize}\setlength{\itemsep}{4pt}
+    \item \textbf{Equal-firm, coalition, j$\times$t FE}: best single-combo $F = 10.7$ --- the only specification exceeding Stock-Yogo 10
+    \item \textbf{Employment-weighted}: second strongest ($F_{\max} = 8.3$); approaching relevance
+    \item \textbf{Owner-count}: weak under coalition ($F \leq 5.9$), near-zero under party alignment
+    \item \textbf{Binary}: weakest weight variant at sector level ($F \leq 3.4$) --- opposite of firm-level pattern
+    \item \textbf{Party alignment uniformly weak}: $F < 3$ across all weight variants and FE choices
+    \item \textbf{m$\times$t FE}: reduces all $F$ relative to j$\times$t FE (absorbs muni-year variation)
+\end{itemize}
+
+\bigskip
+
+\textbf{Interpretation}: Equal-firm and employment weights concentrate exposure on municipalities where BNDES lending actually varies across sectors. Coalition alignment is the operative margin at the sector level. The sector pipeline shows \textbf{some promise under specific weight/FE combinations}, unlike the uniformly weak aggregated firm$\to$sector route.
+
+\end{frame}
+
+% ===========================================================================
+% PART VI: FORWARD PATH
+% ===========================================================================
+\begin{frame}{Why the Current Sector Grouping Fails}
+
+The current 10 sector groups (from 21 CNAE sections) were designed for broad economic categories, \textbf{not} for BNDES lending patterns:
+
+\smallskip
+
+\begin{center}
+\small
+\begin{tabular}{l r l}
+\toprule
+\textbf{Issue} & \textbf{Value} & \textbf{Implication} \\
+\midrule
+Median firms per cell (overall) & 6 & Thin cells \\
+Median pre-election firms per cell & 2 & Very thin instrument base \\
+Cells with 0 affiliated firms & 32.1\% & No instrument variation \\
+Muni-years with $\leq 1$ pos.\ sector & 62.7\% & No cross-sector outcome var. \\
+HHI of BNDES shares (pos.\ m.y.) & 0.670 & Lending highly concentrated \\
+Top-group share (pos.\ m.y.) & 79.9\% & Nearly all BNDES in one sector \\
+\midrule
+Mean affiliation: Tp (Transport) & 38.4\% & Instrument support concentrated \\
+Mean affiliation: Ag (Agriculture) & 4.8\% & Near-zero instrument support \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\smallskip
+
+The sector grouping creates cells that are simultaneously too sparse for reliable aggregation and too fine-grained relative to the coarseness of BNDES lending patterns.
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=8]{Alternative Paths Forward}
+
+\textbf{Option A: Coarser sector groupings aligned with BNDES lending}
+\begin{itemize}\setlength{\itemsep}{1pt}
+    \item Define 3--5 ``BNDES-relevant'' sectors based on where lending occurs and affiliation support exists
+    \item Evidence: Transport and Residual carry the signal --- perhaps a Manufacturing / Services / Transport+Other trichotomy
+    \item \textcolor{notegreen}{Pro}: denser cells, more outcome variation, preserves sector story
+    \item \textcolor{alertred}{Con}: fewer sectors $\Rightarrow$ less heterogeneity for second stage
+\end{itemize}
+
+\smallskip
+
+\textbf{Option B: Firm-level reallocation summary variable}
+\begin{itemize}\setlength{\itemsep}{1pt}
+    \item Construct a municipality-level measure of \emph{firm-level} BNDES reallocation (e.g., turnover in firm access between $t{-}1$ and $t$, or firm-level HHI within municipality)
+    \item Instrument with municipality-level alignment --- \textbf{bypass} the sector dimension
+    \item \textcolor{notegreen}{Pro}: uses the strong firm-level signal directly; no sector-aggregation noise
+    \item \textcolor{alertred}{Con}: new theoretical motivation needed; less interpretable for sector misallocation
+\end{itemize}
+
+\smallskip
+
+\textbf{Option C: Return to ungrouped sectors (21 CNAE sections)}
+\begin{itemize}\setlength{\itemsep}{1pt}
+    \item Ungrouped with muni$\times$year FE achieves $F = 12.4$ for mayor (above Stock-Yogo 10)
+    \item More sections $\to$ more variation in shares and instruments
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Conclusion \& Next Steps}
+
+\textbf{Firm-level validation is solid}: political alignment $\to$ BNDES access is a real channel.
+
+\bigskip
+
+\textbf{Binary exposure is the key finding}:
+\begin{itemize}
+    \item \textbf{Firm level}: binary president $F = 7.4$ vs.\ pooled-count governor $F = 6.9$
+    \item \textbf{Aggregated}: binary survives ($F$ up to 18.8) while pooled-count collapses ($F < 2.3$)
+    \item \textbf{Sector shift-share}: equal-firm weights reach $F = 10.7$; employment $F = 8.3$
+\end{itemize}
+
+\bigskip
+
+\textbf{Remaining challenges}: 53\% of cells have $\leq 2$ firms; 63\% of muni-years have $\leq 1$ positive sector; party alignment uniformly weak at sector level.
+
+\bigskip
+
+\textbf{Next steps}:
+\begin{enumerate}
+    \item Pursue \textbf{equal-firm / employment sector instruments} with j$\times$t FE as the primary sector specification
+    \item Investigate the \textbf{binary aggregated route} (binary party, emp-weighted, $F = 18.8$) as an alternative pathway
+    \item Run ungrouped sector first stage (21 CNAE sections) --- earlier result suggested $F = 12.4$ for mayor
+    \item Evaluate evidence and choose the path to the second stage (GDP)
+\end{enumerate}
+
+\end{frame}
+
+% ===========================================================================
+% APPENDIX
+% ===========================================================================
+\appendix
+
+% ===========================================================================
+\begin{frame}{Appendix A: Aggregation Mechanics}
+\hypertarget{appendix:agg-mechanics}{}
+
+\textbf{Pre-election firm base} $\mathcal{F}^{\mathrm{pre}}_{jme}$:
+\begin{itemize}\setlength{\itemsep}{1pt}
+    \item All firm-muni-year rows where at least one $\FA^\ell_{fmt} \neq 0$
+    \item 2.47M rows out of 44.2M (5.6\% of full firm panel)
+    \item Collapsed to 303K (sector $\times$ muni $\times$ year) cells
+\end{itemize}
+
+\medskip
+
+\textbf{Aggregation}: simple (unweighted) average within each cell
+\begin{itemize}\setlength{\itemsep}{1pt}
+    \item $H^{\mathrm{pre}}_{jmt} = \text{mean}(\mathbf{1}(\text{BNDES}_{fmt} > 0))$ over pre-election firms
+    \item $\overline{\FA}^\ell_{jmt} = \text{mean}(\FA^\ell_{fmt})$ over pre-election firms
+    \item No employment weighting at the aggregation stage
+\end{itemize}
+
+\medskip
+
+\textbf{FE and clustering}:
+\begin{itemize}\setlength{\itemsep}{1pt}
+    \item FE: muni $\times$ sector group + muni $\times$ year (8,606 FE groups; 2,049 singletons removed)
+    \item Two-way clustering: municipality + sector group
+    \item Effective sample: 292,926 observations after singleton removal
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix B: Sector Group Definitions}
+
+\begin{center}
+\small
+\begin{tabular}{llp{7cm}}
+\toprule
+\textbf{Group} & \textbf{Label} & \textbf{CNAE Sections} \\
+\midrule
+Ag  & Agriculture               & A \\
+Mi  & Mining                    & B \\
+CL  & Light Manufacturing       & C (div.\ 10--18: food, textiles, wood, paper, printing) \\
+CH  & Heavy Manufacturing       & C (div.\ 19--25: petroleum, chemicals, metals, rubber) \\
+CA  & Advanced Manufacturing    & C (div.\ 26--33: electronics, machinery, vehicles) \\
+UCo & Utilities \& Construction & D (electricity/gas), E (water/waste), F (construction) \\
+Tr  & Trade                     & G (wholesale and retail) \\
+Tp  & Transport                 & H (transport and storage) \\
+MS  & Market Services           & I, J, L, M--N (accommodation, info, real estate, prof.) \\
+PSO & Public, Social \& Other   & P (education), Q (health), R (arts), S (other services) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix C: Aggregated Panel Descriptive Statistics}
+
+\begin{center}
+\small
+\begin{tabular}{lrr}
+\toprule
+& \textbf{Firm panel} & \textbf{Aggregated panel} \\
+\midrule
+Observations      & 44,181,405 & 303,434 \\
+Pre-election base & 2,467,350  & 303,434 \\
+Unique firms      & 455,356    & --- \\
+Unique munis      & 5,557      & 5,557 \\
+Sector groups     & 9          & 9 \\
+\midrule
+$H^{\mathrm{pre}}_{jmt}$: mean & --- & 0.032 \\
+$H^{\mathrm{pre}}_{jmt}$: sd   & --- & 0.128 \\
+Median $N^{\mathrm{pre}}$ per cell & --- & 2 \\
+Max $N^{\mathrm{pre}}$ per cell    & --- & 2,891 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item \textbf{Sparse}: mean $H^{\mathrm{pre}} = 3.2\%$ --- only 1 in 30 pre-election firms receive BNDES
+    \item \textbf{Thin cells}: median 2 firms per (sector, muni, year) cell
+    \item 2,049 singleton FE removed (10,508 observations dropped)
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[shrink=10]{Appendix D: Aggregated First-Stage Summary Table}
+
+\begin{center}
+\small
+\begin{tabular}{l >{\centering\arraybackslash}p{1.2cm} >{\centering\arraybackslash}p{1.2cm} >{\centering\arraybackslash}p{1.2cm} >{\centering\arraybackslash}p{1.2cm} >{\centering\arraybackslash}p{1.2cm} >{\centering\arraybackslash}p{1.2cm}}
+\toprule
+& \multicolumn{6}{c}{\textbf{Coalition alignment}} \\
+\cmidrule(lr){2-7}
+\textbf{Tier} & M & G & P & M+G & M+P & M+G+P \\
+\midrule
+Coef  & 0.003 & 0.004 & 0.010 & --- & --- & --- \\
+SE    & (0.004) & (0.004) & (0.007) & --- & --- & --- \\
+$F$   & 0.6 & 0.8 & 2.3 & 0.4 & 1.5 & 1.0 \\
+\midrule
+& \multicolumn{6}{c}{\textbf{Party alignment}} \\
+\cmidrule(lr){2-7}
+& M & G & P & M+G & M+P & M+G+P \\
+\midrule
+Coef  & 0.001 & 0.005 & $-0.002$ & --- & --- & --- \\
+SE    & (0.004) & (0.003) & (0.014) & --- & --- & --- \\
+$F$   & 0.0 & 2.3 & 0.0 & 1.2 & --- & 0.8 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+
+\begin{itemize}\setlength{\itemsep}{2pt}
+    \item \textbf{All $F < 2.3$} --- no instrument combination approaches relevance
+    \item 293K observations (after singleton removal) with muni$\times$sector + muni$\times$year FE
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix E: Cell Size Distribution by Sector Group}
+
+\begin{center}
+\includegraphics[width=0.78\linewidth,height=0.72\textheight,keepaspectratio]{\diagdir/sector_group_cell_support/plot_cell_size_by_sector_group.pdf}
+\end{center}
+
+\vspace{-4pt}
+{\footnotesize Cell size distributions vary substantially across sectors. Transport (Tp) and Trade (Tr) have relatively denser cells; Agriculture (Ag) and Mining (Mi) are dominated by singletons.}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix F: BNDES Positive Share by Sector $\times$ Year}
+
+\begin{center}
+\includegraphics[width=0.78\linewidth,height=0.72\textheight,keepaspectratio]{\diagdir/sector_group_cell_support/plot_positive_bndes_share_heatmap.pdf}
+\end{center}
+
+\vspace{-4pt}
+{\footnotesize Share of cells with positive BNDES credit by sector group and year. Trade (Tr) consistently has the highest positive-cell rate.}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix G: Political Affiliation Support by Sector $\times$ Year}
+
+\begin{center}
+\includegraphics[width=0.78\linewidth,height=0.72\textheight,keepaspectratio]{\diagdir/sector_group_cell_support/plot_affiliation_share_heatmap.pdf}
+\end{center}
+
+\vspace{-4pt}
+{\footnotesize Mean affiliation share (fraction of firms with any politically affiliated owner) by sector group and year. Transport (Tp) has the highest support; Agriculture (Ag) the lowest.}
+
+\end{frame}
+
+\end{document}

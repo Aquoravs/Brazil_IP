@@ -1,0 +1,28 @@
+\sbox0{%
+\begin{tabular}[t]{lcccccc}
+\toprule
+\multicolumn{1}{c}{\textbf{ }} & \multicolumn{6}{c}{\textbf{Dep.~var: $\text{Emp share}_{jmt}$}} \\
+\cmidrule(l{3pt}r{3pt}){2-7}
+  & M & G & P & M+G & M+P & M+G+P\\
+\midrule
+$\overline{FA}^{\text{mayor}}_{\text{coal.}}$ & -0.019 &  &  & -0.018 & -0.020 & -0.017\\
+  & (0.016) &  &  & (0.012) & (0.015) & (0.012)\\
+$\overline{FA}^{\text{gov}}_{\text{coal.}}$ &  & -0.024 &  & -0.022 &  & -0.022\\
+  &  & (0.021) &  & (0.020) &  & (0.020)\\
+$\overline{FA}^{\text{pres}}_{\text{coal.}}$ &  &  & -0.015 &  & -0.013 & -0.012\\
+  &  &  & (0.026) &  & (0.027) & (0.027)\\
+\midrule
+Exposure Control & No & No & No & No & No & No\\
+$F$-statistic & 1.5 & 1.4 & 0.3 & 1.4 & 1.3 & 1.0\\
+Observations & 128,170 & 111,454 & 111,454 & 109,193 & 109,193 & 109,193\\
+$R^2$ & 0.811 & 0.869 & 0.869 & 0.870 & 0.870 & 0.870\\
+\bottomrule
+\end{tabular}
+}%
+\ifdim\wd0>\linewidth
+  \resizebox{\linewidth}{!}{\usebox0}%
+  \par\vspace{3pt}\parbox{\linewidth}{\raggedright\scriptsize Muni $\times$ sector + muni $\times$ year FE. Coalition alignment. Cycle-specific baseline. Pooled-count exposure. Owner-count aggregation. WLS uses number of firms in the cell (N_pre). Sample: top-quartile municipalities by mean RAIS employment (2002--2017). No exposure controls. SEs clustered by muni + sector group in parentheses. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\else
+  \usebox0%
+  \par\vspace{3pt}\parbox{\wd0}{\raggedright\scriptsize Muni $\times$ sector + muni $\times$ year FE. Coalition alignment. Cycle-specific baseline. Pooled-count exposure. Owner-count aggregation. WLS uses number of firms in the cell (N_pre). Sample: top-quartile municipalities by mean RAIS employment (2002--2017). No exposure controls. SEs clustered by muni + sector group in parentheses. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\fi

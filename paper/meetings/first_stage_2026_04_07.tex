@@ -1,0 +1,581 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{itemize items}[circle]
+
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage[T1]{fontenc}
+\usepackage{array}
+
+% Path to auto-generated tables (from script 51)
+\newcommand{\tabledir}{../tables/firm}
+
+% Colors
+\definecolor{darkblue}{RGB}{0,51,102}
+\definecolor{alertred}{RGB}{180,30,30}
+\definecolor{pass}{RGB}{198,232,198}   % light green for F > 10
+
+\setbeamercolor{frametitle}{fg=white}
+\setbeamercolor{title}{fg=white}
+\setbeamercolor{structure}{fg=darkblue}
+
+% Shaded cell for passing F-stats
+\newcommand{\fpass}[1]{\cellcolor{pass}\textbf{#1}}
+
+\title{Firm-Level First-Stage Results}
+\subtitle{April 4, 2026}
+\author{}
+\date{}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+% ===========================================================================
+% F-STAT GRID: BNDES EXTENSIVE
+% ===========================================================================
+
+\begin{frame}[t]{$F$-Statistics: BNDES Extensive --- $\mathbf{1}(\text{BNDES}>0)$}
+\framesubtitle{Panel A: 2002-fixed baseline}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}llrccccccc@{}}
+\toprule
+ & & & \multicolumn{6}{c}{Instrument combo} \\
+\cmidrule(l{2pt}r{2pt}){4-9}
+Alignment & Weighting & Exposure & M & G & P & M+G & M+P & M+G+P \\
+\midrule
+\multirow{4}{*}{Coalition}
+  & \multirow{2}{*}{Emp.-weighted}
+    & Binary & 2.7 & 0.1 & 2.4 & 3.9 & 1.6 & 4.6 \\
+  & & Pooled  & 0.2 & 2.5 & 5.5 & 1.4 & 2.9 & 4.1 \\
+  & \multirow{2}{*}{Unweighted}
+    & Binary & 0.9 & 0.3 & 6.9 & 0.6 & \fpass{12.6} & \fpass{12.2} \\
+  & & Pooled  & \fpass{13.7} & \fpass{23.7} & \fpass{24.4} & \fpass{16.3} & \fpass{20.2} & \fpass{22.6} \\
+\addlinespace[5pt]
+\multirow{4}{*}{Party}
+  & \multirow{2}{*}{Emp.-weighted}
+    & Binary & 0.2 & 0.0 & 1.2 & 0.1 & 0.7 & 0.5 \\
+  & & Pooled  & 0.4 & 0.1 & 0.6 & 0.2 & 0.6 & 0.4 \\
+  & \multirow{2}{*}{Unweighted}
+    & Binary & 2.2 & 0.1 & 1.0 & 1.7 & 3.1 & 3.2 \\
+  & & Pooled  & 4.3 & 4.6 & 0.0 & 4.0 & 2.2 & 2.9 \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize \colorbox{pass}{\textbf{Shaded}} = $F>10$. Firm + muni$\times$year FE. SEs clustered by firm + municipality.}
+\end{frame}
+
+\begin{frame}[t]{$F$-Statistics: BNDES Extensive --- $\mathbf{1}(\text{BNDES}>0)$}
+\framesubtitle{Panel B: Cycle-specific baseline}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}llrccccccc@{}}
+\toprule
+ & & & \multicolumn{6}{c}{Instrument combo} \\
+\cmidrule(l{2pt}r{2pt}){4-9}
+Alignment & Weighting & Exposure & M & G & P & M+G & M+P & M+G+P \\
+\midrule
+\multirow{4}{*}{Coalition}
+  & \multirow{2}{*}{Emp.-weighted}
+    & Binary & 1.1 & 0.5 & \fpass{10.2} & 0.5 & 5.3 & 4.1 \\
+  & & Pooled  & 0.2 & 0.9 & \fpass{15.0} & 0.5 & 7.9 & 5.9 \\
+  & \multirow{2}{*}{Unweighted}
+    & Binary & 9.8 & 0.5 & 7.2 & 5.1 & \fpass{13.0} & \fpass{10.1} \\
+  & & Pooled  & \fpass{45.5} & \fpass{103.2} & 0.9 & \fpass{63.3} & \fpass{22.9} & \fpass{43.4} \\
+\addlinespace[5pt]
+\multirow{4}{*}{Party}
+  & \multirow{2}{*}{Emp.-weighted}
+    & Binary & 0.0 & 0.1 & 0.5 & 0.1 & 0.3 & 0.2 \\
+  & & Pooled  & 2.2 & 0.1 & 0.1 & 1.2 & 1.3 & 0.9 \\
+  & \multirow{2}{*}{Unweighted}
+    & Binary & 9.5 & 0.5 & 0.0 & 4.8 & 4.7 & 3.4 \\
+  & & Pooled  & \fpass{19.1} & \fpass{29.9} & \fpass{16.9} & \fpass{22.0} & \fpass{17.4} & \fpass{17.8} \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize \colorbox{pass}{\textbf{Shaded}} = $F>10$. Firm + muni$\times$year FE. SEs clustered by firm + municipality.}
+\end{frame}
+
+% ===========================================================================
+% F-STAT GRID: BNDES INTENSIVE
+% ===========================================================================
+
+\begin{frame}[t]{$F$-Statistics: BNDES Intensive --- $\log(\text{BNDES})$}
+\framesubtitle{Panel A: 2002-fixed baseline}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}llrccccccc@{}}
+\toprule
+ & & & \multicolumn{6}{c}{Instrument combo} \\
+\cmidrule(l{2pt}r{2pt}){4-9}
+Alignment & Weighting & Exposure & M & G & P & M+G & M+P & M+G+P \\
+\midrule
+\multirow{4}{*}{Coalition}
+  & \multirow{2}{*}{Emp.-weighted}
+    & Binary & 0.6 & 4.8 & 1.4 & 2.8 & 1.4 & 2.4 \\
+  & & Pooled  & 0.4 & 2.3 & 0.0 & 1.3 & 0.2 & 0.9 \\
+  & \multirow{2}{*}{Unweighted}
+    & Binary & 1.4 & 0.5 & 1.6 & 1.1 & 1.2 & 1.4 \\
+  & & Pooled  & 3.0 & 0.0 & 0.9 & 1.5 & 1.8 & 1.2 \\
+\addlinespace[5pt]
+\multirow{4}{*}{Party}
+  & \multirow{2}{*}{Emp.-weighted}
+    & Binary & 0.9 & 0.8 & 1.0 & 0.8 & 1.1 & 0.9 \\
+  & & Pooled  & 0.1 & 0.7 & 1.4 & 0.4 & 0.7 & 0.5 \\
+  & \multirow{2}{*}{Unweighted}
+    & Binary & 4.5 & 0.7 & 1.1 & 2.6 & 3.2 & 2.3 \\
+  & & Pooled  & 1.7 & 0.0 & 0.1 & 0.9 & 1.0 & 0.6 \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize No spec reaches $F=10$. Firm + muni$\times$year FE. SEs clustered by firm + municipality.}
+\end{frame}
+
+\begin{frame}[t]{$F$-Statistics: BNDES Intensive --- $\log(\text{BNDES})$}
+\framesubtitle{Panel B: Cycle-specific baseline}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}llrccccccc@{}}
+\toprule
+ & & & \multicolumn{6}{c}{Instrument combo} \\
+\cmidrule(l{2pt}r{2pt}){4-9}
+Alignment & Weighting & Exposure & M & G & P & M+G & M+P & M+G+P \\
+\midrule
+\multirow{4}{*}{Coalition}
+  & \multirow{2}{*}{Emp.-weighted}
+    & Binary & 2.0 & 0.0 & 0.1 & 1.0 & 1.1 & 0.7 \\
+  & & Pooled  & 0.0 & 1.2 & 0.2 & 0.6 & 0.1 & 0.5 \\
+  & \multirow{2}{*}{Unweighted}
+    & Binary & 0.7 & 0.0 & 4.7 & 0.4 & 2.4 & 2.1 \\
+  & & Pooled  & 3.3 & 2.2 & 6.0 & 2.6 & 4.1 & 3.0 \\
+\addlinespace[5pt]
+\multirow{4}{*}{Party}
+  & \multirow{2}{*}{Emp.-weighted}
+    & Binary & 1.8 & 0.1 & 0.5 & 1.0 & 1.3 & 1.0 \\
+  & & Pooled  & 1.2 & 0.1 & 0.5 & 1.1 & 0.9 & 1.0 \\
+  & \multirow{2}{*}{Unweighted}
+    & Binary & 5.4 & 0.1 & 0.3 & 2.7 & 2.7 & 1.8 \\
+  & & Pooled  & 3.6 & 3.8 & 4.4 & 3.4 & 3.9 & 3.4 \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize No spec reaches $F=10$. Firm + muni$\times$year FE. SEs clustered by firm + municipality.}
+\end{frame}
+
+% ===========================================================================
+% F-STAT GRID: EMPLOYMENT LOG
+% ===========================================================================
+
+\begin{frame}[t]{$F$-Statistics: Employment Log}
+\framesubtitle{Panel A: 2002-fixed baseline}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}llrccccccc@{}}
+\toprule
+ & & & \multicolumn{6}{c}{Instrument combo} \\
+\cmidrule(l{2pt}r{2pt}){4-9}
+Alignment & Weighting & Exposure & M & G & P & M+G & M+P & M+G+P \\
+\midrule
+\multirow{4}{*}{Coalition}
+  & \multirow{2}{*}{Emp.-weighted}
+    & Binary & 1.8 & 0.1 & 0.7 & 1.4 & 1.1 & 1.0 \\
+  & & Pooled  & 0.0 & 2.0 & 0.9 & 1.0 & 0.7 & 1.8 \\
+  & \multirow{2}{*}{Unweighted}
+    & Binary & \fpass{40.8} & \fpass{50.6} & \fpass{178.4} & \fpass{47.5} & \fpass{87.6} & \fpass{68.3} \\
+  & & Pooled  & \fpass{41.6} & \fpass{141.0} & \fpass{264.8} & \fpass{77.8} & \fpass{141.8} & \fpass{120.1} \\
+\addlinespace[5pt]
+\multirow{4}{*}{Party}
+  & \multirow{2}{*}{Emp.-weighted}
+    & Binary & 0.0 & 0.1 & 2.5 & 0.0 & 1.2 & 0.9 \\
+  & & Pooled  & 0.0 & 0.1 & 4.7 & 0.0 & 6.4 & 4.3 \\
+  & \multirow{2}{*}{Unweighted}
+    & Binary & 1.3 & 3.1 & 6.5 & 5.4 & 3.2 & 7.7 \\
+  & & Pooled  & 1.8 & \fpass{17.0} & 3.2 & \fpass{10.9} & 2.6 & 7.9 \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize \colorbox{pass}{\textbf{Shaded}} = $F>10$. \textcolor{alertred}{Reduced form, not first stage.} Firm + muni$\times$year FE.}
+\end{frame}
+
+\begin{frame}[t]{$F$-Statistics: Employment Log}
+\framesubtitle{Panel B: Cycle-specific baseline}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}llrccccccc@{}}
+\toprule
+ & & & \multicolumn{6}{c}{Instrument combo} \\
+\cmidrule(l{2pt}r{2pt}){4-9}
+Alignment & Weighting & Exposure & M & G & P & M+G & M+P & M+G+P \\
+\midrule
+\multirow{4}{*}{Coalition}
+  & \multirow{2}{*}{Emp.-weighted}
+    & Binary & 3.1 & 0.0 & 0.6 & 2.1 & 1.7 & 1.4 \\
+  & & Pooled  & 0.4 & 2.0 & 1.3 & 1.2 & 0.8 & 0.9 \\
+  & \multirow{2}{*}{Unweighted}
+    & Binary & \fpass{10.5} & 0.2 & 1.7 & 7.8 & \fpass{19.7} & \fpass{13.2} \\
+  & & Pooled  & \fpass{188.5} & \fpass{87.6} & \fpass{27.2} & \fpass{103.8} & \fpass{94.0} & \fpass{70.8} \\
+\addlinespace[5pt]
+\multirow{4}{*}{Party}
+  & \multirow{2}{*}{Emp.-weighted}
+    & Binary & 0.5 & 3.4 & 1.7 & 6.0 & 1.2 & 5.2 \\
+  & & Pooled  & 5.4 & 0.4 & 0.4 & 3.3 & 3.4 & 2.5 \\
+  & \multirow{2}{*}{Unweighted}
+    & Binary & \fpass{33.9} & 0.6 & 0.1 & \fpass{17.5} & \fpass{17.1} & \fpass{12.0} \\
+  & & Pooled  & \fpass{130.2} & \fpass{24.9} & \fpass{35.2} & \fpass{78.9} & \fpass{92.5} & \fpass{62.9} \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize \colorbox{pass}{\textbf{Shaded}} = $F>10$. \textcolor{alertred}{Reduced form, not first stage.} Firm + muni$\times$year FE.}
+\end{frame}
+
+% ===========================================================================
+% F-STAT GRID: EMPLOYMENT SHARE
+% ===========================================================================
+
+\begin{frame}[t]{$F$-Statistics: Employment Share}
+\framesubtitle{Panel A: 2002-fixed baseline}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}llrccccccc@{}}
+\toprule
+ & & & \multicolumn{6}{c}{Instrument combo} \\
+\cmidrule(l{2pt}r{2pt}){4-9}
+Alignment & Weighting & Exposure & M & G & P & M+G & M+P & M+G+P \\
+\midrule
+\multirow{4}{*}{Coalition}
+  & \multirow{2}{*}{Emp.-weighted}
+    & Binary & 1.0 & 1.9 & 1.8 & 6.1 & 3.2 & 4.0 \\
+  & & Pooled  & 0.0 & \fpass{28.0} & \fpass{44.0} & \fpass{14.4} & \fpass{22.2} & \fpass{15.5} \\
+  & \multirow{2}{*}{Unweighted}
+    & Binary & \fpass{11.1} & 8.4 & 2.3 & 7.5 & 5.6 & 5.0 \\
+  & & Pooled  & \fpass{25.5} & \fpass{35.2} & \fpass{33.8} & \fpass{20.4} & \fpass{25.5} & \fpass{19.2} \\
+\addlinespace[5pt]
+\multirow{4}{*}{Party}
+  & \multirow{2}{*}{Emp.-weighted}
+    & Binary & 0.0 & 1.8 & 1.9 & 1.0 & 0.9 & 1.6 \\
+  & & Pooled  & 1.1 & 1.5 & 7.3 & 2.3 & 4.2 & 3.5 \\
+  & \multirow{2}{*}{Unweighted}
+    & Binary & 8.0 & \fpass{13.6} & 2.7 & 9.5 & 4.6 & 6.4 \\
+  & & Pooled  & 8.6 & \fpass{18.3} & \fpass{52.1} & \fpass{11.7} & \fpass{28.7} & \fpass{23.1} \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize \colorbox{pass}{\textbf{Shaded}} = $F>10$. \textcolor{alertred}{Reduced form, not first stage.} Firm + muni$\times$year FE.}
+\end{frame}
+
+\begin{frame}[t]{$F$-Statistics: Employment Share}
+\framesubtitle{Panel B: Cycle-specific baseline}
+\begin{center}
+\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.05}
+\begin{tabular}{@{}llrccccccc@{}}
+\toprule
+ & & & \multicolumn{6}{c}{Instrument combo} \\
+\cmidrule(l{2pt}r{2pt}){4-9}
+Alignment & Weighting & Exposure & M & G & P & M+G & M+P & M+G+P \\
+\midrule
+\multirow{4}{*}{Coalition}
+  & \multirow{2}{*}{Emp.-weighted}
+    & Binary & 1.0 & 2.4 & 3.2 & 1.8 & 4.5 & 3.5 \\
+  & & Pooled  & 0.7 & \fpass{13.2} & \fpass{38.8} & 7.2 & \fpass{25.4} & \fpass{16.8} \\
+  & \multirow{2}{*}{Unweighted}
+    & Binary & \fpass{97.1} & \fpass{70.4} & \fpass{26.0} & \fpass{54.2} & \fpass{49.5} & \fpass{36.3} \\
+  & & Pooled  & \fpass{222.7} & \fpass{227.3} & \fpass{176.0} & \fpass{152.0} & \fpass{136.0} & \fpass{109.1} \\
+\addlinespace[5pt]
+\multirow{4}{*}{Party}
+  & \multirow{2}{*}{Emp.-weighted}
+    & Binary & 3.0 & \fpass{22.4} & 1.8 & \fpass{11.7} & 3.2 & 3.7 \\
+  & & Pooled  & 3.5 & \fpass{19.2} & 6.1 & 9.9 & 4.9 & 8.2 \\
+  & \multirow{2}{*}{Unweighted}
+    & Binary & \fpass{42.8} & \fpass{39.2} & 6.1 & \fpass{33.9} & \fpass{21.7} & \fpass{25.4} \\
+  & & Pooled  & \fpass{56.3} & \fpass{82.8} & \fpass{19.1} & \fpass{53.4} & \fpass{32.4} & \fpass{36.0} \\
+\bottomrule
+\end{tabular}
+\end{center}
+{\scriptsize \colorbox{pass}{\textbf{Shaded}} = $F>10$. \textcolor{alertred}{Reduced form, not first stage.} Firm + muni$\times$year FE.}
+\end{frame}
+
+% ===========================================================================
+% OBSERVATIONS
+% ===========================================================================
+
+\begin{frame}[c]{Observations}
+\begin{columns}[t]
+\column{0.48\textwidth}
+\textbf{BNDES outcomes}
+\begin{itemize}
+  \item \textbf{Intensive margin: no strong instruments.}
+    Max $F \approx 6$ across all 32 specs.
+  \item \textbf{Extensive margin: three viable families.}
+    \begin{itemize}\small
+      \item Coal $\cdot$ Unwt $\cdot$ Pooled (both baselines)
+      \item Coal $\cdot$ Unwt $\cdot$ Binary (M+P and M+G+P only)
+      \item Party $\cdot$ Unwt $\cdot$ Pooled (cycle-specific only)
+    \end{itemize}
+  \item \textbf{Emp.-weighted is consistently weak}
+    across all outcomes and baselines.
+\end{itemize}
+
+\column{0.48\textwidth}
+\textbf{Employment outcomes (reduced form)}
+\begin{itemize}
+  \item Very large $F$ (up to 265) for Coal $\cdot$ Unwt specs.
+  \item \textcolor{alertred}{$F \gg 10$} may indicate alignment affects employment
+    through channels other than BNDES,
+    a potential exclusion restriction concern.
+  \item Party specs with cycle-specific weights pass $F>10$
+    for employment share but not for BNDES outcomes.
+\end{itemize}
+\end{columns}
+\end{frame}
+
+% ===========================================================================
+% APPENDIX
+% ===========================================================================
+
+\appendix
+
+\begin{frame}
+\begin{center}
+{\Large \textbf{Appendix}}\\[8pt]
+{\normalsize Full regression tables for all specs with $F>10$ in at least one instrument column}
+\end{center}
+\end{frame}
+
+\begin{frame}[c]{Appendix: specs included ($n = 26$)}
+\begin{columns}[t]
+\column{0.33\textwidth}
+\textbf{BNDES Extensive} (7)
+{\footnotesize\begin{itemize}
+  \item Coal $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Bin
+  \item Coal $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Pool
+  \item Coal $\cdot$ Cyc $\cdot$ Ew $\cdot$ Bin
+  \item Coal $\cdot$ Cyc $\cdot$ Ew $\cdot$ Pool
+  \item Coal $\cdot$ Cyc $\cdot$ Uw $\cdot$ Bin
+  \item Coal $\cdot$ Cyc $\cdot$ Uw $\cdot$ Pool
+  \item Party $\cdot$ Cyc $\cdot$ Uw $\cdot$ Pool
+\end{itemize}}
+
+\column{0.33\textwidth}
+\textbf{Employment Log} (7)
+{\footnotesize\begin{itemize}
+  \item Coal $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Bin
+  \item Coal $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Pool
+  \item Coal $\cdot$ Cyc $\cdot$ Uw $\cdot$ Bin
+  \item Coal $\cdot$ Cyc $\cdot$ Uw $\cdot$ Pool
+  \item Party $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Pool
+  \item Party $\cdot$ Cyc $\cdot$ Uw $\cdot$ Bin
+  \item Party $\cdot$ Cyc $\cdot$ Uw $\cdot$ Pool
+\end{itemize}}
+
+\column{0.34\textwidth}
+\textbf{Employment Share} (12)
+{\footnotesize\begin{itemize}
+  \item Coal $\cdot$ 2002fx $\cdot$ Ew $\cdot$ Pool
+  \item Coal $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Bin
+  \item Coal $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Pool
+  \item Coal $\cdot$ Cyc $\cdot$ Ew $\cdot$ Pool
+  \item Coal $\cdot$ Cyc $\cdot$ Uw $\cdot$ Bin
+  \item Coal $\cdot$ Cyc $\cdot$ Uw $\cdot$ Pool
+  \item Party $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Bin
+  \item Party $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Pool
+  \item Party $\cdot$ Cyc $\cdot$ Ew $\cdot$ Bin
+  \item Party $\cdot$ Cyc $\cdot$ Ew $\cdot$ Pool
+  \item Party $\cdot$ Cyc $\cdot$ Uw $\cdot$ Bin
+  \item Party $\cdot$ Cyc $\cdot$ Uw $\cdot$ Pool
+\end{itemize}}
+\end{columns}
+\vspace{4pt}
+{\scriptsize Ew = emp.-weighted, Uw = unweighted, Bin = binary, Pool = pooled count, Cyc = cycle-specific, 2002fx = 2002-fixed.}
+\end{frame}
+
+% ---- BNDES Extensive (7 tables) ----
+
+\begin{frame}{[App] BNDES Extensive --- Coal $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Binary}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__bndes_extensive__coalition__2002_fixed__unweighted__all_firms__binary.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] BNDES Extensive --- Coal $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Pooled}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__bndes_extensive__coalition__2002_fixed__unweighted__all_firms__pooled_count.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] BNDES Extensive --- Coal $\cdot$ Cyc $\cdot$ Ew $\cdot$ Binary}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__bndes_extensive__coalition__cycle_specific__emp_weighted__all_firms__binary.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] BNDES Extensive --- Coal $\cdot$ Cyc $\cdot$ Ew $\cdot$ Pooled}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__bndes_extensive__coalition__cycle_specific__emp_weighted__all_firms__pooled_count.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] BNDES Extensive --- Coal $\cdot$ Cyc $\cdot$ Uw $\cdot$ Binary}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__bndes_extensive__coalition__cycle_specific__unweighted__all_firms__binary.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] BNDES Extensive --- Coal $\cdot$ Cyc $\cdot$ Uw $\cdot$ Pooled}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__bndes_extensive__coalition__cycle_specific__unweighted__all_firms__pooled_count.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] BNDES Extensive --- Party $\cdot$ Cyc $\cdot$ Uw $\cdot$ Pooled}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__bndes_extensive__party__cycle_specific__unweighted__all_firms__pooled_count.tex}
+\end{center}
+\end{frame}
+
+% ---- Employment Log (7 tables) ----
+
+\begin{frame}{[App] Employment Log --- Coal $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Binary}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_log__coalition__2002_fixed__unweighted__all_firms__binary.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Log --- Coal $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Pooled}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_log__coalition__2002_fixed__unweighted__all_firms__pooled_count.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Log --- Coal $\cdot$ Cyc $\cdot$ Uw $\cdot$ Binary}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_log__coalition__cycle_specific__unweighted__all_firms__binary.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Log --- Coal $\cdot$ Cyc $\cdot$ Uw $\cdot$ Pooled}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_log__coalition__cycle_specific__unweighted__all_firms__pooled_count.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Log --- Party $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Pooled}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_log__party__2002_fixed__unweighted__all_firms__pooled_count.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Log --- Party $\cdot$ Cyc $\cdot$ Uw $\cdot$ Binary}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_log__party__cycle_specific__unweighted__all_firms__binary.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Log --- Party $\cdot$ Cyc $\cdot$ Uw $\cdot$ Pooled}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_log__party__cycle_specific__unweighted__all_firms__pooled_count.tex}
+\end{center}
+\end{frame}
+
+% ---- Employment Share (12 tables) ----
+
+\begin{frame}{[App] Employment Share --- Coal $\cdot$ 2002fx $\cdot$ Ew $\cdot$ Pooled}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_share__coalition__2002_fixed__emp_weighted__all_firms__pooled_count.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Share --- Coal $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Binary}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_share__coalition__2002_fixed__unweighted__all_firms__binary.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Share --- Coal $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Pooled}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_share__coalition__2002_fixed__unweighted__all_firms__pooled_count.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Share --- Coal $\cdot$ Cyc $\cdot$ Ew $\cdot$ Pooled}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_share__coalition__cycle_specific__emp_weighted__all_firms__pooled_count.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Share --- Coal $\cdot$ Cyc $\cdot$ Uw $\cdot$ Binary}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_share__coalition__cycle_specific__unweighted__all_firms__binary.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Share --- Coal $\cdot$ Cyc $\cdot$ Uw $\cdot$ Pooled}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_share__coalition__cycle_specific__unweighted__all_firms__pooled_count.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Share --- Party $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Binary}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_share__party__2002_fixed__unweighted__all_firms__binary.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Share --- Party $\cdot$ 2002fx $\cdot$ Uw $\cdot$ Pooled}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_share__party__2002_fixed__unweighted__all_firms__pooled_count.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Share --- Party $\cdot$ Cyc $\cdot$ Ew $\cdot$ Binary}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_share__party__cycle_specific__emp_weighted__all_firms__binary.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Share --- Party $\cdot$ Cyc $\cdot$ Ew $\cdot$ Pooled}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_share__party__cycle_specific__emp_weighted__all_firms__pooled_count.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Share --- Party $\cdot$ Cyc $\cdot$ Uw $\cdot$ Binary}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_share__party__cycle_specific__unweighted__all_firms__binary.tex}
+\end{center}
+\end{frame}
+
+\begin{frame}{[App] Employment Share --- Party $\cdot$ Cyc $\cdot$ Uw $\cdot$ Pooled}
+\begin{center}\footnotesize
+\input{\tabledir/firm__main__levels__employment_share__party__cycle_specific__unweighted__all_firms__pooled_count.tex}
+\end{center}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,27 @@
+\sbox0{%
+\begin{tabular}[t]{lcccccc}
+\toprule
+\multicolumn{1}{c}{\textbf{ }} & \multicolumn{6}{c}{\textbf{Dep.~var: $H^{\text{pre}}_{jmt}$}} \\
+\cmidrule(l{3pt}r{3pt}){2-7}
+  & M & G & P & M+G & M+P & M+G+P\\
+\midrule
+$\bar{\widetilde{FA}}^{\text{mayor}}_{\text{party}}$ & -0.000 &  &  & -0.000 & 0.000 & -0.000\\
+  & (0.004) &  &  & (0.005) & (0.004) & (0.005)\\
+$\bar{\widetilde{FA}}^{\text{gov}}_{\text{party}}$ &  & -0.000 &  & -0.000 &  & 0.003\\
+  &  & (0.008) &  & (0.008) &  & (0.007)\\
+$\bar{\widetilde{FA}}^{\text{pres}}_{\text{party}}$ &  &  & -0.004 &  & -0.004 & -0.005\\
+  &  &  & (0.006) &  & (0.006) & (0.005)\\
+\midrule
+$F$-statistic & 0.0 & 0.0 & 0.5 & 0.0 & 0.3 & 0.4\\
+Observations & 482,395 & 482,395 & 482,395 & 482,395 & 482,395 & 482,395\\
+$R^2$ & 0.446 & 0.446 & 0.446 & 0.446 & 0.446 & 0.446\\
+\bottomrule
+\end{tabular}
+}%
+\ifdim\wd0>\linewidth
+  \resizebox{\linewidth}{!}{\usebox0}%
+  \par\vspace{3pt}\parbox{\linewidth}{\raggedright\scriptsize Muni $\times$ sector + muni $\times$ year FE. Party alignment, cycle-specific. Binary baseline exposure. SEs clustered by muni + sector in parentheses. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\else
+  \usebox0%
+  \par\vspace{3pt}\parbox{\wd0}{\raggedright\scriptsize Muni $\times$ sector + muni $\times$ year FE. Party alignment, cycle-specific. Binary baseline exposure. SEs clustered by muni + sector in parentheses. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\fi

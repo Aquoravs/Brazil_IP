@@ -1,0 +1,28 @@
+\sbox0{%
+\begin{tabular}[t]{lcccccc}
+\toprule
+\multicolumn{1}{c}{\textbf{ }} & \multicolumn{6}{c}{\textbf{Dep.~var: $\text{BNDES share}_{jmt}$}} \\
+\cmidrule(l{3pt}r{3pt}){2-7}
+  & M & G & P & M+G & M+P & M+G+P\\
+\midrule
+$\overline{FA}^{\text{mayor}}_{\text{party}}$ & 0.016 &  &  & 0.020* & 0.019* & 0.020*\\
+  & (0.010) &  &  & (0.009) & (0.009) & (0.009)\\
+$\overline{FA}^{\text{gov}}_{\text{party}}$ &  & -0.002 &  & -0.004 &  & -0.003\\
+  &  & (0.004) &  & (0.007) &  & (0.006)\\
+$\overline{FA}^{\text{pres}}_{\text{party}}$ &  &  & -0.028 &  & -0.031 & -0.031\\
+  &  &  & (0.026) &  & (0.030) & (0.030)\\
+\midrule
+Exposure Control & Yes & Yes & Yes & Yes & Yes & Yes\\
+$F$-statistic & 2.7 & 0.2 & 1.1 & 2.3 & 2.4 & 1.6\\
+Observations & 105,796 & 95,606 & 95,606 & 91,229 & 91,229 & 91,229\\
+$R^2$ & 0.585 & 0.594 & 0.594 & 0.591 & 0.591 & 0.591\\
+\bottomrule
+\end{tabular}
+}%
+\ifdim\wd0>\linewidth
+  \resizebox{\linewidth}{!}{\usebox0}%
+  \par\vspace{3pt}\parbox{\linewidth}{\raggedright\scriptsize Muni $\times$ sector + sector $\times$ year FE. Party alignment. Cycle-specific baseline. Pooled-count exposure. Owner-count aggregation. WLS uses number of firms in the cell (N_pre). Sample: bottom three quartiles by mean RAIS employment (2002--2017). Exposure controls interacted with year. SEs clustered by muni + sector group in parentheses. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\else
+  \usebox0%
+  \par\vspace{3pt}\parbox{\wd0}{\raggedright\scriptsize Muni $\times$ sector + sector $\times$ year FE. Party alignment. Cycle-specific baseline. Pooled-count exposure. Owner-count aggregation. WLS uses number of firms in the cell (N_pre). Sample: bottom three quartiles by mean RAIS employment (2002--2017). Exposure controls interacted with year. SEs clustered by muni + sector group in parentheses. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$.}
+\fi

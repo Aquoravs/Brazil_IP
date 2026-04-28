@@ -67,3 +67,12 @@ data/processed/
 
 # R scripts archive
 scripts/R/_archive/
+
+# Temporary script outputs
+tmp/
+
+# LaTeX section build artifacts
+paper/sections/build/
+
+# kableExtra HTML dependencies (generated, not source)
+paper/tables/**/lib*/
