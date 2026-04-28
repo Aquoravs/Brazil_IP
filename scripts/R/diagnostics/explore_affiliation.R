@@ -9,7 +9,7 @@
 #   1. output/rais_bndes_reconstructed.fst  (firm x muni x year)
 #   2. raw/david_ra/owner_aff_firm_year_party_2002_2019.parquet  (firm x year x party)
 #
-# See: docs/brainstorms/2026-03-15-affiliation-data-diagnostics-brainstorm.md
+# See: docs/archive/brainstorms/2026-03-15-affiliation-data-diagnostics-brainstorm.md
 # ==============================================================================
 
 # Bootstrap using the standard pattern (auto-discovers project root)

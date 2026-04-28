@@ -108,7 +108,7 @@ Main LaTeX manuscript. `main.tex` is the source of truth.
 | Directory / File | Contents |
 |-----------------|----------|
 | `main.tex` | Primary paper file |
-| `sections/` | LaTeX section files: `regs.tex`, `first_stage.tex`, `review_aggregation.tex` |
+| `regs.tex` | Current draft of the Specifications section (firm + sector first stages, aggregation derivation, multi-municipality robustness). Standalone document; **not yet `\input{}`-ed by `main.tex`** |
 | `figures/` | Generated figures (PDF, PNG) |
 | `tables/` | Generated regression tables, organized by level: `firm/`, `sector/`, `sector_grouped/`, `agg_firm/` |
 | `meetings/` | Beamer presentations for advisor meetings |
@@ -123,22 +123,15 @@ Beamer `.tex` source files and compiled PDFs for all meeting presentations.
 
 ### `docs/`
 
-Design documents, reference materials, and research notes.
+Design documents, reference materials, and research notes. See [`docs/README.md`](docs/README.md) for the index.
 
 | File / Directory | Contents |
 |-----------------|----------|
-| `old_CLAUDE_reference.md` | Full variable dictionary and legacy project documentation |
-| `doubts.md` | Open design decisions and assumptions |
-| `shift_share.md` | Shift-share instrument construction notes |
-| `master_roadmap.md` | Project roadmap |
-| `first_stage_review.md` | First stage review notes |
-| `conditions_C3_C5_C6_explained.tex` (`.pdf`) | Explanation of aggregation conditions C3, C5, C6 |
-| `proposition2_failure_note.tex` (`.pdf`) | Note on Proposition 2 failure |
-| `brainstorms/` | Research brainstorming documents |
-| `solutions/` | Past solutions and institutional knowledge |
-| `supporting_papers/` | Reference papers (PDF) |
-| `supporting_slides/` | Reference slides (PDF) |
+| `research_state.md` | Current research state — design decisions, taxonomies, spec engine dimensions, findings, AR-test focus |
+| `doubts.md` | 9 substantive design issues with their decisions |
+| `methodology_notes/` | Formal/technical reference docs: aggregation review, Proposition 2 verification, C3/C5/C6 explainer |
 | `meetings/` | Meeting notes |
+| `archive/` | Superseded material (master_roadmap, old CLAUDE reference, shift_share notes, first_stage review, brainstorms) |
 
 ### `logs/`
 
