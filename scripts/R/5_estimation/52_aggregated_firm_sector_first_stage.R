@@ -18,7 +18,7 @@
 #   --outcome=VAL[,VAL]              bndes_extensive, bndes_share, log_employment, employment_share
 #   --exposure=VAL[,VAL]             pooled_count, binary
 #   --aggregation=VAL[,VAL]          owner_count, equal_firm, employment
-#   --regression-weight=VAL[,VAL]    unweighted, emp_weighted, emp_share_weighted
+#   --regression-weight=VAL[,VAL]    unweighted, emp_weighted, emp_share_weighted, n_firms_weighted
 #   --sector-var=VAL[,VAL]           cnae_section, custom_sector, bndes_sector, size_bin,
 #                                    cnae_size_bin, sector_group_size_bin
 #   --baseline=VAL[,VAL]             cycle_specific, 2002_fixed
@@ -99,9 +99,10 @@ source(normalizePath(bootstrap_file, winslash = "/", mustWork = TRUE))
 bootstrap_politicsregs()
 
 setDTthreads(1L)
-fixest::setFixest_nthreads(4L)
+fixest::setFixest_nthreads(10L)
 
 source(politicsregs_path("_utils", "beamer_tables.R"))
+source(politicsregs_path("_utils", "load_firm_panel.R"))
 
 # =============================================================================
 # Spec Engine Configuration
@@ -111,9 +112,9 @@ DIMENSION_OPTIONS <- list(
   outcome          = c("bndes_extensive", "bndes_share", "log_employment", "employment_share"),
   exposure         = c("pooled_count", "binary"),
   aggregation      = c("owner_count", "equal_firm", "employment"),
-  regression_weight = c("unweighted", "emp_weighted", "emp_share_weighted"),
+  regression_weight = c("unweighted", "emp_weighted", "emp_share_weighted", "n_firms_weighted"),
   sector_var       = c("cnae_section", "custom_sector", "bndes_sector", "size_bin",
-                       "cnae_size_bin", "sector_group_size_bin"),
+                       "cnae_size_bin", "sector_group_size_bin", "bndes_sector_size_bin"),
   baseline         = c("cycle_specific", "2002_fixed"),
   alignment        = c("coalition", "party"),
   fe               = c("mxj_jxt", "mxj_mxt"),
@@ -140,6 +141,7 @@ SPEC_CATALOG <- list(
   baseline             = list(),
   emp_weighted         = list(aggregation = "employment", regression_weight = "emp_weighted"),
   emp_share_weighted   = list(regression_weight = "emp_share_weighted"),
+  n_firms_weighted     = list(regression_weight = "n_firms_weighted"),
   equal_firm           = list(aggregation = "equal_firm"),
   party                = list(alignment = "party"),
   fixed_baseline       = list(baseline = "2002_fixed"),
@@ -153,7 +155,8 @@ SPEC_CATALOG <- list(
   top_q4_sample        = list(muni_sample = "top_q4"),
   bottom_3q_sample     = list(muni_sample = "bottom_3q"),
   size_bin_battery     = list(sector_var = c("cnae_section", "custom_sector",
-                                             "cnae_size_bin", "sector_group_size_bin"))
+                                             "cnae_size_bin", "sector_group_size_bin",
+                                             "bndes_sector_size_bin"))
 )
 
 COMBOS <- c("M", "G", "P", "M+G", "M+P", "M+G+P")
@@ -505,6 +508,7 @@ get_sector_label <- function(sector_var) {
     size_bin              = "size bin",
     cnae_size_bin         = "CNAE section $\\times$ firm-size tercile",
     sector_group_size_bin = "sector group $\\times$ firm-size tercile",
+    bndes_sector_size_bin = "BNDES sector $\\times$ firm-size tercile",
     stop("Unknown sector_var: ", sector_var)
   )
 }
@@ -529,7 +533,8 @@ build_table_notes <- function(cfg) {
     cfg$regression_weight,
     unweighted         = "Unweighted regressions.",
     emp_weighted       = "WLS uses pre-election cell employment.",
-    emp_share_weighted = "WLS uses sector's share of pre-election municipality employment."
+    emp_share_weighted = "WLS uses sector's share of pre-election municipality employment.",
+    n_firms_weighted   = "WLS uses number of firms in the cell (N_pre)."
   )
   family_label <- if (!is.null(cfg$family) && identical(cfg$family, "interaction_mqemp")) {
     "Instruments interacted with top-quartile municipality employment dummy."
@@ -676,7 +681,14 @@ run_six_combos <- function(cfg, agg_dt, sector_col, year_ref) {
 
   # Base weight formula (NULL for unweighted / emp_share_weighted which is per-combo)
   use_emp_share_wt <- identical(cfg$regression_weight, "emp_share_weighted")
-  wt_formula <- if (identical(cfg$regression_weight, "emp_weighted")) ~emp_pre else NULL
+  wt_formula <- if (identical(cfg$regression_weight, "emp_weighted")) {
+    ~emp_pre
+  } else if (identical(cfg$regression_weight, "n_firms_weighted")) {
+    # Precision-weighting: cells with more firms carry more information.
+    ~N_pre
+  } else {
+    NULL
+  }
 
   family <- if (is.null(cfg$family)) "main" else cfg$family
 
@@ -892,7 +904,17 @@ load_sector_size_bin_mappings <- function() {
   group_map[, sector_group_size_bin := as.character(sector_group_size_bin)]
   group_map <- unique(group_map[, .(firm_id, election_cycle, sector_group_size_bin)])
 
-  list(cnae = cnae_map, group = group_map)
+  bndes_map <- load_mapping_qs2(
+    make_output_path("sector_size_bin_bndes_mapping.qs2"),
+    required_cols = c("firm_id", "election_cycle", "bndes_sector_size_bin"),
+    missing_msg = "sector_size_bin_bndes_mapping.qs2 not found. Run script 30d first."
+  )
+  bndes_map[, firm_id               := as.integer(firm_id)]
+  bndes_map[, election_cycle        := as.integer(election_cycle)]
+  bndes_map[, bndes_sector_size_bin := as.character(bndes_sector_size_bin)]
+  bndes_map <- unique(bndes_map[, .(firm_id, election_cycle, bndes_sector_size_bin)])
+
+  list(cnae = cnae_map, group = group_map, bndes = bndes_map)
 }
 
 load_baseline_exposure_aux <- function() {
@@ -931,46 +953,40 @@ load_baseline_exposure_aux <- function() {
 }
 
 load_panel_bundle <- function(baseline, need_bndes_amount = FALSE) {
-  panel_stub <- if (identical(baseline, "2002_fixed")) "firm_panel_for_regs_2002_fixed" else "firm_panel_for_regs"
-  panel_fst <- make_output_path(paste0(panel_stub, ".fst"))
-  panel_qs2 <- make_output_path(paste0(panel_stub, ".qs2"))
+  paths <- firm_panel_paths(baseline)
 
-  if (file.exists(panel_fst) && requireNamespace("fst", quietly = TRUE)) {
-    avail_cols <- fst::metadata_fst(panel_fst)$columnNames
-    use_fst <- TRUE
-  } else if (file.exists(panel_qs2)) {
-    tmp <- qs_read(panel_qs2)
-    avail_cols <- names(tmp)
-    rm(tmp)
-    invisible(gc())
-    use_fst <- FALSE
-  } else {
+  if (!file.exists(paths$base)) {
     stop("Firm panel not found for baseline '", baseline, "'. Run script 42 first.")
   }
 
-  fa_cols_all <- grep("^FA_", avail_cols, value = TRUE)
+  # Enumerate available FA columns from the sparse instruments file.
+  avail_inst_cols <- if (file.exists(paths$sparse) && requireNamespace("fst", quietly = TRUE)) {
+    fst::metadata_fst(paths$sparse)$columnNames
+  } else character(0)
+  fa_cols_all    <- grep("^FA_", avail_inst_cols, value = TRUE)
   fa_cols_pooled <- grep("^FA_(mayor|gov|pres)_(coalition|party)$", fa_cols_all, value = TRUE)
   fa_cols_binary <- grep("^FA_binary_(mayor|gov|pres)_(coalition|party)$", fa_cols_all, value = TRUE)
   fa_cols <- c(fa_cols_pooled, fa_cols_binary)
 
-  # Optional columns from Unit 2 (emp-share weights, top-quartile flag)
-  optional_cols <- c("emp_share_muni_pre_mayor", "emp_share_muni_pre_gp", "top_q4_muni")
+  # Optional base columns (emp-share weights, top-quartile flag).
+  avail_base_cols <- fst::metadata_fst(paths$base)$columnNames
+  optional_cols <- intersect(
+    c("emp_share_muni_pre_mayor", "emp_share_muni_pre_gp", "top_q4_muni", "value_dis_real_2018_total"),
+    avail_base_cols
+  )
+  keep_base_cols <- intersect(
+    unique(c("firm_id", "muni_id", "year", "cnae_section",
+             "has_bndes_fmt", "n_employees", "bl_n_employees", optional_cols)),
+    avail_base_cols
+  )
 
-  keep_cols <- unique(c(
-    "firm_id", "muni_id", "year", "cnae_section",
-    "has_bndes_fmt", "n_employees", "bl_n_employees", "value_dis_real_2018_total",
-    fa_cols,
-    optional_cols
-  ))
-
-  if (use_fst) {
-    dt <- fst::read_fst(panel_fst, columns = intersect(keep_cols, avail_cols), as.data.table = TRUE)
-  } else {
-    dt <- qs_read(panel_qs2)
-    setDT(dt)
-    read_cols <- intersect(keep_cols, names(dt))
-    dt <- dt[, ..read_cols]
-  }
+  dt <- load_firm_panel(
+    baseline_type = baseline,
+    columns       = keep_base_cols,
+    instruments   = if (length(fa_cols)) fa_cols else character(0),
+    zero_fill     = TRUE,
+    as_data_table = TRUE
+  )
 
   dt[, firm_id := as.integer(firm_id)]
   dt[, muni_id := as.integer(muni_id)]
@@ -983,8 +999,7 @@ load_panel_bundle <- function(baseline, need_bndes_amount = FALSE) {
   } else {
     dt[, bl_n_employees := NA_real_]
   }
-  for (col in fa_cols) dt[, (col) := as.numeric(get(col))]
-  # Coerce optional columns when present
+  for (col in intersect(fa_cols, names(dt))) dt[, (col) := as.numeric(get(col))]
   for (col in c("emp_share_muni_pre_mayor", "emp_share_muni_pre_gp")) {
     if (col %in% names(dt)) dt[, (col) := as.numeric(get(col))]
   }
@@ -1151,6 +1166,7 @@ get_sector_col <- function(sector_var) {
     size_bin              = "size_bin_label",
     cnae_size_bin         = "cnae_size_bin",
     sector_group_size_bin = "sector_group_size_bin",
+    bndes_sector_size_bin = "bndes_sector_size_bin",
     stop("Unknown sector_var: ", sector_var)
   )
 }
@@ -1164,6 +1180,7 @@ get_table_dir_suffix <- function(sector_var) {
     size_bin              = "_size_bin",
     cnae_size_bin         = "_cnae_size_bin",
     sector_group_size_bin = "_sector_group_size_bin",
+    bndes_sector_size_bin = "_bndes_sector_size_bin",
     stop("Unknown sector_var: ", sector_var)
   )
 }
@@ -1236,6 +1253,19 @@ join_sector_classification <- function(dt, sector_var, size_bin_map = NULL,
     return(dt)
   }
 
+  if (sector_var == "bndes_sector_size_bin") {
+    if (is.null(sector_size_bin_maps) || is.null(sector_size_bin_maps$bndes)) {
+      stop("bndes_sector_size_bin crosswalk not loaded. Run script 30d first.")
+    }
+    bsb_map <- sector_size_bin_maps$bndes
+    dt[, sz_cycle := mayor_treatment_year(year)]
+    dt[bsb_map[, .(firm_id, sz_cycle = election_cycle, bndes_sector_size_bin)],
+       bndes_sector_size_bin := i.bndes_sector_size_bin,
+       on = .(firm_id, sz_cycle)]
+    dt[, sz_cycle := NULL]
+    return(dt)
+  }
+
   stop("Unknown sector_var: ", sector_var)
 }
 
@@ -1292,6 +1322,15 @@ build_supported_keys <- function(dt, sector_var, sector_col, f_pre_year_map,
     return(build_from_cycle_lookup(lookup, "sector_group_size_bin"))
   }
 
+  if (sector_var == "bndes_sector_size_bin") {
+    if (is.null(sector_size_bin_maps) || is.null(sector_size_bin_maps$bndes)) {
+      stop("bndes_sector_size_bin crosswalk not loaded. Run script 30d first.")
+    }
+    bsb <- sector_size_bin_maps$bndes
+    lookup <- unique(bsb[, .(firm_id, size_bin_cycle = election_cycle, bndes_sector_size_bin)])
+    return(build_from_cycle_lookup(lookup, "bndes_sector_size_bin"))
+  }
+
   # Panel-based sector_vars (cnae_section, custom_sector, bndes_sector)
   cell_years <- unique(dt[!is.na(get(sector_col)), .(
     firm_id, muni_id, year, sector_value = as.character(get(sector_col))
@@ -1339,7 +1378,7 @@ if (parsed_args$dry_run) {
 }
 
 size_bin_map <- if ("size_bin" %in% config_dt$sector_var) load_size_bin_mapping() else NULL
-sector_size_bin_maps <- if (any(c("cnae_size_bin", "sector_group_size_bin") %in% config_dt$sector_var)) {
+sector_size_bin_maps <- if (any(c("cnae_size_bin", "sector_group_size_bin", "bndes_sector_size_bin") %in% config_dt$sector_var)) {
   load_sector_size_bin_mappings()
 } else {
   NULL

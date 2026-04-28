@@ -53,7 +53,17 @@ Thumbs.db
 paper/quarto/*_files/
 paper/quarto/.quarto/
 
-# Output artifacts — uncomment lines below based on your preference
-# *.rds
-# output/**/*.rds
-docs/
+# Large data files (not tracked in git)
+data/raw/
+data/processed/
+*.qs2
+*.fst
+*.rds
+
+# Keep regression tables tracked
+!paper/tables/**/*.tex
+!paper/tables/**/*.md
+!paper/tables/**/*.csv
+
+# R scripts archive
+scripts/R/_archive/

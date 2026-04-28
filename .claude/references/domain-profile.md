@@ -9,8 +9,7 @@ If no field is specified, agents default to applied economics.
 
 ## Field
 
-**Primary:** [e.g., Health Economics, Labor Economics, Development, IO, Public Finance]
-**Adjacent subfields:** [e.g., Labor, Public, IO — fields whose methods and journals overlap]
+**Primary:** IO (industrial policy), Political Economy, Development
 
 ---
 
@@ -21,9 +20,7 @@ If no field is specified, agents default to applied economics.
 | Tier | Journals |
 |------|----------|
 | Top-5 | AER, Econometrica, JPE, QJE, REStud |
-| Top field | [e.g., JHE, RAND JE, AEJ:EP, AEJ:Applied] |
-| Strong field | [e.g., Health Affairs, AJHE, JPubE, JHR] |
-| Specialty | [e.g., Medical Care, Health Services Research] |
+| Top field | International Journal of Industrial Organization, Journal of Industrial Economics, RAND, Review of Industrial Organization, AEJ:Microeconomics |
 
 ---
 

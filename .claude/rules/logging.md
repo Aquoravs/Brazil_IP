@@ -1,11 +1,22 @@
 # Logging
 
-## Session Report
-Append to `SESSION_REPORT.md` at end of session or before context compression.
-**Rules:** Append only. Bullet points. Include file paths and commit hashes when available.
-Create the file if it doesn't exist: `# Session Report — [Project Name]`
+## Session Logs
 
-**Entry format:**
+Individual session logs saved to `quality_reports/session_logs/YYYY-MM-DD_description.md`.
+
+### Three Triggers (all proactive)
+
+**1. Post-Plan Log**
+After plan approval, immediately capture: goal, approach, rationale, key context.
+
+**2. Incremental Logging**
+Append 1–3 lines whenever: a design decision is made, a problem is solved, the user corrects something, or the approach changes. Do not batch.
+
+**3. End-of-Session Log**
+When wrapping up (user says goodbye, plan was implemented, or before context compression): high-level summary, quality scores, open questions, blockers.
+
+### Entry Format
+
 ```markdown
 ## YYYY-MM-DD HH:MM — [Brief Title]
 
@@ -26,7 +37,23 @@ Create the file if it doesn't exist: `# Session Report — [Project Name]`
 - Pending: [what remains]
 ```
 
+### Rules
+
+- One file per session, named by date and topic
+- Append-only within a session — never overwrite earlier entries
+- Include file paths and commit hashes when available
+- If context compression hits mid-session, the incremental entries already capture the important decisions
+
+---
+
+## Quality Reports
+
+Generated only at merge time — not at every commit or PR. Save to `quality_reports/merges/YYYY-MM-DD_[branch-name].md`.
+
+---
+
 ## Research Journal
+
 Append to `quality_reports/research_journal.md` whenever an agent completes work — writing code, drafting a section, producing a review, making an editorial decision, or transitioning between phases.
 **Rules:** Append only. One entry per agent invocation. Include phase transitions and editorial decisions.
 
