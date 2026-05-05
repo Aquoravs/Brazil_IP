@@ -17,6 +17,7 @@
 *.synctex.gz
 *.run.xml
 *-blx.bib
+*.xdv
 
 # Compiled PDFs (uncomment to track specific PDFs)
 # *.pdf
@@ -74,6 +75,8 @@ tmp/
 # LaTeX build artifacts in specific folders
 paper/sections/build/
 presentations/build/
+docs/methodology_notes/build/
+explorations/anderson_rubin/output/build/
 
 # kableExtra HTML dependencies (generated, not source)
 paper/tables/**/lib*/
