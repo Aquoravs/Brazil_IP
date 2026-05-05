@@ -26,6 +26,9 @@ This file is the **current working understanding** of the Brazil IP project. It 
 ## 1. Current focus
 
 **Policy evaluation via Anderson-Rubin (AR) test.** The previous firm-level and sector-level first-stage exploration was preparatory; it produced the spec engines, the taxonomies, and the F-stat patterns documented below, and clarified that some sector classifications might be more appropriate for the test.
+
+BNDES private loans can influence municipal GDP through two distinct channels: (1) a **composition channel** — the allocation of credit across sectors within a municipality (the channel of interest), and (2) a **volume channel** — the overall amount of credit flowing to firms in a municipality. The objective is to isolate the composition (allocation) effect by sweeping out the total volume effect. Both sets of variables are endogenous, which raises the question of how to cleanly identify the composition channel when both sector-share variables and aggregate municipality-level disbursements are endogenous. Four approaches are under consideration: pure AR (OLS on both), partial IV (instrument sector shares only), full IV (instrument both), and mixed (OLS for shares, IV for total). See blueprint A10.
+
 The relevant inferential object is the AR-style test of $H_0: \beta = 0$ ("BNDES sectoral reallocation has no GDP effect within a municipality"). The four-phase AR strategy is the active research agenda:
 
 1. **Baseline**: regress $\log(\text{GDP}_{mt})$ on instruments with muni FE + year FE (± total muni employment), clustered AR test.
@@ -58,7 +61,7 @@ Numbered for cross-reference. Source for each is the location where the decision
 | D7 | Employment weighting enters firm regression via `bl_n_employees` (pre-election baseline mean), **not** contemporaneous; redefined 2026-04-04 | script 42, 51; session log `2026-04-04_max-binary-baseline-employment` |
 | D8 | `binary_fp` baseline = `max(1(L_fp,s > 0))` over pre-election window (any-year indicator), not fraction-of-years | script 36; same session log |
 | D9 | `exposure_control` ($\sum_p w^\ell_{jmp,t}$) included in primary sector spec; tier-specific variants emitted; bounded above by 1 (pooled-count) but exposure-control-binary may exceed 1 | scripts 31/34, `regs.tex` exposure-control footnote |
-| D10 | Total BNDES not used as second-stage scale control (bad-control concern) | `docs/archive/doubts.md` Issue 9; current treatment in script 54 |
+| D10 | **How to handle total BNDES in the second stage is open (blueprint A10).** The composition channel (sector allocation) and volume channel (aggregate muni disbursements) are both endogenous. Four approaches are under consideration: (1) Pure AR — OLS on both; (2) Partial IV — instrument sector shares only; (3) Full IV — instrument both using sum of sector instruments; (4) Mixed — OLS for shares, IV for total. The earlier "do not include total BNDES" framing was too restrictive — the volume control is needed to isolate the composition channel. | `docs/archive/doubts.md` Issue 9; blueprint A10; 2026-04-30 meeting notes |
 | D11 | Multi-municipality firms (2% of firm-years, 30% of employment) handled as robustness via `is_multi_muni == 0` subsample | script 42; `regs.tex` "Multi-Municipality Firm Robustness" |
 
 ---
