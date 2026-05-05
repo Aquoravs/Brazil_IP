@@ -1,0 +1,3 @@
+margin,denom,n_bins,n_supported,max_share_within,mean_share_within,med_share_within,max_med_sigma,med_med_sigma,verdict
+standalone_S3,all,3,2,0.610861985727906,0.544234165298767,0.538208253859918,0.19403614856913,0.142579386611872,SUPPORTED
+standalone_S4,all,4,3,0.693792759990793,0.590405354721076,0.574256102954797,0.298500865880722,0.197740072147957,SUPPORTED
