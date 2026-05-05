@@ -1,0 +1,397 @@
+\documentclass[12pt]{article}
+
+% ====== Page Layout (internal-note version: single-spaced, tighter margins) ======
+\usepackage[top=2.3cm, bottom=2.3cm, left=2.1cm, right=2.1cm]{geometry}
+\usepackage{setspace}
+\singlespacing
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+% ====== Typography ======
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[T1]{fontenc}
+
+% ====== Math ======
+\usepackage{amssymb, amsmath, amsfonts, mathtools, amsthm}
+\usepackage{dsfont}
+\usepackage{bbm}
+
+% ====== Tables ======
+\usepackage{array, booktabs, makecell}
+\usepackage{tabularx}
+\usepackage[flushleft]{threeparttable}
+\usepackage{longtable}
+
+% ====== Lists, captions, color ======
+\usepackage{enumitem}
+\usepackage{caption}
+\captionsetup{font=small, labelfont=bf, justification=justified}
+\usepackage{xcolor}
+\definecolor{citationcolor}{RGB}{0, 127, 255}
+
+% ====== Hyperref + cleveref (loaded last) ======
+\usepackage[hidelinks, breaklinks, colorlinks=true,
+            linkcolor=citationcolor, citecolor=citationcolor,
+            urlcolor=citationcolor]{hyperref}
+\usepackage[nameinlink]{cleveref}
+
+% ====== Loose typography for long \texttt paths ======
+\emergencystretch=3em
+\sloppy
+
+% ====== Theorem-like environments (definitions only; this is an internal catalogue) ======
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+
+% ====== Custom macros ======
+\newcommand{\Align}{\mathrm{Align}}
+\newcommand{\ind}{\mathbf{1}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\Lij}{L}                % owner-count primitive
+\newcommand{\Eij}{N}                % employment primitive
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\title{Aggregation Catalogue:\\
+Firm to Sector to Municipality\\
+\texorpdfstring{\large}{} Weights, Margins, and Constructions in the Brazil IP Project}
+\author{}
+\date{\today}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+\noindent\textbf{Purpose.} Internal reference. This note catalogues every way the project aggregates firm-level objects (alignment shocks, employment, BNDES disbursements) into municipality-sector-level objects. For each aggregation choice it states (i) the construction, (ii) the script that builds it, (iii) the column name in the panel, and (iv) the current status (active, robustness, diagnostic, or planned). Section~\ref{sec:summary} provides a cross-reference table.
+
+\tableofcontents
+\bigskip
+
+% =====================================================================
+\section{Setup and notation}
+\label{sec:setup}
+
+\paragraph{Indices.}
+\begin{itemize}[leftmargin=2em, itemsep=2pt]
+\item $f$ --- firm (CNPJ root in RAIS).
+\item $m$ --- municipality (IBGE 7-digit code; 5{,}570 munis after 2013 boundary harmonisation).
+\item $j$ --- sector. The taxonomy of $j$ is itself a design choice: see \cref{sec:taxonomies}.
+\item $t$ --- year, in $\{2002,\dots,2017\}$.
+\item $p$ --- political party (treatment dimension; alignment is firm-owner $\times$ incumbent).
+\item $\ell$ --- political tier, $\ell \in \{\text{mayor}, \text{gov}, \text{pres}\}$.
+\end{itemize}
+
+\paragraph{Firm-level alignment object.}
+For firm $f$, party $p$, tier $\ell$, year $t$:
+\[
+  \mathrm{aff}_{fp,t} \;=\; \text{count of owners of firm $f$ affiliated to party $p$ at $t$ (RFB-TSE match)},
+\]
+\[
+  \Align^{\ell}_{fp,t} \;=\; \mathrm{aff}_{fp,t}\,\cdot\,\ind\!\left[p \text{ holds tier-$\ell$ incumbency in muni $m(f)$ in year $t$}\right].
+\]
+At the muni $\times$ party $\times$ tier $\times$ year level the aggregate is
+$\Align^{\ell}_{m p t} = \ind[p \text{ wins tier-$\ell$ in muni $m$ at $t$}]$.\footnote{The firm-level object is what enters the firm regression; the muni-level binary is what enters the shift-share. The two collapse to the same object after weighting because $\Align^{\ell}_{fp,t}$ inherits the indicator structure of $\Align^{\ell}_{m(f), p, t}$.}
+
+\paragraph{Baseline window.}
+For each treatment year $t_0$ (election year) and tier $\ell$, the baseline window is
+\[
+  W^\ell(t_0) \;=\; [\,t_0-4,\; t_0-1\,] \cap [2002, 2017].
+\]
+Windows are summed across (not averaged), so weights remain proper shares when parties enter or exit specific years; see \texttt{scripts/R/3\_instruments/33\_select\_baseline\_weights.R}, lines~134--186. The robustness variant fixes the window to $\{2002\}$ (decision~D3 in \texttt{docs/research\_state.md}~\S3).
+
+\paragraph{Primitive counts.}
+\begin{itemize}[leftmargin=2em, itemsep=2pt]
+\item $L_{fp,t}$ --- count of firm $f$'s owners affiliated to party $p$ at $t$.
+\item $L_{f,t} = \sum_p L_{fp,t}$ --- total owners of $f$ at $t$ (estimated from $\mathrm{aff}_{fp,t}/\mathrm{share\_aff}_{fp,t}$ when partial).
+\item $N_{f,m,t}$ --- $f$'s employment headcount in muni $m$ at $t$ (RAIS, monthly average).
+\end{itemize}
+All sector-level objects below are built from these three primitives.
+
+\paragraph{Pre-flight: the F0 admissibility rule.}
+Per blueprint decision~D14 (\texttt{docs/PROJECT\_BLUEPRINT.md}~\S6), an aggregation margin $j$ is \textbf{admissible} iff it is a firm-side classifier defined for \emph{every} firm in RAIS, including non-borrowers. Loan-side classifiers (\texttt{bndes\_product}, FINEM/FINAME/PSI line, etc.) are inadmissible because the baseline share $s_{m,j,t_0}$ they would induce is undefined for the non-borrower majority. \cref{sec:taxonomies} flags admissibility for each candidate.
+
+% =====================================================================
+\section{Sector taxonomies (the $j$ dimension)}
+\label{sec:taxonomies}
+
+Several admissible firm-side taxonomies exist or are planned. The current production margin is \texttt{policy\_block\_active} $\times$ S3 size bins, with \texttt{cnae\_section} $\times$ S3 as robustness (D16/D17 in \texttt{docs/PROJECT\_BLUEPRINT.md}~\S6); older sector-only margins remain useful for comparison and legacy spec engines.
+
+\small
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.21\textwidth}
+                    >{\raggedright\arraybackslash}p{0.08\textwidth}
+                    >{\raggedright\arraybackslash}p{0.26\textwidth}
+                    >{\raggedright\arraybackslash}p{0.39\textwidth}@{}}
+\toprule
+\textbf{Variable} & \textbf{Bins} & \textbf{Built by} & \textbf{Status}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Variable} & \textbf{Bins} & \textbf{Built by} & \textbf{Status}\\
+\midrule
+\endhead
+
+\texttt{cnae\_section} & 21 (A--U) & upstream RAIS-CNAE crosswalk & \textbf{ACTIVE}. Default panel taxonomy; F1 confirmed (D15). \\
+
+\texttt{custom\_sector}\newline {\small implemented as \texttt{sector\_group} in scripts 31--35/41/53} & 11 & \texttt{30\_build\_sector\_groups.R} & \textbf{ACTIVE} as robustness. Splits manufacturing 3-way; matches BNDES departments. \\
+
+\texttt{bndes\_sector}\newline {\small (was \texttt{setor\_bndes})} & 4 macros & \texttt{30b\_build\_bndes\_sector\_mapping.R} & \textbf{ACTIVE}. AR Phase~1 candidate; coarsest. \{Agropecu\'aria, Ind\'ustria, Infraestrutura, Com\'ercio e Servi\c{c}os\}. \\
+
+\texttt{policy\_block} & 4 active blocks + XX tag & \texttt{30e\_build\_policy\_block\_mapping.R} & \textbf{ACTIVE}. Hand-coded CNAE$\to$\{Agro, Ind, Infra, Serv, XX\}; downstream \texttt{--sector-var=policy\_block} scripts drop XX (K, O, T, U). F1 confirmed (D15). \\
+
+\texttt{policy\_block\_active} & 4 (Agro, Ind, Infra, Serv) & \texttt{30e\_...} (filtered) & \textbf{PRODUCTION sector dimension}. Same as \texttt{policy\_block} after dropping XX residual. F1 confirmed (D15); crossed with S3 size bins as the current primary AR production margin (D16). \\
+
+\texttt{size\_bin} & S3 or S4 absolute bins; legacy terciles & \texttt{30c\_build\_size\_bin\_mapping.R} & \textbf{ADMISSIBLE} standalone per D17, but not the preferred production margin. Current preferred S3 thresholds are MPME 0--49, Media 50--499, Grande 500+ employees; legacy script 30c used national terciles. \\
+
+\texttt{bndes\_sector\_size\_bin} & 12 (4$\times$3) & \texttt{30d\_build\_sector\_size\_bin\_mapping.R} & \textbf{ROBUSTNESS}. Tercile-within-macro. Addresses advisor comment C3. \\
+
+\texttt{policy\_block\_active} $\times$ S3 & 12 & {\small follow-on production crosswalk pending} & \textbf{PRIMARY AR production margin} per D16. Active policy blocks crossed with absolute size bins MPME/Media/Grande. \\
+
+\texttt{cnae\_section} $\times$ S3 & 51 active bins & {\small follow-on robustness wiring pending} & \textbf{SECONDARY ROBUSTNESS} per D16. CNAE sections crossed with absolute size bins; XX-style inactive sections excluded from the active treatment set. \\
+
+\bottomrule
+\end{longtable}
+\normalsize
+
+\paragraph{Margins considered but not pursued (documented for completeness).}
+The following were \emph{considered} but are not active aggregation margins:
+\begin{itemize}[leftmargin=2em, itemsep=2pt]
+\item \texttt{bndes\_product} (FINEM, FINAME, Cart\~ao, Exim, PSI line) --- inadmissible because it is loan-side and undefined for non-borrowers.
+\item \texttt{psi\_eligible} --- inadmissible because it is defined by loan purpose, not firm CNAE.
+\item Industrial-policy CNAE crosswalks (PBM-Block, Profarma-CNAE, Prosoft-CNAE) --- admissible as recodings but redundant with raw \texttt{cnae\_section}.
+\item Region/state --- available as a control, not as an aggregation margin.
+\end{itemize}
+
+\begin{remark}[Why the residual block matters]
+The 2026-05-03 CNAE coverage audit found that \texttt{XX} firms are 18.2\% of muni employment overall and 57.8\% in Q1 (smallest) munis. The denominator choice in the SSIV --- whether the share-of-sector-$j$ uses the full muni economy or only active blocks --- therefore depends on muni size. This is the F4 weight horse race (A7), currently paused while the production AR margin is wired.
+\end{remark}
+
+% =====================================================================
+\section{Instrument weights (the $w$ dimension)}
+\label{sec:weights}
+
+The shift-share instrument at the muni-sector-year level is generically
+\begin{equation}
+\label{eq:ssiv}
+Z^{\ell}_{m j t} \;=\; \sum_{p}\, w_{m j p, t_0}\,\cdot\,\Align^{\ell}_{m p t},
+\qquad
+\Delta Z^{\ell}_{m j t} \;=\; \sum_{p}\, w_{m j p, t_0}\,\cdot\,\Delta \Align^{\ell}_{m p t},
+\end{equation}
+where $w_{m j p, t_0}$ is the baseline exposure weight pooled over $W^\ell(t_0)$ (\cref{sec:setup}). Four variants of $w$ are built. They differ in what they treat as the unit of political ``access'' to sector $j$.
+
+The build pipeline is \texttt{31\_build\_sector\_exposure\_weights.R} (year-level $w_{m j p, t}$) $\to$ \texttt{33\_select\_baseline\_weights.R} (pool counts within $W^\ell(t_0)$, then divide) $\to$ \texttt{34\_build\_shift\_share\_instruments.R} (multiply by alignment shocks). The pooling step divides aggregated counts rather than averaging period-level ratios; this preserves the shares-sum-to-one property when parties enter or exit specific baseline years.
+
+\subsection{Variant a: \texttt{owner\_count}}
+Each owner is treated as one independent political channel.
+\begin{equation}
+w^{\text{own}}_{m j p, t} \;=\; \frac{L^{\text{owners}}_{m j p, t}}{L^{\text{owners}}_{m j, t}}
+\quad\text{with}\quad
+L^{\text{owners}}_{m j p, t} = \sum_{f \in (j,m)} L_{fp,t},
+\quad
+L^{\text{owners}}_{m j, t} = \sum_{f \in (j,m)} L_{f, t}.
+\end{equation}
+\textit{Column names.} Year-level: \texttt{w\_mjp\_owners} (with primitives \texttt{L\_mjp}, \texttt{L\_mj}). Pooled baseline: \texttt{w\_rjp\_owners\_0} (or \texttt{w\_rjp\_0}). Instrument infix: empty. Final names \texttt{Z\_mayor\_party}, \texttt{dZ\_mayor\_coalition}, etc.\\
+\textit{Status.} \textbf{Default (D2/D3 baseline)}. Strongest first stage at the firm level (cycle-specific F up to 103 on the extensive margin; \texttt{docs/research\_state.md}~\S6).
+
+\subsection{Variant b: \texttt{employment}}
+Each owner channel is weighted by the size of the firm it sits inside.
+\begin{equation}
+w^{\text{emp}}_{m j p, t} \;=\; \frac{1}{N_{m j, t}}
+\sum_{f \in (j,m)} N_{f,m,t}\,\cdot\,\frac{L_{fp,t}}{L_{f,t}},
+\qquad
+N_{m j, t} = \sum_{f \in (j,m)} N_{f,m,t}.
+\end{equation}
+\textit{Interpretation.} A firm with 1{,}000 employees and one aligned owner gets the same weight as a firm with 1 employee and 1{,}000 aligned owners. Captures ``BNDES responds to economic size, not headcount of political ties.''\\
+\textit{Column names.} \texttt{w\_mjp\_emp} $\to$ \texttt{w\_rjp\_emp\_0}. Instrument infix: \texttt{emp\_}. Final names \texttt{Z\_emp\_mayor\_party}, etc.\\
+\textit{Status.} \textbf{Currently de-emphasized at the regression-weight margin} (per memory \texttt{feedback\_weighting\_convention}: \emph{regression weighting} is restricted to unweighted and emp-share-weighted, and the contemporaneous \texttt{emp\_weighted} regression has been dropped). The instrument-weight variant \texttt{employment} is still built and looped over by \texttt{53\_sector\_first\_stage.R}; empirically it is systematically weaker than \texttt{owner\_count} (\texttt{research\_state.md}~\S6 fourth bullet).
+
+\subsection{Variant c: \texttt{equal\_firm}}
+Simple average of owner-party shares across firms.
+
+\begin{equation}
+N^{\mathrm{firm}}_{mjt}
+\;=\;
+\#\{f \in (j,m) : L_{f,t} > 0\},
+\qquad
+w^{\text{firm}}_{m j p, t} \;=\;
+\frac{1}{N^{\mathrm{firm}}_{mjt}}
+\sum_{\substack{f \in (j,m)\\ L_{f,t}>0}}
+\frac{L_{fp,t}}{L_{f,t}}.
+\end{equation}
+\textit{Interpretation.} A firm with one party-$p$ owner out of four total owners contributes $1/4$ to party $p$; a firm whose owners are all in party $p$ contributes one. Thus $\sum_p w^{\text{firm}}_{mjp,t}\le 1$ within a muni-sector-year cell when parties exclude the \texttt{No party} category.\\
+\textit{Column names.} \texttt{w\_mjp\_firm} $\to$ \texttt{w\_rjp\_firm\_0}. Infix: \texttt{firm\_}. Final names \texttt{Z\_firm\_mayor\_party}, etc.\\
+\textit{Status.} \textbf{Robustness}. Used in the \texttt{weight\_battery} spec bundle in \texttt{53\_sector\_first\_stage.R}.
+
+\subsection{Variant d: \texttt{binary}}
+Extensive margin over firms with owner data (at least one recorded owner): fraction of firms with \emph{any} party-$p$ owner, irrespective of how many.
+\begin{equation}
+w^{\text{bin}}_{m j p, t} \;=\;
+\frac{1}{\#\{f \in (j,m) : L_{f,t} > 0\}}
+\sum_{\substack{f \in (j,m)\\ L_{f,t}>0}}
+\ind\!\left[L_{fp,t} > 0\right].
+\end{equation}
+\textit{Interpretation.} This differs from \texttt{equal\_firm} only when a firm has multiple owners or multiple represented parties: \texttt{equal\_firm} fractionalizes the firm by owner shares, while \texttt{binary} gives party $p$ a full firm-count contribution whenever $L_{fp,t}>0$.\\
+\textit{Column names.} \texttt{w\_mjp\_binary} $\to$ \texttt{w\_rjp\_binary\_0}. Infix: \texttt{binary\_}.\\
+\textit{Status.} \textbf{Robustness}. The only variant where $\sum_p w$ may exceed 1 in a (muni, sector, year) cell --- a firm with two distinct-party owners is counted once for each party. Asserted only via the per-party bound $w \le 1$.
+
+\paragraph{Tier and shock pairing.} Each $w$-variant crosses with six alignment shocks: $\{$mayor, gov, pres$\}$ $\times$ $\{$party, coalition$\}$. Levels instruments $Z$ are spread across the full electoral term; changes instruments $\Delta Z$ are non-zero only at inauguration years (D2 in \texttt{research\_state.md}~\S3). Not a literal first difference of $Z$ at cycle boundaries: see footnote labelled \texttt{not-first-diff} in \texttt{paper/regs.tex}.
+
+\paragraph{Exposure-control sidecar.} For every $w$-variant, \texttt{34\_build\_shift\_share\_instruments.R} also produces \texttt{exposure\_control}, \texttt{exposure\_control\_mayor}, \texttt{exposure\_control\_gov\_pres}: the row-sum $\sum_p w$ which captures how much of sector $j$ in muni $m$ is connected to \emph{any} party. Bounded above by 1 for all variants except \texttt{binary}.
+
+% =====================================================================
+\section{Aggregation schemes (firm $\to$ sector outcomes)}
+\label{sec:aggregation}
+
+\cref{sec:weights} concerns weights inside the SSIV (RHS). This section concerns weights for aggregating the firm-level \emph{outcome} to the sector level (LHS of sector regressions in \texttt{52\_aggregated\_firm\_sector\_first\_stage.R}).
+
+For a firm-level outcome $Y_{f,m,t}$ (e.g., $\ind[\text{firm received BNDES}]$ or $\log N_{f,m,t}$), the sector-level outcome is
+\begin{equation}
+\bar Y^{\,\alpha}_{m j t} \;=\; \sum_{f \in (j,m)} \alpha_{f,m,t}\,Y_{f,m,t},\qquad \sum_f \alpha_{f,m,t} = 1.
+\end{equation}
+Three aggregation kernels $\alpha$ are or have been used. The pairing rule (\texttt{research\_state.md}~\S5) ties each LHS aggregation to a specific regression weight: \emph{the regression weight must match the aggregation kernel} for the cell-level coefficient to be a faithful aggregate of the firm-level coefficient.
+
+\subsection*{(a) Unweighted aggregation $\leftrightarrow$ \texttt{equal\_firm} regression weight}
+\[
+  \alpha^{\text{eq}}_{f,m,t} \;=\; \frac{1}{\#\{f' \in (j,m)\}},
+  \qquad
+  \bar Y^{\text{eq}}_{m j t} = \frac{1}{\#\{f' \in (j,m)\}}\sum_{f \in (j,m)} Y_{f,m,t}.
+\]
+The sector regression is run \emph{unweighted} (i.e.\ each cell counts equally). This is the current default per memory \texttt{feedback\_weighting\_convention}.
+
+\subsection*{(b) Employment aggregation $\leftrightarrow$ \texttt{emp\_weighted} regression weight}
+\[
+  \alpha^{\text{emp}}_{f,m,t} \;=\; \frac{N_{f,m,t}}{\sum_{f'\in(j,m)} N_{f',m,t}},
+  \qquad
+  \bar Y^{\text{emp}}_{m j t} = \sum_{f \in (j,m)} \alpha^{\text{emp}}_{f,m,t}\,Y_{f,m,t}.
+\]
+\textit{Status.} \textbf{Dropped from the active spec set} per memory \texttt{feedback\_weighting\_convention}. Still produced by \texttt{52\_proposition2\_equivalence.R} for proposition-2 verification, but not run as a primary regression.
+
+\subsection*{(c) Employment-share weighting (\texttt{emp\_share\_weighted})}
+This is a \emph{regression weight}, not an outcome aggregator. The regression weight is the share of muni $m$'s total employment in sector $j$:
+\[
+  \omega^{\text{emp-sh}}_{m j t} \;=\; \frac{\sum_{f \in (j,m)} N_{f,m,t}}{\sum_{f \in m} N_{f,m,t}}.
+\]
+Crucially, the denominator is the \emph{whole muni}, not sector $j$. So large munis and economically dense muni-sectors get more weight in the regression. \textbf{Active per memory \texttt{feedback\_weighting\_convention}.}
+
+\paragraph{Why the pairing rule.}
+Proposition~2 in \texttt{proposition2\_aggregation\_review.tex} shows that the cell-level OLS coefficient equals the firm-level OLS coefficient \emph{only if} the cell-level regression weight equals the inverse of the within-cell variance of the firm-level residual under aggregation kernel $\alpha$. For homoskedastic residuals this collapses to: regression weight = aggregation kernel weight. Hence \texttt{equal\_firm} regression $\leftrightarrow$ unweighted $\bar Y^{\text{eq}}$, and \texttt{emp\_weighted} regression $\leftrightarrow$ employment-aggregated $\bar Y^{\text{emp}}$. Mixing the two breaks the equivalence (see \texttt{proposition2\_failure\_note.tex} for a numeric demonstration that condition C6 fails on real data).
+
+% =====================================================================
+\section{Proposed: aligned-employment-share weight}
+\label{sec:aligned-emp-share}
+
+A new \emph{instrument-weight} variant proposed in the 2026-04-23 advisor meeting (and discussed again 2026-04-30). It is conceptually distinct from both \texttt{employment} (\cref{sec:weights}) and \texttt{emp\_share\_weighted} (\cref{sec:aggregation}) because it conditions on alignment status.
+
+\begin{definition}[Aligned-employment-share weight]
+\label{def:aligned-emp-share}
+Let $\mathcal{A}_{m,t} = \{f \in m : f \text{ has at least one aligned owner at } t\}$. Define
+\begin{equation}
+\label{eq:aligned-emp-share}
+w^{\text{a-emp}}_{m j t_0} \;=\;
+\frac{\sum_{f \in (j,m) \cap \mathcal{A}_{m,t_0}} N_{f,m,t_0}}{\sum_{f \in m \cap \mathcal{A}_{m,t_0}} N_{f,m,t_0}}.
+\end{equation}
+The numerator is the politically-exposed labour force in sector $j$ of muni $m$. The denominator is the politically-exposed labour force in muni $m$ across all sectors.
+\end{definition}
+
+\paragraph{Contrast with existing objects.}
+\begin{itemize}[leftmargin=2em, itemsep=2pt]
+\item Vs.\ \texttt{owner\_count}: the latter counts political channels (owners), \cref{eq:aligned-emp-share} measures the labour-market footprint those channels touch.
+\item Vs.\ \texttt{employment} (\cref{sec:weights}): \texttt{employment} weights every firm by size and is normalised by the sector-muni employment denominator. \cref{eq:aligned-emp-share} restricts both numerator and denominator to firms with $\ge 1$ aligned owner, and uses the muni denominator (across sectors).
+\item Vs.\ \texttt{emp\_share\_weighted} (\cref{sec:aggregation}): \texttt{emp\_share\_weighted} uses unconditional muni employment in the denominator. \cref{eq:aligned-emp-share} conditions on alignment in both halves of the ratio.
+\end{itemize}
+
+\paragraph{Implementation note.}
+Not yet built. Would slot in as a fifth \texttt{WEIGHT\_VARIANTS} entry in \texttt{34\_build\_shift\_share\_instruments.R} (lines~101--106), with infix \texttt{aemp\_} producing instrument columns \texttt{Z\_aemp\_mayor\_party} etc. The build also requires extending \texttt{31\_build\_sector\_exposure\_weights.R} so that the muni-level denominator $\sum_{f \in m \cap \mathcal{A}}\!N_{f,m,t}$ is computed (not currently a column in the panel).
+
+\begin{remark}[Selection-bias concern]
+\cref{eq:aligned-emp-share} conditions on alignment status, which is the \emph{treatment} dimension. If alignment is correlated with sector productivity (e.g.\ politically connected owners cluster in capital-intensive sectors), then $w^{\text{a-emp}}$ no longer represents an exogenous baseline allocation --- it represents an allocation \emph{within the connected sub-economy}. This violates the SSIV exclusion restriction in the standard Borusyak--Hull--Jaravel sense unless the conditioning is interpreted at the instrument-design stage rather than the identification stage. To be discussed with advisor before building. Source: 2026-04-23 meeting notes.
+\end{remark}
+
+% =====================================================================
+\section{Composition vs.\ volume}
+\label{sec:composition-vs-volume}
+
+The aggregation choices above determine \emph{which} composition object the AR test instruments. They do not determine \emph{whether} the volume channel is also instrumented. These are separable questions.
+
+Two channels through which BNDES affects municipal GDP (\texttt{research\_state.md}~\S1; 2026-04-30 meeting):
+\begin{enumerate}[leftmargin=2em, itemsep=2pt, label=(\arabic*)]
+\item \textbf{Composition channel.} Sector shares $s_{m j t} = \mathrm{BNDES}_{m j t}/\mathrm{BNDES}_{m t}$. The channel of interest. Built by \texttt{35\_build\_credit\_shares.R}.
+\item \textbf{Volume channel.} Total muni disbursements $\mathrm{BNDES}_{m t}$, expressed as $\mathrm{BNDES}_{m t}/\mathrm{GDP}_{m,t_0}$ to avoid log-of-zero. A scale variable.
+\end{enumerate}
+
+Both are endogenous to muni economic conditions. Decision~D10 (\texttt{research\_state.md}~\S3) records the bad-control concern with using total BNDES as a second-stage scale control. The 2026-04-30 caveat notes that the volume channel cannot simply be omitted; four AR identification alternatives (blueprint A10) formalise the trade-off:
+
+\small
+\begin{longtable}{@{}c >{\raggedright\arraybackslash}p{0.20\textwidth}
+                    >{\raggedright\arraybackslash}p{0.62\textwidth}@{}}
+\toprule
+\textbf{ID} & \textbf{Approach} & \textbf{Description} \\
+\midrule
+\endhead
+A10.1 & Pure AR (OLS on both) & Regress $\log\mathrm{GDP}_{mt}$ on $s_{mjt}$ and $\mathrm{BNDES}_{mt}/\mathrm{GDP}_{m,t_0}$ jointly, no instrumentation. AR test on the joint coefficient vector. Loses identification but trivially feasible. \\
+A10.2 & Partial IV & Instrument the sector-share vector (using SSIVs from \cref{sec:weights}); leave total volume as endogenous control. The AR test then concerns $\beta = 0$ on instrumented sector shares only. \\
+A10.3 & Full IV & Instrument both sector shares \emph{and} total volume. Total-volume instrument: sum of sector-specific instruments, $\sum_j Z^{\ell}_{mjt}$. AR test on the combined coefficient. \\
+A10.4 & Mixed (OLS-shares, IV-volume) & OLS on sector shares; instrument total volume. Inverse of A10.2. Useful if sector shares are plausibly orthogonal but total volume is not (unlikely but tractable). \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\begin{remark}
+The aggregation catalogue (\cref{sec:taxonomies,sec:weights,sec:aggregation,sec:aligned-emp-share}) is orthogonal to the choice in A10. Pick a taxonomy and an instrument weight (right column of \cref{tab:summary}) for the composition object; \emph{then} choose an A10 variant for how to handle volume. The cross-product is the active design space.
+\end{remark}
+
+% =====================================================================
+\section{Summary cross-reference}
+\label{sec:summary}
+
+\cref{tab:summary} maps \{taxonomy\} $\times$ \{instrument weight\} to current build status. Aggregation kernels (\cref{sec:aggregation}) and the AR identification variants (\cref{sec:composition-vs-volume}) are orthogonal axes and not enumerated here.
+
+\begin{table}[h!]
+\centering
+\caption{Status grid of (taxonomy $\times$ instrument weight) combinations. \textbf{A} = active. \textbf{R} = robustness or diagnostic. \textbf{P} = planned or pending production wiring. Empty = not applicable / not built.}
+\label{tab:summary}
+\small
+\begin{tabularx}{\textwidth}{@{}l *{5}{>{\centering\arraybackslash}X}@{}}
+\toprule
+\textbf{Taxonomy ($j$)} & \texttt{owner\_count} & \texttt{employment} & \texttt{equal\_firm} & \texttt{binary} & \texttt{a-emp-share}\newline{\small (\cref{sec:aligned-emp-share})}\\
+\midrule
+\texttt{cnae\_section} (21)             & A & A & R & R & P \\
+\texttt{custom\_sector} (11)            & A & A & R & R & P \\
+\texttt{bndes\_sector} (4)              & A & A & R & R & P \\
+\texttt{policy\_block} (4)              & A & A & R & R & P \\
+\texttt{policy\_block\_active} (4)      & A & A & R & R & P \\
+\texttt{size\_bin} (standalone)         & R & R & R & R & P \\
+\texttt{bndes\_sector\_size\_bin} (12)  & R & R & R & R & P \\
+\texttt{policy\_block\_active} $\times$ S3 & P & P & P & P & P \\
+\texttt{cnae\_section} $\times$ S3 & P & P & P & P & P \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Reading the table.}
+The script-31/34/41/53 sector-only pipeline is currently wired for \texttt{cnae\_section}, \texttt{sector\_group}/\texttt{custom\_sector}, and \texttt{policy\_block}; size-crossed D16 production margins require follow-on wiring. Treat \cref{tab:summary} as a catalogue of design status, not as a guarantee that every row is accepted by every spec engine.
+
+\paragraph{Pointers to scripts.}
+\begin{itemize}[leftmargin=2em, itemsep=1pt]
+\item Taxonomy builders: \texttt{30\_build\_sector\_groups.R}; \texttt{30b\_build\_bndes\_sector\_mapping.R}; \\
+      \texttt{30c\_build\_size\_bin\_mapping.R}; \texttt{30d\_build\_sector\_size\_bin\_mapping.R}; \\
+      \texttt{30e\_build\_policy\_block\_mapping.R}.
+\item \texttt{31\_build\_sector\_exposure\_weights.R} --- year-level $w_{m j p, t}$ for all four variants.
+\item \texttt{33\_select\_baseline\_weights.R} --- pooled baseline $w_{m j p, t_0}$ (cycle-specific and 2002-fixed).
+\item \texttt{34\_build\_shift\_share\_instruments.R} --- $Z$ and $\Delta Z$ at muni-sector and muni levels.
+\item \texttt{35\_build\_credit\_shares.R} --- $s_{m j t}$, $\Delta s_{m j t}$ on the balanced muni-sector panel.
+\item \texttt{41\_build\_muni\_panel.R} --- assembly into Panel A (muni-sector-year) and Panel B (muni-year, wide-format).
+\item \texttt{52\_aggregated\_firm\_sector\_first\_stage.R} / \texttt{52b\_proposition2\_equivalence.R} --- LHS aggregation kernels.
+\item \texttt{53\_sector\_first\_stage.R} --- spec engine over the (instrument-weight $\times$ baseline $\times$ alignment $\times$ FE $\times$ exposure-control $\times$ time-variation) grid.
+\end{itemize}
+
+\paragraph{Pointers to docs.}
+\texttt{docs/research\_state.md} \S\S1, 3, 4, 5, 6 (state catalogue and findings).
+\texttt{docs/PROJECT\_BLUEPRINT.md} \S\S3 (F-links), 4 (A1, A3, A10, A11, A12), 6 (D13--D15) (argument map).
+\texttt{logs/strategy/bndes\_allocation\_logic.md} (A1 memo on F0 admissibility).
+\texttt{docs/methodology\_notes/proposition2\_aggregation\_review.tex} (firm $\to$ sector aggregation theory).
+
+\end{document}
