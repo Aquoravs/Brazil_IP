@@ -58,7 +58,7 @@
 **Phase:** Execution (Exploration)
 **Target:** `explorations/anderson_rubin/diagnostics/within_muni_variation.R`
 **Score:** N/A (simplified-mode, exploration)
-**Verdict:** F1 CONFIRMED on initial 3-margin set. Variance decomposition of BNDES credit shares supports F1 on all 6 (margin × denom) specs: cnae_section, policy_block, policy_block_active × {V1 active-only, V2 full-economy}. Active blocks (Ind / Infra / Serv) have cross-muni median σ_within ≈ 0.26–0.33 and share_within ≈ 0.58–0.83 — comfortably above the SUPPORTED heuristic. Denominator choice (V1 vs V2) does not change the verdict. Universe: 51,842 muni-years (5,291 munis × 16 years) with total muni BNDES > 0. F5 separability (V1 vs V2 robustness) holds at the F1 level. A2 round 2 (bndes_product, cnae_section × size_tertile) still pending. Blueprint §3 F1 OPEN → CONFIRMED; §6 D15 logged; §7 Next action shifted to A6 (F2) with A2 round 2 in parallel.
+**Verdict:** F1 CONFIRMED on initial 3-margin set. Variance decomposition of BNDES credit shares supports F1 on all 6 (margin × denom) specs: cnae_section, policy_block, policy_block_active × {V1 active-only, V2 full-economy}. Active blocks (Ind / Infra / Serv) have cross-muni median σ_within ≈ 0.26–0.33 and share_within ≈ 0.58–0.83 — comfortably above the SUPPORTED heuristic. Denominator choice (V1 vs V2) does not change the verdict. Universe: 51,842 muni-years (5,291 munis × 16 years) with total muni BNDES > 0. F4 separability (V1 vs V2 robustness) holds at the F1 level. A2 round 2 (bndes_product, cnae_section × size_tertile) still pending. Blueprint §3 F1 OPEN → CONFIRMED; §6 D15 logged; §7 Next action shifted to A6 (descriptive; old chain F2 retired per D18) with A2 round 2 in parallel.
 **Report:** `explorations/anderson_rubin/diagnostics/output/within_muni_variation_report.md`
 
 ### 2026-05-03 — Desk research (A1 addendum: admissibility correction)
@@ -82,5 +82,5 @@
 
 Caveats documented in §8.5 of f1_combined_report.md: E2 nominal-coverage failure on Media/Grande (acceptable under V1 renormalization); 266k unmatched-stated-large-firm loans dropped (BNDES revenue-vs-headcount classification divergence); A4 4-bin scheme dropped at E2 despite E0/E1 passing.
 
-Blueprint updated: §3 F1 → CONFIRMED with size×sector evidence; §4 A3 ~~COMPLETED~~; §6 D16 added; §7 Next action shifted to F3 (sector first stage at the new margin) + production crosswalk script + A6 descriptive.
+Blueprint updated: §3 F1 → CONFIRMED with size×sector evidence; §4 A3 ~~COMPLETED~~; §6 D16 added; §7 Next action shifted to F2 (sector first stage at the new margin) + production crosswalk script + A6 descriptive.
 **Report:** `explorations/anderson_rubin/diagnostics/output/f1_combined_report.md` (§§1–8); plan at `logs/plans/2026-05-04_size-bin-diagnostics.md`.

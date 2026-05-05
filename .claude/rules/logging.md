@@ -69,3 +69,22 @@ Append to `logs/research_journal.md` whenever an agent completes work — writin
 **Why it exists:** Agents read this to understand pipeline state — the editor checks what strategist-critic scored, the orchestrator checks which phases passed, the coder-critic checks what the coder built. It's the shared context across agents.
 
 Agent outputs (reports, scripts, memos, decisions) are saved to `logs/` by the skills that produce them.
+
+---
+
+## Blueprint updates
+
+The project's argument map at [`docs/PROJECT_BLUEPRINT.md`](../../docs/PROJECT_BLUEPRINT.md) is updated **in the same commit** as the work that triggered the update. The blueprint is the front door (`workflow.md` §5 Session Recovery step 0); failure to update breaks the document for the next session and is a process violation, not just a hygiene lapse.
+
+**Mandatory triggers:**
+
+- **New idea or angle** mentioned in any session → row in §4 (open angles register), with an A-number assigned. No exceptions; even half-formed ideas get an A-entry.
+- **F-link status changes** (any element of F0–F4 moves between OPEN / UNDER TEST / PARTIAL / CONFIRMED / BLOCKED / PAUSED) → update §3 + add a one-line D-entry in §6.
+- **Decision made** → entry in §6 (decisions log), append-only, D-numbered.
+- **A-entry closed** (done, abandoned, superseded) → strike through with date and reason in §4. Do not delete (auditability).
+- **Branch starts/closes** in `explorations/` → update §5.
+- **Next action started or completed** → update §7 with the new actionable item. §7 is always concrete, never aspirational.
+
+**Promotion rule:** an A-entry whose result reshapes the identification chain → promote to a new F-link in §3, with a D-entry in §6 recording the promotion.
+
+**Coordination with `research_state.md`:** the blueprint is the *argument map* (load-bearing claims with status); `docs/research_state.md` is the *state catalog* (taxonomies, design decisions, findings). A taxonomy change goes in `research_state.md`. A decision that changes the argument goes in the blueprint. Operational decisions D1–D11 in `research_state.md` §3 are not duplicated in the blueprint; new framing decisions D12+ live in the blueprint §6.

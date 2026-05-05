@@ -494,5 +494,5 @@ After all four:
 4. Implement **E2** (`02_size_bin_coverage.R`) → run → determine surviving options among {A4, A3, B}.
 5. Implement **E3** (`03_size_bin_f1.R`) for surviving options × {V1, V2} → run → check F1 verdicts.
 6. **In parallel with E3** (independent): implement **E3b** (`03b_agro_conditional_f1.R`).
-7. Synthesize decision into `f1_combined_report.md`; update Blueprint §3 (F1), §4 (A3 row), §6 (new D-entry recording the production margin choice), §7 (Next action moves to F2 / F3).
+7. Synthesize decision into `f1_combined_report.md`; update Blueprint §3 (F1), §4 (A3 row), §6 (new D-entry recording the production margin choice), §7 (Next action moves to F2 [old F3; old F2 retired per D18]).
 8. Once the production margin is fixed, draft a successor to `30c` (e.g., `30f_build_size_sector_mapping.R`) that produces the chosen crosswalk for downstream consumption by `31`, `34`, `41`. This is a separate, follow-on plan — not part of this diagnostic.

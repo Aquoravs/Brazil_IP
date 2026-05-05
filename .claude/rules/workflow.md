@@ -271,7 +271,8 @@ First message should be: "Resuming after compression. Last task: [read most rece
 ### Session Recovery
 
 After compression or a new session, in order:
-0. **Read the most recent checkpoint artifacts:** tail of `SESSION_REPORT.md`, tail of `logs/research_journal.md`, and — if `.claude/state/obsidian-config.md` exists and Obsidian MCP is connected — the latest project-note journal entry
-1. Read `CLAUDE.md` + most recent plan in `logs/plans/`
-2. Check `git log --oneline -10` and `git diff`
-3. State what you understand the current task to be
+1. **Read [`docs/PROJECT_BLUEPRINT.md`](../../docs/PROJECT_BLUEPRINT.md) — the project's argument map.** It tells you: which premises are confirmed (P-entries), which foundations (F0–F4) are still under test, what's in flight (§5), and the current Next action (§7). This is the front door of the project; everything else is detail.
+2. **Read the most recent checkpoint artifacts:** tail of `SESSION_REPORT.md`, tail of `logs/research_journal.md`, and — if `.claude/state/obsidian-config.md` exists and Obsidian MCP is connected — the latest project-note journal entry
+3. Read `CLAUDE.md` + most recent plan in `logs/plans/`
+4. Check `git log --oneline -10` and `git diff`
+5. State what you understand the current task to be

@@ -182,5 +182,5 @@ Per (margin x denom), the 5 most variable + 5 least variable munis (by mean sigm
 
 ## 5. Implications for Identification
 
-F1 is **CONFIRMED** on at least one (margin x denom) specification. Within-muni x time variation in BNDES credit shares exists for at least one candidate margin under at least one denominator choice. The shift-share IV identification strategy is not degenerate at the F1 link. **Next:** A6 (firm vs. project CNAE reconciliation, F2).
+F1 is **CONFIRMED** on at least one (margin x denom) specification. Within-muni x time variation in BNDES credit shares exists for at least one candidate margin under at least one denominator choice. The shift-share IV identification strategy is not degenerate at the F1 link. **Next:** F2 (sector first stage at the chosen margin).
 
