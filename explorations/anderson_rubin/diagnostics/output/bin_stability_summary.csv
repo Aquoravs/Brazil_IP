@@ -1,0 +1,4 @@
+option,share_firms_ever_changed,n_multi_cycle_firms,n_firms_ever_changed,up_moves,down_moves,skip_bin_moves,share_skip_bin_moves,share_boundary_noise_A4,fall_back_rate,recommendation_flag
+A4,0.097456361736483,5528577,538795,343448,220397,7225,0.0128138052124254,0.632679193750056,0.473044630541587,1
+A3,0.0173770389288542,5532991,96147,,,,,,0.473044630541587,
+B,0.340816880896703,5533071,1885764,,,,,,0.473044630541587,

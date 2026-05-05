@@ -1,0 +1,2 @@
+option,n_bins,thin_cell_share_overall,max_share_munis_borrower,min_share_munis_borrower,structurally_thin_bins,verdict
+A2,2,0.835666540547358,0.54834532209432,0.273327650917782,"",THIN_BIN_OK

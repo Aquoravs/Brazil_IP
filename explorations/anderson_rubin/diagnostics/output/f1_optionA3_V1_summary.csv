@@ -1,0 +1,2 @@
+margin,denom,n_bins_total,n_bins_with_share_within,max_share_within,med_share_within_across_bins,mean_share_within_across_bins,max_med_sigma_within,med_med_sigma_within,n_bins_supported,any_bin_supports_f1,verdict
+A3_size_x_sec,V1,51,51,0.928591717438466,0.8077155186685,0.768783465991249,0.280741625685751,0,3,TRUE,SUPPORTED

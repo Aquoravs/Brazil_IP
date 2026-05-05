@@ -1,0 +1,4 @@
+option,n_cells_total,n_cells_with_borrower,share_cells_with_borrower,overall_thin_cell_share,max_share_munis_with_bin_borrower,min_share_munis_with_bin_borrower,n_structurally_thin_bins,structurally_thin_bins,verdict
+A4,1991722,213184,0.107035017939251,0.873864830381267,0.123173491423941,0.0443973704416246,3,"Grande, Micro, Media",THIN_BIN
+A3,1619825,177746,0.109731606809378,0.847169556558235,0.118340128108833,0.0443973704416246,2,"Grande, Media",THIN_BIN
+B,2025621,204883,0.101145772086684,0.869383989886911,0.114201845960767,0.0552434392986085,2,"Tercile_2, Tercile_1",THIN_BIN

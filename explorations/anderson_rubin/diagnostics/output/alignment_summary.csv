@@ -1,0 +1,5 @@
+metric,value,threshold,pass
+unweighted_diag_4x4,0.653563940260137,,
+value_weighted_diag_4x4,0.539965035115308,0.6,FALSE
+collapsed_diag_3x3_unweighted,0.866077255568626,0.65,TRUE
+collapsed_diag_3x3_value_weighted,0.541515888694798,,

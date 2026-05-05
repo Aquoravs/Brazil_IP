@@ -1,0 +1,2 @@
+n_total_loans,n_porte_known_loans,n_dropped_year_edge,n_firm_cycle_pairs,n_crosstab_pairs,fallback_rate,top3_offdiag_cells
+1653775,1653310,66125,541856,504119,0.251533025579884,Micro->A4_Pequena(n=63900); Pequena->A4_Micro(n=43232); Pequena->A4_Media(n=18556)

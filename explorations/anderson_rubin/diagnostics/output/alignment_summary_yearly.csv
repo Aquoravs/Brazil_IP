@@ -1,0 +1,9 @@
+metric,value
+4x4_unweighted_diag,0.627862996427821
+4x4_value_weighted_diag,0.702040774041288
+3x3_collapsed_unweighted_diag,0.762885167644571
+3x3_collapsed_value_weighted_diag,0.702794770201053
+n_loans_after_clean,1653310
+n_loans_matched_rais,742404
+n_loans_dropped_no_rais,910906
+n_loans_in_crosstab,742404

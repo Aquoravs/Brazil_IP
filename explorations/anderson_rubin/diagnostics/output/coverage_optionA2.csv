@@ -1,0 +1,3 @@
+size_bin,bin_label,n_cells_total,n_cells_with_borrower,share_cells_with_borrower,n_borrowers_p10,n_borrowers_p50,n_borrowers_p90,share_thin,share_munis_with_bin_borrower_med,struct_thin
+1,MPME,823289,118607,0.144064842357908,1,1,8,0.816300892864671,0.54834532209432,FALSE
+2,Big,582345,47902,0.0822570812834317,1,1,5,0.883616550457183,0.273327650917782,FALSE

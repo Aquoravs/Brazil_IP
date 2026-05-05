@@ -1,0 +1,2 @@
+verdict,med_sigma_above_median,share_within_above_median,n_munis_above_median,threshold_med_sigma,p25_pos_baseline,p50_pos_baseline,n_agro_having_munis,sanity_gate_passed
+AGRO_OK,0.325919291901322,0.728879364200268,445,0.05,0.0242599290061373,0.141193512140304,891,TRUE
