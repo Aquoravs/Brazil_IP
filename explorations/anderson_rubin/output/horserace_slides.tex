@@ -1,0 +1,159 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usetheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{headline}{}
+\setbeamertemplate{footline}{%
+  \hfill{\usebeamerfont{footline}\insertframenumber}\hspace{0.6em}\vspace{0.4em}%
+}
+\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\setbeamerfont{footline}{size=\scriptsize}
+
+\usepackage{palatino}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{makecell}
+
+\title{\textbf{AR Test}\\[0.5em]
+  \large Instrument Strength Across Weighting Schemes}
+\date{April 2026}
+
+\begin{document}
+
+% ---- Slide 1: Title ----
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ---- Slide 2: Summary ----
+\begin{frame}{Summary of Results}
+
+\begin{itemize}\setlength{\itemsep}{0.4em}
+  \item 80 specifications: 4 weights $\times$ 5 instrument sets $\times$ 4 control ladders
+  \item Outcome: log municipal GDP;\quad
+        H$_0$: shift-share instruments jointly zero in reduced form
+  \item Controls ladder: None $\to$ FE only $\to$ FE + Aggregate Exposure $\to$ FE + Sector Exposure
+\end{itemize}
+
+\vspace{0.6em}
+
+{\footnotesize
+\setlength{\tabcolsep}{6pt}
+\begin{tabular}{@{}lcp{5.5cm}@{}}
+\toprule
+\textbf{Weighting Scheme}
+  & \makecell[c]{\textbf{Specs rejecting H$_0$}\\\textbf{at 5\% (FE + Sector Exp.)}}
+  & \textbf{Best tier(s) at FE + Sector Exposure} \\
+\midrule
+Employment Share (Municipal)       & 4 of 5 & Mayor + Governor;\; Mayor + Gov + President \\
+Binary Affiliation (Municipal)     & 5 of 5 & Governor \\
+Ownership Share (Municipal)        & 4 of 5 & Governor;\; Mayor + Governor \\
+Ownership Share (Legacy)           & 3 of 5 & Governor;\; Mayor + Governor \\
+\bottomrule
+\end{tabular}}
+
+\end{frame}
+
+% ---- Helper: common column spec for data slides ----
+% Columns: l | c c c c  — resizebox handles overflow
+
+% ---- Slide 3: Employment Share (Municipal) ----
+\begin{frame}{Employment Share (Municipal)}
+
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{5pt}%
+\footnotesize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+ & No Controls & FE Only & FE + Agg.\ Exposure & \textbf{FE + Sector Exposure} \\
+\midrule
+Mayor                        & 47.41*** {[}p=0.000{]} & 2.92** {[}p=0.020{]}  & 2.45** {[}p=0.044{]}  & 2.30* {[}p=0.056{]}   \\
+Governor                     & 69.21*** {[}p=0.000{]} & 3.11** {[}p=0.014{]}  & 4.15*** {[}p=0.002{]} & 3.80*** {[}p=0.004{]} \\
+Mayor + Governor             & 36.56*** {[}p=0.000{]} & 4.47*** {[}p=0.000{]} & 4.79*** {[}p=0.000{]} & 4.50*** {[}p=0.000{]} \\
+Mayor + President            & 47.18*** {[}p=0.000{]} & 2.22** {[}p=0.023{]}  & 2.07** {[}p=0.035{]}  & 1.97** {[}p=0.046{]}  \\
+Mayor + Governor + President & 55.31*** {[}p=0.000{]} & 3.31*** {[}p=0.000{]} & 3.51*** {[}p=0.000{]} & 3.32*** {[}p=0.000{]} \\
+\bottomrule
+\end{tabular}%
+}
+
+\vskip 0.6em
+{\footnotesize 4 of 5 tier specs reject H$_0$ at 5\% under sector exposure controls.}
+
+\end{frame}
+
+% ---- Slide 4: Binary Affiliation (Municipal) ----
+\begin{frame}{Binary Affiliation (Municipal)}
+
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{5pt}%
+\footnotesize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+ & No Controls & FE Only & FE + Agg.\ Exposure & \textbf{FE + Sector Exposure} \\
+\midrule
+Mayor                        & 70.26*** {[}p=0.000{]} & 3.46*** {[}p=0.008{]} & 3.36*** {[}p=0.009{]} & 3.35*** {[}p=0.009{]} \\
+Governor                     & 88.30*** {[}p=0.000{]} & 5.05*** {[}p=0.000{]} & 6.22*** {[}p=0.000{]} & 5.79*** {[}p=0.000{]} \\
+Mayor + Governor             & 53.94*** {[}p=0.000{]} & 5.41*** {[}p=0.000{]} & 5.98*** {[}p=0.000{]} & 5.78*** {[}p=0.000{]} \\
+Mayor + President            & 45.87*** {[}p=0.000{]} & 2.40** {[}p=0.014{]}  & 2.41** {[}p=0.014{]}  & 2.42** {[}p=0.013{]}  \\
+Mayor + Governor + President & 42.42*** {[}p=0.000{]} & 4.45*** {[}p=0.000{]} & 4.88*** {[}p=0.000{]} & 4.75*** {[}p=0.000{]} \\
+\bottomrule
+\end{tabular}%
+}
+
+\vskip 0.6em
+{\footnotesize 5 of 5 tier specs reject H$_0$ at 5\% under sector exposure controls.}
+
+\end{frame}
+
+% ---- Slide 5: Ownership Share (Municipal) ----
+\begin{frame}{Ownership Share (Municipal)}
+
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{5pt}%
+\footnotesize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+ & No Controls & FE Only & FE + Agg.\ Exposure & \textbf{FE + Sector Exposure} \\
+\midrule
+Mayor                        & 120.26*** {[}p=0.000{]} & 6.14*** {[}p=0.000{]} & 2.19* {[}p=0.068{]}    & 2.27* {[}p=0.059{]}    \\
+Governor                     & 163.08*** {[}p=0.000{]} & 4.99*** {[}p=0.001{]} & 10.67*** {[}p=0.000{]} & 10.60*** {[}p=0.000{]} \\
+Mayor + Governor             & 76.56*** {[}p=0.000{]}  & 7.01*** {[}p=0.000{]} & 7.76*** {[}p=0.000{]}  & 7.66*** {[}p=0.000{]}  \\
+Mayor + President            & 157.71*** {[}p=0.000{]} & 4.35*** {[}p=0.000{]} & 2.50** {[}p=0.010{]}   & 2.38** {[}p=0.015{]}   \\
+Mayor + Governor + President & 106.45*** {[}p=0.000{]} & 5.54*** {[}p=0.000{]} & 5.77*** {[}p=0.000{]}  & 5.83*** {[}p=0.000{]}  \\
+\bottomrule
+\end{tabular}%
+}
+
+\vskip 0.6em
+{\footnotesize 4 of 5 tier specs reject H$_0$ at 5\% under sector exposure controls.}
+
+\end{frame}
+
+% ---- Slide 6: Ownership Share (Sector-Normalized, Legacy) ----
+\begin{frame}{Ownership Share (Sector-Normalized, Legacy)}
+
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{5pt}%
+\footnotesize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+ & No Controls & FE Only & FE + Agg.\ Exposure & \textbf{FE + Sector Exposure} \\
+\midrule
+Mayor                        & 123.18*** {[}p=0.000{]} & 3.46*** {[}p=0.008{]} & 0.56 {[}p=0.689{]}     & 0.65 {[}p=0.623{]}     \\
+Governor                     & 99.93*** {[}p=0.000{]}  & 4.48*** {[}p=0.001{]} & 12.82*** {[}p=0.000{]} & 17.12*** {[}p=0.000{]} \\
+Mayor + Governor             & 73.13*** {[}p=0.000{]}  & 4.62*** {[}p=0.000{]} & 7.03*** {[}p=0.000{]}  & 8.96*** {[}p=0.000{]}  \\
+Mayor + President            & 66.77*** {[}p=0.000{]}  & 2.91*** {[}p=0.003{]} & 1.85* {[}p=0.063{]}    & 1.09 {[}p=0.365{]}     \\
+Mayor + Governor + President & 52.22*** {[}p=0.000{]}  & 3.85*** {[}p=0.000{]} & 5.85*** {[}p=0.000{]}  & 6.52*** {[}p=0.000{]}  \\
+\bottomrule
+\end{tabular}%
+}
+
+\vskip 0.6em
+{\footnotesize 3 of 5 tier specs reject H$_0$ at 5\% under sector exposure controls.}
+
+\end{frame}
+
+\end{document}

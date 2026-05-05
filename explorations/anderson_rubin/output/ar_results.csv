@@ -1,0 +1,6 @@
+spec_id,tier,align,baseline,weight,time_var,outcome,controls,K,n_obs,n_clusters,f_stat,p_value,df1,df2,r2,is_primary
+primary,mayor,coalition,cycle_specific,owner,Z,log_gdp,none,4,89009,5570,123.184946804925,4.88608596711174e-105,4,89004,0.0199268501074257,TRUE
+C1_FE,mayor,coalition,cycle_specific,owner,Z,log_gdp,FE,4,89009,5570,3.45908887910928,0.00783943989735698,4,83420,0.000447565380098602,FALSE
+C2_FE_R0a,mayor,coalition,cycle_specific,owner,Z,log_gdp,FE_R0a,4,89009,5570,0.563942764071827,0.688833401489117,4,83419,0.00131351185120865,FALSE
+C3_FE_R0b,mayor,coalition,cycle_specific,owner,Z,log_gdp,FE_R0b,4,89009,5570,0.654737268779708,0.623471791378031,4,83416,0.00169830769532653,FALSE
+C4_FE_emp,mayor,coalition,cycle_specific,owner,Z,log_gdp,FE_emp,4,,,,,,,,FALSE
