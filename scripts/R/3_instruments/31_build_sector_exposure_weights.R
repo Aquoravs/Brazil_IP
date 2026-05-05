@@ -117,11 +117,12 @@ svar_flag <- grep("^--sector-var=", args, value = TRUE)
 SECTOR_VAR <- "sector_group"
 if (length(svar_flag)) {
   SECTOR_VAR <- tolower(trimws(sub("^--sector-var=", "", svar_flag[1])))
-  if (!SECTOR_VAR %in% c("cnae_section", "sector_group")) {
-    stop("Invalid --sector-var value: '", SECTOR_VAR, "'. Use 'cnae_section' or 'sector_group'.")
+  if (!SECTOR_VAR %in% c("cnae_section", "sector_group", "policy_block")) {
+    stop("Invalid --sector-var value: '", SECTOR_VAR, "'. Use 'cnae_section', 'sector_group', or 'policy_block'.")
   }
 }
 USE_GROUPS <- (SECTOR_VAR == "sector_group")
+USE_POLICY_BLOCKS <- (SECTOR_VAR == "policy_block")
 
 configs <- Filter(function(cfg) cfg$stub %in% selection, configs)
 cat("Running for group(s):", paste(selection, collapse = ", "), "\n")
@@ -129,11 +130,14 @@ cat("Primary denominator:  owners (w_mjp = L_mjp / L_mj)\n")
 cat("Sector variable:      --sector-var=", SECTOR_VAR, "\n")
 if (USE_GROUPS) {
   cat("  Using sector_group aggregation (from script 30 crosswalk)\n")
+} else if (USE_POLICY_BLOCKS) {
+  cat("  Using policy_block aggregation (from script 30e crosswalk)\n")
 }
 cat("\n")
 
-# Load sector group crosswalk if using grouped sectors
+# Load sector crosswalk if using grouped or policy-block sectors
 group_crosswalk <- NULL
+pb_crosswalk <- NULL
 if (USE_GROUPS) {
   cw_path <- make_output_path("sector_group_mapping.qs2")
   if (!file.exists(cw_path)) {
@@ -143,10 +147,22 @@ if (USE_GROUPS) {
   setDT(group_crosswalk)
   cat("  Loaded sector group crosswalk:", nrow(group_crosswalk), "rows\n\n")
 
-  # Update output paths for grouped variants
   for (i in seq_along(configs)) {
     configs[[i]]$output_path <- sub("\\.qs2$", "_grouped.qs2", configs[[i]]$output_path)
     configs[[i]]$summary_path <- sub("\\.csv$", "_grouped.csv", configs[[i]]$summary_path)
+  }
+} else if (USE_POLICY_BLOCKS) {
+  cw_path <- make_output_path("policy_block_mapping.qs2")
+  if (!file.exists(cw_path)) {
+    stop("Policy block mapping not found: ", cw_path, "\n  Run script 30e first.")
+  }
+  pb_crosswalk <- qs_read(cw_path)
+  setDT(pb_crosswalk)
+  cat("  Loaded policy block crosswalk:", nrow(pb_crosswalk), "rows\n\n")
+
+  for (i in seq_along(configs)) {
+    configs[[i]]$output_path <- sub("\\.qs2$", "_policy_block.qs2", configs[[i]]$output_path)
+    configs[[i]]$summary_path <- sub("\\.csv$", "_policy_block.csv", configs[[i]]$summary_path)
   }
 }
 
@@ -202,6 +218,18 @@ if (USE_GROUPS) {
     firm_sector <- firm_sector[!is.na(sector_group) & sector_group != "XX"]
   }
   firm_sector[, c("classe", "cnae_division") := NULL]
+}
+
+if (USE_POLICY_BLOCKS) {
+  firm_sector[pb_crosswalk, policy_block := i.policy_block, on = "cnae_section"]
+  n_matched <- sum(!is.na(firm_sector$policy_block))
+  cat(sprintf("  Policy block assignment: %d / %d (%.1f%%)\n",
+              n_matched, nrow(firm_sector), 100 * n_matched / nrow(firm_sector)))
+  n_xx <- sum(firm_sector$policy_block == "XX", na.rm = TRUE)
+  if (n_xx > 0) {
+    cat(sprintf("  Dropping %d rows in residual block XX (sections K, O, T, U)\n", n_xx))
+    firm_sector <- firm_sector[!is.na(policy_block) & policy_block != "XX"]
+  }
 }
 
 # Standardize key types
@@ -681,7 +709,7 @@ process_weights <- function(cfg) {
     sector_var     = SECTOR_VAR
   )]
 
-  drop_cols <- intersect(c("n_firms_mjp", "n_firms_with_owners", "n_firms_with_emp"), names(wt))
+  drop_cols <- intersect(c("n_firms_mjp", "n_firms_with_emp"), names(wt))
   if (length(drop_cols)) wt[, (drop_cols) := NULL]
 
   qs_save(wt, output_path)

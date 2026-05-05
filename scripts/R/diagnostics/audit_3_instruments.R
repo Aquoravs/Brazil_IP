@@ -56,7 +56,7 @@ parse_bool <- function(x, default = FALSE) {
 }
 
 SECTOR_VAR <- parse_flag("--sector-var=", "sector_group")
-if (!SECTOR_VAR %in% c("cnae_section", "sector_group")) {
+if (!SECTOR_VAR %in% c("cnae_section", "sector_group", "policy_block")) {
   stop("Invalid --sector-var value: ", SECTOR_VAR)
 }
 STRICT <- parse_bool(parse_flag("--strict=", "true"), default = TRUE)
@@ -66,7 +66,13 @@ cat("Sector variable:", SECTOR_VAR, "\n")
 cat("Strict mode:", STRICT, "\n")
 cat("Dry-run checks:", CHECK_DRYRUN, "\n\n")
 
-suffix <- if (SECTOR_VAR == "sector_group") "_grouped" else ""
+# --- Suffix logic -------------------------------------------------------------
+# cnae_section -> "" (base name), sector_group -> "_grouped",
+# policy_block -> "_policy_block"
+suffix <- switch(SECTOR_VAR,
+  sector_group = "_grouped",
+  policy_block = "_policy_block",
+  "")
 sc_col <- SECTOR_VAR
 
 audit_dir <- file.path(
@@ -150,59 +156,185 @@ for (i in seq_len(nrow(registry))) {
   }
 }
 
+# ==============================================================================
+# A. Sector Exposure Weights (script 31 output)
+# ==============================================================================
+# Schema: muni_id, {sc_col}, year, party, L_mjp, L_mj, L_mj_affiliated,
+#   n_firms_with_owners, w_mjp, w_mjp_owners, w_mjp_emp, w_mjp_firm,
+#   w_mjp_binary, L_mjp_emp, E_mj, L_mjp_firm, L_mjp_binary
+# ==============================================================================
+
 if (!is.null(d$sector_exposure_weights_owner)) {
   wt <- d$sector_exposure_weights_owner
-  required_cols <- c("muni_id", sc_col, "year", "party", "L_rjp", "L_rj", "N_rj", "w_rjp")
+
+  # A1: Required columns
+  required_cols <- c(
+    "muni_id", sc_col, "year", "party",
+    "L_mjp", "L_mj", "L_mj_affiliated",
+    "w_mjp", "w_mjp_owners", "w_mjp_emp", "w_mjp_firm", "w_mjp_binary",
+    "L_mjp_emp", "E_mj", "L_mjp_firm", "L_mjp_binary",
+    "n_firms_with_owners"
+  )
   missing_cols <- setdiff(required_cols, names(wt))
   add_check("schema", "sector_exposure_weights_owner", "required_columns",
             length(missing_cols) == 0,
             if (length(missing_cols)) paste("Missing:", paste(missing_cols, collapse = ", ")) else "OK")
-  add_check("schema", "sector_exposure_weights_owner", "no_firm_count_columns",
-            !any(c("F_rj", "w_rjp_firms") %in% names(wt)),
-            "Firm-count robustness columns should be absent.")
+
+  # A2: n_firms_with_owners should be present (retained after fix)
+  add_check("schema", "sector_exposure_weights_owner", "has_n_firms_with_owners",
+            "n_firms_with_owners" %in% names(wt),
+            if ("n_firms_with_owners" %in% names(wt)) "Present" else "Missing -- re-run script 31")
+
+  # A3: Unique key check
   if (all(c("muni_id", sc_col, "year", "party") %in% names(wt))) {
     n_dup <- nrow(wt) - uniqueN(wt, by = c("muni_id", sc_col, "year", "party"))
     add_check("keys", "sector_exposure_weights_owner", "unique_key", n_dup == 0,
               paste("Duplicate rows:", n_dup))
   }
-  if ("w_rjp" %in% names(wt)) {
-    rng <- range(wt$w_rjp, na.rm = TRUE)
-    add_check("identity", "sector_exposure_weights_owner", "weight_bounds",
+
+  # A4: Primary weight (w_mjp) bounds and sum constraint
+  if ("w_mjp" %in% names(wt)) {
+    rng <- range(wt$w_mjp, na.rm = TRUE)
+    add_check("identity", "sector_exposure_weights_owner", "w_mjp_bounds",
               is.finite(rng[1]) && is.finite(rng[2]) && rng[1] >= -1e-10 && rng[2] <= 1 + 1e-10,
               sprintf("Range [%.6f, %.6f]", rng[1], rng[2]))
-    cell_sums <- wt[, .(sum_w = sum(w_rjp, na.rm = TRUE)), by = c("muni_id", sc_col, "year")]
+    cell_sums <- wt[, .(sum_w = sum(w_mjp, na.rm = TRUE)),
+                    by = c("muni_id", sc_col, "year")]
     max_sum <- cell_sums[, max(sum_w, na.rm = TRUE)]
-    add_check("identity", "sector_exposure_weights_owner", "weight_sum_per_cell",
+    add_check("identity", "sector_exposure_weights_owner", "w_mjp_sum_per_cell",
               is.finite(max_sum) && max_sum <= 1.001,
-              sprintf("Max sum_p(w_rjp)=%.6f", max_sum))
+              sprintf("Max sum_p(w_mjp)=%.6f", max_sum))
+  }
+
+  # A5: Variant weight bounds and sum constraints
+  variant_cols <- c("w_mjp_emp", "w_mjp_firm")
+  for (vcol in variant_cols) {
+    if (vcol %in% names(wt) && !all(is.na(wt[[vcol]]))) {
+      vals <- wt[[vcol]][!is.na(wt[[vcol]])]
+      rng <- range(vals)
+      add_check("identity", "sector_exposure_weights_owner",
+                paste0(vcol, "_bounds"),
+                is.finite(rng[1]) && is.finite(rng[2]) && rng[1] >= -1e-10 && rng[2] <= 1 + 1e-10,
+                sprintf("Range [%.6f, %.6f]", rng[1], rng[2]))
+
+      cell_sums_v <- wt[, .(sum_w = sum(get(vcol), na.rm = TRUE)),
+                        by = c("muni_id", sc_col, "year")]
+      max_sum_v <- cell_sums_v[, max(sum_w, na.rm = TRUE)]
+      add_check("identity", "sector_exposure_weights_owner",
+                paste0(vcol, "_sum_per_cell"),
+                is.finite(max_sum_v) && max_sum_v <= 1.001,
+                sprintf("Max sum_p(%s)=%.6f", vcol, max_sum_v))
+    }
+  }
+
+  # A6: Binary weight bounds (no strict sum-to-one for binary)
+  if ("w_mjp_binary" %in% names(wt) && !all(is.na(wt$w_mjp_binary))) {
+    rng_b <- range(wt$w_mjp_binary, na.rm = TRUE)
+    add_check("identity", "sector_exposure_weights_owner", "w_mjp_binary_bounds",
+              is.finite(rng_b[1]) && is.finite(rng_b[2]) && rng_b[1] >= -1e-10,
+              sprintf("Range [%.6f, %.6f]", rng_b[1], rng_b[2]))
   }
 }
 
+# ==============================================================================
+# B. Baseline Sector Weights (script 33 output)
+# ==============================================================================
+# Schema: muni_id, {sc_col}, party, treatment_year, tier, baseline_type,
+#   baseline_years_used, L_rjp_0, L_rj_0, N_rj_0, w_rjp_0, w_rjp_owners_0,
+#   w_rjp_emp_0, w_rjp_firm_0, w_rjp_binary_0, N_r_0, L_r_0
+# ==============================================================================
+
 if (!is.null(d$baseline_sector_weights)) {
   bw <- d$baseline_sector_weights
+
+  # B1: Required columns (includes variant weights and baseline_years_used)
   required_cols <- c(
     "muni_id", sc_col, "party", "treatment_year", "tier", "baseline_type",
-    "baseline_year", "L_rjp_0", "L_rj_0", "N_rj_0", "w_rjp_0", "N_r_0", "L_r_0"
+    "baseline_years_used",
+    "L_rjp_0", "L_rj_0", "N_rj_0", "w_rjp_0",
+    "w_rjp_owners_0", "w_rjp_emp_0", "w_rjp_firm_0", "w_rjp_binary_0",
+    "N_r_0", "L_r_0"
   )
   missing_cols <- setdiff(required_cols, names(bw))
   add_check("schema", "baseline_sector_weights", "required_columns",
             length(missing_cols) == 0,
             if (length(missing_cols)) paste("Missing:", paste(missing_cols, collapse = ", ")) else "OK")
-  add_check("schema", "baseline_sector_weights", "no_firm_count_columns",
-            !any(c("F_rj_0", "w_rjp_firms_0", "F_r_0") %in% names(bw)),
-            "Firm-count robustness columns should be absent.")
+
+  # B2: Unique key check
+  bw_key <- c("muni_id", sc_col, "party", "treatment_year", "tier", "baseline_type")
+  if (all(bw_key %in% names(bw))) {
+    n_dup_bw <- nrow(bw) - uniqueN(bw, by = bw_key)
+    add_check("keys", "baseline_sector_weights", "unique_key", n_dup_bw == 0,
+              paste("Duplicate rows:", n_dup_bw))
+  }
+
+  # B3: Primary baseline weight (w_rjp_0) bounds and sum constraint
+  bw_group_keys <- c("muni_id", sc_col, "treatment_year", "tier", "baseline_type")
+  if ("w_rjp_0" %in% names(bw)) {
+    rng_bw <- range(bw$w_rjp_0, na.rm = TRUE)
+    add_check("identity", "baseline_sector_weights", "w_rjp_0_bounds",
+              is.finite(rng_bw[1]) && is.finite(rng_bw[2]) &&
+                rng_bw[1] >= -1e-10 && rng_bw[2] <= 1 + 1e-10,
+              sprintf("Range [%.6f, %.6f]", rng_bw[1], rng_bw[2]))
+  }
+
+  # B4: Variant baseline weight sum constraints
+  bw_variant_cols <- c("w_rjp_emp_0", "w_rjp_firm_0")
+  bw_sum_keys <- c("muni_id", "treatment_year", "tier", "baseline_type")
+  for (bvcol in bw_variant_cols) {
+    if (bvcol %in% names(bw) && !all(is.na(bw[[bvcol]]))) {
+      vals_bv <- bw[[bvcol]][!is.na(bw[[bvcol]])]
+      rng_bv <- range(vals_bv)
+      add_check("identity", "baseline_sector_weights",
+                paste0(bvcol, "_bounds"),
+                is.finite(rng_bv[1]) && is.finite(rng_bv[2]) &&
+                  rng_bv[1] >= -1e-10 && rng_bv[2] <= 1 + 1e-10,
+                sprintf("Range [%.6f, %.6f]", rng_bv[1], rng_bv[2]))
+
+      # Sum across parties within (muni, sector, treatment_year, tier, baseline_type)
+      bw_cell_sums <- bw[, .(sum_w = sum(get(bvcol), na.rm = TRUE)),
+                         by = bw_group_keys]
+      max_sum_bv <- bw_cell_sums[, max(sum_w, na.rm = TRUE)]
+      add_check("identity", "baseline_sector_weights",
+                paste0(bvcol, "_sum_per_cell"),
+                is.finite(max_sum_bv) && max_sum_bv <= 1.001,
+                sprintf("Max sum_p(%s)=%.6f", bvcol, max_sum_bv))
+    }
+  }
+
+  # B5: Binary baseline weight bounds (no strict sum constraint)
+  if ("w_rjp_binary_0" %in% names(bw) && !all(is.na(bw$w_rjp_binary_0))) {
+    rng_bb <- range(bw$w_rjp_binary_0, na.rm = TRUE)
+    add_check("identity", "baseline_sector_weights", "w_rjp_binary_0_bounds",
+              is.finite(rng_bb[1]) && is.finite(rng_bb[2]) && rng_bb[1] >= -1e-10,
+              sprintf("Range [%.6f, %.6f]", rng_bb[1], rng_bb[2]))
+  }
+
+  # B6: baseline_years_used is a positive integer
+  if ("baseline_years_used" %in% names(bw)) {
+    byu <- bw$baseline_years_used[!is.na(bw$baseline_years_used)]
+    add_check("identity", "baseline_sector_weights", "baseline_years_used_valid",
+              length(byu) > 0 && all(byu >= 1L) && all(byu == as.integer(byu)),
+              sprintf("Range [%d, %d]", min(byu), max(byu)))
+  }
 }
+
+# ==============================================================================
+# C. Shift-Share Instruments -- sector level (script 34 output)
+# ==============================================================================
 
 if (!is.null(d$shift_share_instruments_sector)) {
   zs <- d$shift_share_instruments_sector
   z_cols <- grep("^Z_", names(zs), value = TRUE)
+  dz_cols <- grep("^dZ_", names(zs), value = TRUE)
   add_check("schema", "shift_share_instruments_sector", "has_sector_instruments",
-            length(z_cols) > 0,
-            paste("Z columns:", length(z_cols)))
-  add_check("schema", "shift_share_instruments_sector", "no_zf1_columns",
-            !any(grepl("^Zf1_", names(zs))),
-            "Zf1 columns should be absent.")
+            length(z_cols) > 0 || length(dz_cols) > 0,
+            paste("Z columns:", length(z_cols), "; dZ columns:", length(dz_cols)))
 }
+
+# ==============================================================================
+# D. Exposure Controls (script 34 output)
+# ==============================================================================
 
 if (!is.null(d$exposure_control_sector)) {
   ctrl <- d$exposure_control_sector
@@ -221,6 +353,10 @@ if (!is.null(d$exposure_control_sector)) {
               severity = "warning")
   }
 }
+
+# ==============================================================================
+# E. BNDES Credit Shares (script 35 output)
+# ==============================================================================
 
 if (!is.null(d$bndes_credit_shares)) {
   cs <- d$bndes_credit_shares
@@ -259,6 +395,10 @@ if (!is.null(d$bndes_credit_shares)) {
   }
 }
 
+# ==============================================================================
+# F. Optional dry-run check
+# ==============================================================================
+
 if (CHECK_DRYRUN) {
   cmd <- c(
     politicsregs_path("run_politicsregs.R"),
@@ -270,6 +410,10 @@ if (CHECK_DRYRUN) {
   status <- system2("Rscript", args = cmd)
   add_check("execution", "run_politicsregs", "31_35_dryrun", status == 0, paste("Exit status:", status))
 }
+
+# ==============================================================================
+# Save results and produce report
+# ==============================================================================
 
 fwrite(checks, file.path(audit_dir, "audit_checks.csv"))
 

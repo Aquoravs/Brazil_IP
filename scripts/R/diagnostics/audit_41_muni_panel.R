@@ -56,7 +56,7 @@ parse_bool <- function(x, default = FALSE) {
 }
 
 SECTOR_VAR <- parse_flag("--sector-var=", "sector_group")
-if (!SECTOR_VAR %in% c("cnae_section", "sector_group")) {
+if (!SECTOR_VAR %in% c("cnae_section", "sector_group", "policy_block")) {
   stop("Invalid --sector-var value: ", SECTOR_VAR)
 }
 STRICT <- parse_bool(parse_flag("--strict=", "true"), default = TRUE)
@@ -64,7 +64,7 @@ STRICT <- parse_bool(parse_flag("--strict=", "true"), default = TRUE)
 cat("Sector variable:", SECTOR_VAR, "\n")
 cat("Strict mode:", STRICT, "\n\n")
 
-suffix <- if (SECTOR_VAR == "sector_group") "_grouped" else ""
+suffix <- if (SECTOR_VAR == "sector_group") "_grouped" else if (SECTOR_VAR == "policy_block") "_policy_block" else ""
 sc_col <- SECTOR_VAR
 
 audit_dir <- file.path(OUTPUT_DIR, "diagnostics", paste0("41_muni_panel_audit_", SECTOR_VAR))
@@ -173,6 +173,35 @@ if (!is.null(d$muni_panel_for_regs)) {
               paste("Defined wide delta_s entries in municipality true first year:", n_defined_first_year,
                     "| zeros among them:", n_zero_first_year))
   }
+}
+
+# Audit: muni-total EC presence and identity (policy_block only)
+if (SECTOR_VAR == "policy_block" && !is.null(d$muni_panel_for_regs)) {
+  panel_b <- d$muni_panel_for_regs
+  ec_total_cols <- grep("^ec_total_", names(panel_b), value = TRUE)
+  add_check("structure", "muni_panel_for_regs", "ec_total_columns_present",
+            length(ec_total_cols) >= 24,
+            sprintf("Found %d ec_total_* columns (expected 24 for policy_block)",
+                    length(ec_total_cols)))
+
+  # Numerical identity: ec_total = sum of ar_exposure_control_*_<sector>
+  max_diff <- 0
+  bad_stem <- character(0)
+  sec_ar <- c("Agro", "Ind", "Infra", "Serv")
+  for (tot in ec_total_cols) {
+    cc <- sub("^ec_total", "exposure_control", tot)
+    parts <- paste0("ar_", cc, "_", sec_ar)
+    parts <- intersect(parts, names(panel_b))
+    if (!length(parts)) next
+    diffs <- panel_b[[tot]] - rowSums(panel_b[, ..parts], na.rm = TRUE)
+    md <- max(abs(diffs), na.rm = TRUE)
+    if (is.finite(md) && md > max_diff) max_diff <- md
+    if (is.finite(md) && md > 1e-9) bad_stem <- c(bad_stem, tot)
+  }
+  add_check("identity", "muni_panel_for_regs", "ec_total_equals_sector_sum",
+            length(bad_stem) == 0,
+            sprintf("max|ec_total - sum(ar_exposure_control_*_<sector>)| = %.2e; failing stems: %s",
+                    max_diff, paste(head(bad_stem, 3), collapse = ", ")))
 }
 
 fwrite(checks, file.path(audit_dir, "audit_checks.csv"))

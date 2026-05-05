@@ -194,7 +194,7 @@ if (length(auto_files)) {
   automatic <- rbindlist(auto_list, use.names = TRUE, fill = TRUE)
   rm(auto_list)
 } else {
-  log_warn("No automatic loan files found with prefix: ", auto_prefix)
+  log_warn("No automatic loan files found in: ", raw_auto_dir)
   automatic <- data.table()
 }
 
@@ -275,10 +275,6 @@ log_info(sprintf("Private filter: %d -> %d (dropped %d)", n0, nrow(loans), n0 - 
 n0 <- nrow(loans)
 loans <- loans[!(automatic == 0L & ascii_upper(modality) == "NAO REEMBOLSAVEL")]
 log_info(sprintf("Reimbursable filter: %d -> %d (dropped %d)", n0, nrow(loans), n0 - nrow(loans)))
-
-# n0 <- nrow(loans)
-# loans <- loans[!is.na(value_dis) & value_dis != 0]
-# log_info(sprintf("Non-zero value filter: %d -> %d (dropped %d)", n0, nrow(loans), n0 - nrow(loans)))
 
 # =====================================================================
 # IPCA deflation (base year 2018)
@@ -408,4 +404,3 @@ qs_save(agg, agg_path)
 log_info(sprintf("Saved aggregated: %d rows -> %s", nrow(agg), agg_path))
 
 log_info("Script 11 completed successfully.")
-# t <- qs2::qs_read(file.path(here::here(), "BNDES", "output", "bndes_firm_year_muni_sector.qs2"))

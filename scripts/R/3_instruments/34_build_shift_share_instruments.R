@@ -66,11 +66,12 @@ svar_flag <- grep("^--sector-var=", args, value = TRUE)
 SECTOR_VAR <- "sector_group"
 if (length(svar_flag)) {
   SECTOR_VAR <- tolower(trimws(sub("^--sector-var=", "", svar_flag[1])))
-  if (!SECTOR_VAR %in% c("cnae_section", "sector_group")) {
-    stop("Invalid --sector-var value: '", SECTOR_VAR, "'. Use 'cnae_section' or 'sector_group'.")
+  if (!SECTOR_VAR %in% c("cnae_section", "sector_group", "policy_block")) {
+    stop("Invalid --sector-var value: '", SECTOR_VAR, "'. Use 'cnae_section', 'sector_group', or 'policy_block'.")
   }
 }
 USE_GROUPS <- (SECTOR_VAR == "sector_group")
+USE_POLICY_BLOCKS <- (SECTOR_VAR == "policy_block")
 SCOL <- SECTOR_VAR
 cat("Sector variable:", SECTOR_VAR, "\n\n")
 
@@ -82,6 +83,12 @@ if (USE_GROUPS) {
   output_sector_path <- make_output_path("shift_share_instruments_sector_grouped.qs2")
   summary_path <- make_output_path("shift_share_instruments_grouped_summary.csv")
   controls_output_path <- make_output_path("exposure_control_sector_grouped.qs2")
+} else if (USE_POLICY_BLOCKS) {
+  baseline_path <- make_output_path("baseline_sector_weights_policy_block.qs2")
+  out_path <- make_output_path("shift_share_instruments_policy_block.qs2")
+  output_sector_path <- make_output_path("shift_share_instruments_sector_policy_block.qs2")
+  summary_path <- make_output_path("shift_share_instruments_policy_block_summary.csv")
+  controls_output_path <- make_output_path("exposure_control_sector_policy_block.qs2")
 } else {
   baseline_path <- make_output_path("baseline_sector_weights.qs2")
   out_path <- make_output_path("shift_share_instruments.qs2")

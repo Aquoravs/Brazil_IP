@@ -121,11 +121,12 @@ svar_flag <- grep("^--sector-var=", args, value = TRUE)
 SECTOR_VAR <- "sector_group"
 if (length(svar_flag)) {
   SECTOR_VAR <- tolower(trimws(sub("^--sector-var=", "", svar_flag[1])))
-  if (!SECTOR_VAR %in% c("cnae_section", "sector_group")) {
-    stop("Invalid --sector-var value: '", SECTOR_VAR, "'. Use 'cnae_section' or 'sector_group'.")
+  if (!SECTOR_VAR %in% c("cnae_section", "sector_group", "policy_block")) {
+    stop("Invalid --sector-var value: '", SECTOR_VAR, "'. Use 'cnae_section', 'sector_group', or 'policy_block'.")
   }
 }
 USE_GROUPS <- (SECTOR_VAR == "sector_group")
+USE_POLICY_BLOCKS <- (SECTOR_VAR == "policy_block")
 
 cat("Alignment type:", ALIGN_TYPE, "\n")
 cat("Sector variable:", SECTOR_VAR, "\n")
@@ -136,6 +137,9 @@ cat("Specifications:", paste(run_specs, collapse = ", "), "\n\n")
 if (USE_GROUPS) {
   panel_b_path <- make_output_path("muni_panel_for_regs_grouped.qs2")
   table_dir    <- file.path(TABLES_DIR, "sector_grouped")
+} else if (USE_POLICY_BLOCKS) {
+  panel_b_path <- make_output_path("muni_panel_for_regs_policy_block.qs2")
+  table_dir    <- file.path(TABLES_DIR, "sector_policy_block")
 } else {
   panel_b_path <- make_output_path("muni_panel_for_regs.qs2")
   table_dir    <- file.path(TABLES_DIR, "sector")

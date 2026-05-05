@@ -66,8 +66,8 @@ svar_flag <- grep("^--sector-var=", args, value = TRUE)
 SECTOR_VAR <- "sector_group"
 if (length(svar_flag)) {
   SECTOR_VAR <- tolower(trimws(sub("^--sector-var=", "", svar_flag[1])))
-  if (!SECTOR_VAR %in% c("sector_group", "cnae_section")) {
-    stop("Invalid --sector-var value: '", SECTOR_VAR, "'. Use 'sector_group' or 'cnae_section'.")
+  if (!SECTOR_VAR %in% c("sector_group", "cnae_section", "policy_block")) {
+    stop("Invalid --sector-var value: '", SECTOR_VAR, "'. Use 'sector_group', 'cnae_section', or 'policy_block'.")
   }
 }
 SCOL <- SECTOR_VAR

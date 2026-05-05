@@ -81,11 +81,12 @@ svar_flag <- grep("^--sector-var=", args, value = TRUE)
 SECTOR_VAR <- "sector_group"
 if (length(svar_flag)) {
   SECTOR_VAR <- tolower(trimws(sub("^--sector-var=", "", svar_flag[1])))
-  if (!SECTOR_VAR %in% c("cnae_section", "sector_group")) {
-    stop("Invalid --sector-var value: '", SECTOR_VAR, "'. Use 'cnae_section' or 'sector_group'.")
+  if (!SECTOR_VAR %in% c("cnae_section", "sector_group", "policy_block")) {
+    stop("Invalid --sector-var value: '", SECTOR_VAR, "'. Use 'cnae_section', 'sector_group', or 'policy_block'.")
   }
 }
 USE_GROUPS <- (SECTOR_VAR == "sector_group")
+USE_POLICY_BLOCKS <- (SECTOR_VAR == "policy_block")
 SCOL <- SECTOR_VAR
 cat("Sector variable:", SECTOR_VAR, "\n\n")
 
@@ -93,6 +94,10 @@ if (USE_GROUPS) {
   weights_path <- make_output_path("sector_exposure_weights_owner_grouped.qs2")
   out_path     <- make_output_path("baseline_sector_weights_grouped.qs2")
   summary_path <- make_output_path("baseline_sector_weights_grouped_summary.csv")
+} else if (USE_POLICY_BLOCKS) {
+  weights_path <- make_output_path("sector_exposure_weights_owner_policy_block.qs2")
+  out_path     <- make_output_path("baseline_sector_weights_policy_block.qs2")
+  summary_path <- make_output_path("baseline_sector_weights_policy_block_summary.csv")
 } else {
   weights_path <- make_output_path("sector_exposure_weights_owner.qs2")
   out_path     <- make_output_path("baseline_sector_weights.qs2")
@@ -116,19 +121,14 @@ cat("  Available years:", paste(sort(unique(wt$year)), collapse = ", "), "\n\n")
 required_cols <- c(
   "muni_id", SCOL, "year", "party",
   "L_mjp", "L_mj", "L_mj_affiliated",
-  "w_mjp", "w_mjp_emp", "w_mjp_firm", "w_mjp_binary"
+  "w_mjp", "w_mjp_emp", "w_mjp_firm", "w_mjp_binary",
+  "L_mjp_emp", "E_mj", "L_mjp_firm", "L_mjp_binary",
+  "n_firms_with_owners"
 )
 missing_cols <- setdiff(required_cols, names(wt))
 if (length(missing_cols)) {
-  stop("Weights file is missing required columns: ", paste(missing_cols, collapse = ", "))
-}
-
-mean_or_na <- function(x) {
-  x <- x[is.finite(x) & !is.na(x)]
-  if (!length(x)) {
-    return(NA_real_)
-  }
-  mean(x)
+  stop("Weights file is missing required columns: ", paste(missing_cols, collapse = ", "),
+       "\n  Re-run script 31 to regenerate with count columns.")
 }
 
 build_baseline_rows <- function(wt_slice, treatment_year, tier, baseline_type, baseline_years_used) {
@@ -152,12 +152,28 @@ build_baseline_rows <- function(wt_slice, treatment_year, tier, baseline_type, b
   out[, w_rjp := fifelse(N_rj > 0, L_rjp / N_rj, 0)]
   out[, w_rjp_owners := w_rjp]
 
-  variant_means <- wt_slice[, .(
-    w_rjp_emp = mean_or_na(w_mjp_emp),
-    w_rjp_firm = mean_or_na(w_mjp_firm),
-    w_rjp_binary = mean_or_na(w_mjp_binary)
-  ), by = by_party]
-  out <- merge(out, variant_means, by = by_party, all.x = TRUE)
+  # Pool counts across years then divide — preserves sum-to-one when parties
+  # enter/exit across baseline years (averaging ratios does not)
+  emp_num <- wt_slice[, .(L_rjp_emp = sum(L_mjp_emp, na.rm = TRUE)), by = by_party]
+  emp_den <- unique(wt_slice[, c(by_sector, "year", "E_mj"), with = FALSE])
+  emp_den <- emp_den[, .(E_rj = sum(E_mj, na.rm = TRUE)), by = by_sector]
+  emp_wt <- merge(emp_num, emp_den, by = by_sector, all.x = TRUE)
+  emp_wt[, w_rjp_emp := fifelse(!is.na(E_rj) & E_rj > 0, L_rjp_emp / E_rj, 0)]
+
+  firm_num <- wt_slice[, .(L_rjp_firm = sum(L_mjp_firm, na.rm = TRUE),
+                           L_rjp_binary = sum(L_mjp_binary, na.rm = TRUE)), by = by_party]
+  firm_den <- unique(wt_slice[, c(by_sector, "year", "n_firms_with_owners"), with = FALSE])
+  firm_den <- firm_den[, .(N_firms_rj = sum(n_firms_with_owners, na.rm = TRUE)), by = by_sector]
+  firm_wt <- merge(firm_num, firm_den, by = by_sector, all.x = TRUE)
+  firm_wt[, w_rjp_firm := fifelse(!is.na(N_firms_rj) & N_firms_rj > 0,
+                                  L_rjp_firm / N_firms_rj, 0)]
+  firm_wt[, w_rjp_binary := fifelse(!is.na(N_firms_rj) & N_firms_rj > 0,
+                                    L_rjp_binary / N_firms_rj, 0)]
+
+  out <- merge(out, emp_wt[, c(by_party, "w_rjp_emp"), with = FALSE],
+               by = by_party, all.x = TRUE)
+  out <- merge(out, firm_wt[, c(by_party, "w_rjp_firm", "w_rjp_binary"), with = FALSE],
+               by = by_party, all.x = TRUE)
 
   out[, `:=`(
     treatment_year = treatment_year,
@@ -176,9 +192,11 @@ cat("Step 2: Pooling counts across baseline windows...\n\n")
 available_years <- sort(unique(wt$year))
 cat("  Available years in data:", paste(available_years, collapse = ", "), "\n\n")
 
-baseline_list <- list()
+n_windows <- nrow(baseline_window_map)
+baseline_list <- vector("list", 2L * n_windows)
+bl_idx <- 0L
 
-for (i in seq_len(nrow(baseline_window_map))) {
+for (i in seq_len(n_windows)) {
   ty <- baseline_window_map$treatment_year[i]
   bstart <- baseline_window_map$bl_start[i]
   bend <- baseline_window_map$bl_end[i]
@@ -212,7 +230,8 @@ for (i in seq_len(nrow(baseline_window_map))) {
     paste(window_years, collapse = ","),
     nrow(wt_avg)
   ))
-  baseline_list[[length(baseline_list) + 1L]] <- wt_avg
+  bl_idx <- bl_idx + 1L
+  baseline_list[[bl_idx]] <- wt_avg
 }
 
 # --- Step 3: Create 2002-fixed robustness variant ----------------------------
@@ -223,11 +242,12 @@ wt_2002 <- wt[year == 2002L]
 if (!nrow(wt_2002)) {
   cat("  WARNING: No data for year 2002 -- skipping 2002-fixed variant\n")
 } else {
-  for (i in seq_len(nrow(baseline_window_map))) {
+  for (i in seq_len(n_windows)) {
     ty <- baseline_window_map$treatment_year[i]
     tier <- baseline_window_map$tier[i]
 
-    baseline_list[[length(baseline_list) + 1L]] <- build_baseline_rows(
+    bl_idx <- bl_idx + 1L
+    baseline_list[[bl_idx]] <- build_baseline_rows(
       wt_slice = wt_2002,
       treatment_year = ty,
       tier = tier,
@@ -235,9 +255,11 @@ if (!nrow(wt_2002)) {
       baseline_years_used = 1L
     )
   }
-  cat("  Created 2002-fixed weights for", nrow(baseline_window_map),
+  cat("  Created 2002-fixed weights for", n_windows,
       "treatment-year x tier combinations\n")
 }
+
+baseline_list <- baseline_list[seq_len(bl_idx)]
 
 # --- Step 4: Combine and compute municipality totals -------------------------
 

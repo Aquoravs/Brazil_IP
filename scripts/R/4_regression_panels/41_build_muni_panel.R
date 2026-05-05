@@ -69,11 +69,12 @@ svar_flag <- grep("^--sector-var=", args, value = TRUE)
 SECTOR_VAR <- "sector_group"
 if (length(svar_flag)) {
   SECTOR_VAR <- tolower(trimws(sub("^--sector-var=", "", svar_flag[1])))
-  if (!SECTOR_VAR %in% c("cnae_section", "sector_group")) {
-    stop("Invalid --sector-var value: '", SECTOR_VAR, "'. Use 'cnae_section' or 'sector_group'.")
+  if (!SECTOR_VAR %in% c("cnae_section", "sector_group", "policy_block")) {
+    stop("Invalid --sector-var value: '", SECTOR_VAR, "'. Use 'cnae_section', 'sector_group', or 'policy_block'.")
   }
 }
 USE_GROUPS <- (SECTOR_VAR == "sector_group")
+USE_POLICY_BLOCKS <- (SECTOR_VAR == "policy_block")
 SCOL <- SECTOR_VAR
 cat("Sector variable:", SECTOR_VAR, "\n\n")
 
@@ -90,6 +91,14 @@ if (USE_GROUPS) {
   output_sector_path <- make_output_path("muni_sector_panel_grouped.qs2")
   output_muni_path   <- make_output_path("muni_panel_for_regs_grouped.qs2")
   summary_path       <- make_output_path("muni_panel_grouped_summary.csv")
+} else if (USE_POLICY_BLOCKS) {
+  credit_path     <- make_output_path("bndes_credit_shares_policy_block.qs2")
+  instr_path      <- make_output_path("shift_share_instruments_policy_block.qs2")
+  instr_sec_path  <- make_output_path("shift_share_instruments_sector_policy_block.qs2")
+  controls_sec_path <- make_output_path("exposure_control_sector_policy_block.qs2")
+  output_sector_path <- make_output_path("muni_sector_panel_policy_block.qs2")
+  output_muni_path   <- make_output_path("muni_panel_for_regs_policy_block.qs2")
+  summary_path       <- make_output_path("muni_panel_policy_block_summary.csv")
 } else {
   credit_path     <- make_output_path("bndes_credit_shares.qs2")
   instr_path      <- make_output_path("shift_share_instruments.qs2")
@@ -651,7 +660,7 @@ cat("  Panel B (base):", nrow(panel_b), "rows,",
 
 # --- Step 5b: Determine dropped sector and build wide-format columns ---------
 
-cat("\nStep 5b: Building wide-format sector columns for vector 2SLS...\n")
+cat("\nStep 5b: Building wide-format sector columns for vector 2SLS and AR...\n")
 
 # Determine j0 (dropped sector): largest average share
 sec_shares <- panel_a[!is.na(s_mjt), .(mean_share = mean(s_mjt)), by = SCOL]
@@ -662,77 +671,74 @@ cat(sprintf("  Dropped sector (j0): %s (mean share = %.4f)\n",
 cat("  Sector shares:\n")
 print(sec_shares)
 
+sec_all <- sec_shares[[SCOL]]
+sec_iv <- setdiff(sec_all, j0)
+sec_ar <- sec_all
+
+make_sector_wide <- function(dt, value_col, sectors, out_prefix, fill = NULL) {
+  if (!length(sectors)) {
+    return(data.table(muni_id = integer(), year = integer()))
+  }
+
+  source <- dt[
+    get(SCOL) %in% sectors,
+    c("muni_id", "year", SCOL, value_col),
+    with = FALSE
+  ]
+
+  if (is.null(fill)) {
+    wide <- dcast(
+      source,
+      as.formula(paste("muni_id + year ~", SCOL)),
+      value.var = value_col
+    )
+  } else {
+    wide <- dcast(
+      source,
+      as.formula(paste("muni_id + year ~", SCOL)),
+      value.var = value_col,
+      fill = fill
+    )
+  }
+
+  sector_cols <- setdiff(names(wide), c("muni_id", "year"))
+  setnames(wide, sector_cols, paste0(out_prefix, "_", sector_cols))
+  wide
+}
+
 # Pivot delta_s_mjt to wide (excluding j0)
 # Do not zero-fill: undefined deltas (e.g. first year) must stay NA.
-delta_s_wide <- dcast(
-  panel_a[get(SCOL) != j0, c("muni_id", "year", SCOL, "delta_s_mjt"), with = FALSE],
-  as.formula(paste("muni_id + year ~", SCOL)),
-  value.var = "delta_s_mjt"
-)
-# Prefix columns with "delta_s_"
-sec_cols <- setdiff(names(delta_s_wide), c("muni_id", "year"))
-setnames(delta_s_wide, sec_cols, paste0("delta_s_", sec_cols))
+delta_s_wide <- make_sector_wide(panel_a, "delta_s_mjt", sec_iv, "delta_s")
 
 # Pivot s_mjt to wide (for levels specification)
-s_wide <- dcast(
-  panel_a[get(SCOL) != j0, c("muni_id", "year", SCOL, "s_mjt"), with = FALSE],
-  as.formula(paste("muni_id + year ~", SCOL)),
-  value.var = "s_mjt", fill = 0
-)
-s_sec_cols <- setdiff(names(s_wide), c("muni_id", "year"))
-setnames(s_wide, s_sec_cols, paste0("s_", s_sec_cols))
+s_wide <- make_sector_wide(panel_a, "s_mjt", sec_iv, "s", fill = 0)
 
-# Pivot sector-level instruments to wide
-# Pivot sector-level changes instruments (dZ) to wide
+# Pivot sector-level instruments to wide.
+# Existing names remain J-1 for structural share/2SLS specs.
+# The ar_* namespace keeps all J sectors for reduced-form AR tests, where the
+# BNDES share simplex does not require dropping a sector.
 dz_sec_cols <- grep("^dZ_.*_cycle_specific$", names(panel_a), value = TRUE)
-z_sec_wide_list <- list()
-for (zc in dz_sec_cols) {
-  zw <- dcast(
-    panel_a[get(SCOL) != j0, c("muni_id", "year", SCOL, zc), with = FALSE],
-    as.formula(paste("muni_id + year ~", SCOL)),
-    value.var = zc, fill = 0
-  )
-  zw_cols <- setdiff(names(zw), c("muni_id", "year"))
-  # e.g., dZ_mayor_coalition_cycle_specific_A, dZ_mayor_coalition_cycle_specific_B, ...
-  setnames(zw, zw_cols, paste0(zc, "_", zw_cols))
-  z_sec_wide_list[[zc]] <- zw
-}
-
-# Also do 2002-fixed changes instruments
 dz_sec_cols_fixed <- grep("^dZ_.*_2002_fixed$", names(panel_a), value = TRUE)
-for (zc in dz_sec_cols_fixed) {
-  zw <- dcast(
-    panel_a[get(SCOL) != j0, c("muni_id", "year", SCOL, zc), with = FALSE],
-    as.formula(paste("muni_id + year ~", SCOL)),
-    value.var = zc, fill = 0
+z_sec_cols <- grep("^Z_.*_cycle_specific$", names(panel_a), value = TRUE)
+z_sec_cols_fixed <- grep("^Z_.*_2002_fixed$", names(panel_a), value = TRUE)
+sector_inst_cols <- c(dz_sec_cols, dz_sec_cols_fixed, z_sec_cols, z_sec_cols_fixed)
+z_sec_wide_list <- list()
+for (zc in sector_inst_cols) {
+  z_sec_wide_list[[paste0("iv__", zc)]] <- make_sector_wide(
+    panel_a, zc, sec_iv, zc, fill = 0
   )
-  zw_cols <- setdiff(names(zw), c("muni_id", "year"))
-  setnames(zw, zw_cols, paste0(zc, "_", zw_cols))
-  z_sec_wide_list[[zc]] <- zw
+  z_sec_wide_list[[paste0("ar__", zc)]] <- make_sector_wide(
+    panel_a, zc, sec_ar, paste0("ar_", zc), fill = 0
+  )
 }
 
-# Also pivot sector-level levels instruments (Z) to wide
-z_sec_cols <- grep("^Z_.*_cycle_specific$", names(panel_a), value = TRUE)
-for (zc in z_sec_cols) {
-  zw <- dcast(
-    panel_a[get(SCOL) != j0, c("muni_id", "year", SCOL, zc), with = FALSE],
-    as.formula(paste("muni_id + year ~", SCOL)),
-    value.var = zc, fill = 0
+# Pivot all-sector exposure controls for AR robustness checks only.
+ctrl_sec_cols <- grep("^exposure_control.*_(cycle_specific|2002_fixed)$",
+                      names(panel_a), value = TRUE)
+for (cc in ctrl_sec_cols) {
+  z_sec_wide_list[[paste0("ar__", cc)]] <- make_sector_wide(
+    panel_a, cc, sec_ar, paste0("ar_", cc), fill = 0
   )
-  zw_cols <- setdiff(names(zw), c("muni_id", "year"))
-  setnames(zw, zw_cols, paste0(zc, "_", zw_cols))
-  z_sec_wide_list[[zc]] <- zw
-}
-z_sec_cols_fixed <- grep("^Z_.*_2002_fixed$", names(panel_a), value = TRUE)
-for (zc in z_sec_cols_fixed) {
-  zw <- dcast(
-    panel_a[get(SCOL) != j0, c("muni_id", "year", SCOL, zc), with = FALSE],
-    as.formula(paste("muni_id + year ~", SCOL)),
-    value.var = zc, fill = 0
-  )
-  zw_cols <- setdiff(names(zw), c("muni_id", "year"))
-  setnames(zw, zw_cols, paste0(zc, "_", zw_cols))
-  z_sec_wide_list[[zc]] <- zw
 }
 
 # Merge all wide columns into Panel B
@@ -742,13 +748,29 @@ for (zw in z_sec_wide_list) {
   panel_b <- merge(panel_b, zw, by = c("muni_id", "year"), all.x = TRUE)
 }
 
-# Sectors retained (all except j0)
-sec_cols_raw <- setdiff(sec_shares[[SCOL]], j0)
+# --- Step 5b': Build muni-total exposure controls (row-sum across sectors) ----
+# R0a sensitivity: EC^ell_mt = sum_j sum_p w^ell_jmp,t. Row-sum the existing
+# ar_exposure_control_*_<sector> columns; one ec_total_* column per (infix,
+# tier, baseline) stem. See logs/strategy/strategy_memo_ar_test.md §3.1.
+
+cat("\n  Building muni-total exposure controls (sum across sectors)...\n")
+ec_total_added <- character(0)
+for (cc in ctrl_sec_cols) {
+  ar_cols <- paste0("ar_", cc, "_", sec_ar)
+  ar_cols <- intersect(ar_cols, names(panel_b))
+  if (!length(ar_cols)) next
+  total_col <- sub("^exposure_control", "ec_total", cc)
+  panel_b[, (total_col) := rowSums(.SD, na.rm = TRUE), .SDcols = ar_cols]
+  ec_total_added <- c(ec_total_added, total_col)
+}
+cat(sprintf("  Added %d muni-total EC columns (sample: %s)\n",
+            length(ec_total_added),
+            paste(head(ec_total_added, 4), collapse = ", ")))
 
 # Fill NAs with 0 only for share and instrument columns.
 # delta_s_* must keep NA when the underlying change is undefined.
-# Regex: match sector codes (letters A-U for cnae_section, or group codes like AM, CL, etc.)
-fill_cols <- grep("^(s_[A-Z]|(d?Z)_.*_(cycle_specific|2002_fixed)(_|$))", names(panel_b), value = TRUE)
+fill_cols <- grep("^(s_|d?Z_|ar_d?Z_|ar_exposure_control)",
+                  names(panel_b), value = TRUE)
 for (fc in fill_cols) {
   panel_b[is.na(get(fc)), (fc) := 0]
 }
@@ -767,15 +789,17 @@ panel_b[, bndes_pc := fifelse(!is.na(total_bndes_real) & !is.na(population) & po
 panel_b[, log_bndes_pc := fifelse(!is.na(bndes_pc) & bndes_pc > 0,
                                   log(bndes_pc), NA_real_)]
 
-# Store dropped sector as attribute
-attr(panel_b, "dropped_sector_j0") <- j0
-attr(panel_b, "sector_var") <- SECTOR_VAR
 cat(sprintf("  Panel B with wide columns: %d rows, %d cols\n",
             nrow(panel_b), ncol(panel_b)))
-cat(sprintf("  Wide sector columns (J-1=%d): %s%s\n",
-            length(sec_cols_raw),
-            paste(head(paste0("delta_s_", sec_cols_raw), 5), collapse = ", "),
-            if (length(sec_cols_raw) > 5) ", ..." else ""))
+cat(sprintf("  Structural wide sectors (J-1=%d): %s%s\n",
+            length(sec_iv),
+            paste(head(paste0("delta_s_", sec_iv), 5), collapse = ", "),
+            if (length(sec_iv) > 5) ", ..." else ""))
+cat(sprintf("  AR wide sectors (J=%d): %s\n",
+            length(sec_ar), paste(sec_ar, collapse = ", ")))
+cat(sprintf("  AR instrument columns: %d; AR exposure-control columns: %d\n",
+            length(grep("^ar_d?Z_", names(panel_b), value = TRUE)),
+            length(grep("^ar_exposure_control", names(panel_b), value = TRUE))))
 
 # --- Step 5c: Download transfer data (optional) -----------------------------
 
@@ -900,11 +924,12 @@ if (length(panel_a_drop)) {
 }
 
 cat("  Dropping unused columns from Panel B...\n")
-# Note: s_* wide columns are retained for potential levels-specification second stage
+# Note: s_* wide columns are retained for potential levels-specification second
+# stage; log_gdp and population are retained for AR robustness/balance checks.
 panel_b_drop <- intersect(
   c("total_bndes_real", "total_employment", "n_firms", "n_bndes_firms",
     "log_bndes", "bndes_per_worker",
-    "pib", "pib_real", "population", "gdp_pc", "log_gdp",
+    "pib", "pib_real", "gdp_pc",
     "hhi", "log_bndes_pc",
     "transfers_federal", "transfers_state", "transfers_total"),
   names(panel_b)
@@ -940,6 +965,11 @@ qs_save(panel_a, output_sector_path)
 cat(sprintf("  Saved Panel A: %s (%.2f MB)\n",
             output_sector_path, file.size(output_sector_path) / 1024^2))
 
+attr(panel_b, "dropped_sector_j0") <- j0
+attr(panel_b, "sector_var") <- SECTOR_VAR
+attr(panel_b, "sectors_all") <- sec_all
+attr(panel_b, "sectors_iv") <- sec_iv
+attr(panel_b, "sectors_ar") <- sec_ar
 setorder(panel_b, year, muni_id)
 qs_save(panel_b, output_muni_path)
 cat(sprintf("  Saved Panel B: %s (%.2f MB)\n",

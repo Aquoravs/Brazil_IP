@@ -79,16 +79,18 @@ svar_flag <- grep("^--sector-var=", args, value = TRUE)
 SECTOR_VAR <- "sector_group"
 if (length(svar_flag)) {
   SECTOR_VAR <- tolower(trimws(sub("^--sector-var=", "", svar_flag[1])))
-  if (!SECTOR_VAR %in% c("cnae_section", "sector_group")) {
-    stop("Invalid --sector-var value: '", SECTOR_VAR, "'. Use 'cnae_section' or 'sector_group'.")
+  if (!SECTOR_VAR %in% c("cnae_section", "sector_group", "policy_block")) {
+    stop("Invalid --sector-var value: '", SECTOR_VAR, "'. Use 'cnae_section', 'sector_group', or 'policy_block'.")
   }
 }
 USE_GROUPS <- (SECTOR_VAR == "sector_group")
+USE_POLICY_BLOCKS <- (SECTOR_VAR == "policy_block")
 SCOL <- SECTOR_VAR
 cat("Sector variable:", SECTOR_VAR, "\n\n")
 
-# Load sector group crosswalk if using grouped sectors
+# Load sector crosswalk if using grouped or policy-block sectors
 group_crosswalk <- NULL
+pb_crosswalk <- NULL
 if (USE_GROUPS) {
   cw_path <- make_output_path("sector_group_mapping.qs2")
   if (!file.exists(cw_path)) {
@@ -97,6 +99,14 @@ if (USE_GROUPS) {
   group_crosswalk <- qs_read(cw_path)
   setDT(group_crosswalk)
   cat("  Loaded sector group crosswalk:", nrow(group_crosswalk), "rows\n\n")
+} else if (USE_POLICY_BLOCKS) {
+  cw_path <- make_output_path("policy_block_mapping.qs2")
+  if (!file.exists(cw_path)) {
+    stop("Policy block mapping not found: ", cw_path, "\n  Run script 30e first.")
+  }
+  pb_crosswalk <- qs_read(cw_path)
+  setDT(pb_crosswalk)
+  cat("  Loaded policy block crosswalk:", nrow(pb_crosswalk), "rows\n\n")
 }
 
 # --- Step 1: Load reconstructed panel ----------------------------------------
@@ -146,6 +156,16 @@ if (USE_GROUPS) {
   }
   dt[, c("classe", "cnae_division") := NULL]
   cat(sprintf("  Assigned sector_group: %d unique groups\n", uniqueN(dt$sector_group)))
+}
+
+if (USE_POLICY_BLOCKS) {
+  dt[pb_crosswalk, policy_block := i.policy_block, on = "cnae_section"]
+  n_xx <- sum(dt$policy_block == "XX", na.rm = TRUE)
+  if (n_xx > 0) {
+    cat(sprintf("  Dropping %d rows in residual block XX (sections K, O, T, U)\n", n_xx))
+    dt <- dt[!is.na(policy_block) & policy_block != "XX"]
+  }
+  cat(sprintf("  Assigned policy_block: %d unique blocks\n", uniqueN(dt$policy_block)))
 }
 
 # --- Step 2: Build RAIS skeleton (muni × sector × year) ---------------------
@@ -318,6 +338,8 @@ setorderv(credit, c("year", "muni_id", SCOL))
 
 if (USE_GROUPS) {
   out_path <- make_output_path("bndes_credit_shares_grouped.qs2")
+} else if (USE_POLICY_BLOCKS) {
+  out_path <- make_output_path("bndes_credit_shares_policy_block.qs2")
 } else {
   out_path <- make_output_path("bndes_credit_shares.qs2")
 }

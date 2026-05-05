@@ -252,11 +252,11 @@ qs_save(align_dt, out_path)
 
 summ <- data.table(
   variable = dalign_cols,
-  n_positive = sapply(dalign_cols, function(dc) sum(align_dt[[dc]] > 0)),
-  n_negative = sapply(dalign_cols, function(dc) sum(align_dt[[dc]] < 0)),
-  n_zero     = sapply(dalign_cols, function(dc) sum(align_dt[[dc]] == 0)),
-  mean_shock = sapply(dalign_cols, function(dc) mean(align_dt[[dc]])),
-  sd_shock   = sapply(dalign_cols, function(dc) sd(align_dt[[dc]]))
+  n_positive = vapply(dalign_cols, function(dc) sum(align_dt[[dc]] > 0), integer(1)),
+  n_negative = vapply(dalign_cols, function(dc) sum(align_dt[[dc]] < 0), integer(1)),
+  n_zero     = vapply(dalign_cols, function(dc) sum(align_dt[[dc]] == 0), integer(1)),
+  mean_shock = vapply(dalign_cols, function(dc) mean(align_dt[[dc]]), numeric(1)),
+  sd_shock   = vapply(dalign_cols, function(dc) sd(align_dt[[dc]]), numeric(1))
 )
 fwrite(summ, summary_path)
 

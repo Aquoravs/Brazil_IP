@@ -85,6 +85,7 @@ pipeline_main <- list(
   "30b" = "3_instruments/30b_build_bndes_sector_mapping.R",
   "30c" = "3_instruments/30c_build_size_bin_mapping.R",
   "30d" = "3_instruments/30d_build_sector_size_bin_mapping.R",
+  "30e" = "3_instruments/30e_build_policy_block_mapping.R",
   "31" = "3_instruments/31_build_sector_exposure_weights.R",
   "32" = "3_instruments/32_build_alignment_shocks.R",
   "32b" = "3_instruments/32b_build_muni_employment_baselines.R",
