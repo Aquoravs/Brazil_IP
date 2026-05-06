@@ -1,0 +1,101 @@
+Loading Step 1 weights panel...
+  783,517 rows, 25 cols
+Loading Step 3 representative selection...
+  6 cluster-rep entries
+
+========================================================
+BUILDING TIER B WEIGHTS (clusters 1 and 2)
+========================================================
+Loading policy_block crosswalk...
+Loading reconstructed RAIS-BNDES panel...
+  RAIS panel: 43,422,687 firm-muni-year rows, 5,572 munis
+Loading owner affiliation data...
+Joining total_owners onto RAIS panel (Tier B match-only path)...
+  Tier B firm-muni-year rows (matched only): 35,875,419 / 43,422,687 (82.6%)
+  Tier B numerator base (firm, muni, year, party): 6,543,841 rows
+  Building Tier B for treatment=2005, window=2000-2003
+  Building Tier B for treatment=2009, window=2004-2007
+  Building Tier B for treatment=2013, window=2008-2011
+  Building Tier B for treatment=2017, window=2012-2015
+  Tier B weights panel: 451,599 rows, 5,570 munis
+  Saved: C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/explorations/anderson_rubin/a7_weight_comparison/output/a7_tier_b_weights_panel.qs2 (8.59 MB)
+
+========================================================
+BUILDING TIER B SECTOR-DECOMPOSED INSTRUMENTS
+========================================================
+  Tier B instruments panel: 70,164 muni-year rows, 11 cols
+  Saved: C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/explorations/anderson_rubin/a7_weight_comparison/output/a7_tier_b_instruments_panel.qs2 (0.74 MB)
+
+========================================================
+BUILDING TIER C SECTOR-DECOMPOSED INSTRUMENTS
+========================================================
+  Tier C sector-decomposed instruments: 70,164 rows, 26 cols
+
+========================================================
+LOADING MUNI PANEL AND MERGING INSTRUMENTS
+========================================================
+  Muni panel: 89,066 rows, 5,572 munis (full panel)
+  One-cycle sample (year 2005-2008): 22,247 rows; dropped 19 for NA/Inf log_gdp
+  Final estimation sample: 22,247 muni-year obs, 5,564 munis, 4 years (2005, 2006, 2007, 2008)
+
+========================================================
+RUNNING F-STAT FIRST STAGES (weight x spec)
+========================================================
+  [ 1] owners_muni_univ                  cluster=1  tier=C              spec=no_controls
+  [ 2] owners_muni_univ                  cluster=1  tier=C              spec=C1_FE
+  [ 3] owners_muni_univ                  cluster=1  tier=C              spec=C2_FE_R0a
+  [ 4] firm_empshare_floor               cluster=2  tier=C              spec=no_controls
+  [ 5] firm_empshare_floor               cluster=2  tier=C              spec=C1_FE
+  [ 6] firm_empshare_floor               cluster=2  tier=C              spec=C2_FE_R0a
+  [ 7] firm_muni_univ                    cluster=3  tier=C              spec=no_controls
+  [ 8] firm_muni_univ                    cluster=3  tier=C              spec=C1_FE
+  [ 9] firm_muni_univ                    cluster=3  tier=C              spec=C2_FE_R0a
+  [10] binary_muni_univ                  cluster=4  tier=C              spec=no_controls
+  [11] binary_muni_univ                  cluster=4  tier=C              spec=C1_FE
+  [12] binary_muni_univ                  cluster=4  tier=C              spec=C2_FE_R0a
+  [13] binary_empshare_floor             cluster=5  tier=C              spec=no_controls
+  [14] binary_empshare_floor             cluster=5  tier=C              spec=C1_FE
+  [15] binary_empshare_floor             cluster=5  tier=C              spec=C2_FE_R0a
+  [16] emp_muni_univ                     cluster=2  tier=C_clustermate  spec=no_controls
+  [17] emp_muni_univ                     cluster=2  tier=C_clustermate  spec=C1_FE
+  [18] emp_muni_univ                     cluster=2  tier=C_clustermate  spec=C2_FE_R0a
+  [19] owners_muni_match                 cluster=1  tier=B              spec=no_controls
+  [20] owners_muni_match                 cluster=1  tier=B              spec=C1_FE
+  [21] owners_muni_match                 cluster=1  tier=B              spec=C2_FE_R0a
+  [22] firm_empshare_floor_match         cluster=2  tier=B              spec=no_controls
+  [23] firm_empshare_floor_match         cluster=2  tier=B              spec=C1_FE
+  [24] firm_empshare_floor_match         cluster=2  tier=B              spec=C2_FE_R0a
+
+Saved F-stat table: C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/explorations/anderson_rubin/a7_weight_comparison/output/a7_onecycle_proxy_fstats.csv (24 rows)
+
+========================================================
+F-STAT RANKING UNDER C1_FE (production-relevant spec)
+========================================================
+weight_id                        tier           cl          F_kp         F_cd
+--------------------------------------------------------------------------------
+owners_muni_univ                 C                1       59.558      236.355
+owners_muni_match                B                1       59.558      236.355
+binary_muni_univ                 C                4       47.536      188.836
+firm_empshare_floor_match        B                2       45.912      181.959
+firm_muni_univ                   C                3       33.355      132.173
+emp_muni_univ                    C_clustermate    2       18.757       74.575
+binary_empshare_floor            C                5       13.813       54.901
+firm_empshare_floor              C                2       13.383       53.189
+--------------------------------------------------------------------------------
+Total rows in F-stat table: 24
+Sample: 22247 obs, 5564 munis, years 2005, 2006, 2007, 2008
+Saved summary: C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/explorations/anderson_rubin/a7_weight_comparison/output/a7_onecycle_proxy_summary.md
+
+========================================================
+STEP 4 COMPLETE
+========================================================
+F-stat rows: 24
+  Tier C (5 reps x 3 specs):       15
+  Tier C clustermate (1 x 3):      3
+  Tier B (2 weights x 3 specs):    6
+  Total expected (5+1+2 x 3):      24
+Outputs:
+  C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/explorations/anderson_rubin/a7_weight_comparison/output/a7_onecycle_proxy_fstats.csv
+  C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/explorations/anderson_rubin/a7_weight_comparison/output/a7_tier_b_weights_panel.qs2
+  C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/explorations/anderson_rubin/a7_weight_comparison/output/a7_tier_b_instruments_panel.qs2
+  C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/explorations/anderson_rubin/a7_weight_comparison/output/a7_onecycle_proxy_summary.md
