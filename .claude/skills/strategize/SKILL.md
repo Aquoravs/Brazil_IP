@@ -58,9 +58,9 @@ If research spec, literature review, or data assessment are missing, the Strateg
    - Phase 3: Inference soundness (clustering, multiple testing)
    - Phase 4: Polish and completeness (robustness, citations)
 5. If CRITICAL issues found, iterate (max 3 rounds per three-strikes)
-6. Save memo to `logs/strategy/strategy_memo_[topic].md`
-7. Save review to `logs/strategy/strategy_memo_[topic]_review.md`
-8. **Save decision record** → `logs/decisions/strategy_[topic].md`
+6. Save memo to `docs/strategy/strategy_memo_[topic].md`
+7. Save review to `docs/strategy/strategy_memo_[topic]_review.md`
+8. **Save decision record** → `docs/decisions/strategy_[topic].md`
    Using `templates/decision-record.md`, record:
    - **Decision:** The chosen identification strategy (design + estimator)
    - **Alternatives:** Other designs the Strategist considered (e.g., IV, RDD, SC, selection-on-observables)
@@ -174,9 +174,9 @@ After PAP creation, optionally dispatch the strategist-critic to review:
 - Are multiple testing corrections appropriate?
 - Are any [ASSUMED] items potentially problematic if left uncorrected?
 
-Save review to `logs/strategy/pre_analysis_plan_[topic]_review.md`
+Save review to `docs/strategy/pre_analysis_plan_[topic]_review.md`
 
-Save PAP to `logs/strategy/pre_analysis_plan_[topic].md`
+Save PAP to `docs/strategy/pre_analysis_plan_[topic].md`
 
 ---
 
@@ -223,19 +223,19 @@ If strategy memo or paper type is missing, the Theorist flags it and asks before
 
 2. Read `.claude/references/domain-profile.md` for the Theoretical Foundational References table and Author Team table.
 3. Dispatch **Theorist** to produce:
-   - `logs/theory/[topic]/theory_memo.md`
-   - `logs/theory/[topic]/assumptions.tex`
-   - `logs/theory/[topic]/results.tex`
-   - `logs/theory/[topic]/proofs.tex`
-   - `logs/theory/[topic]/notation_glossary.md`
+   - `docs/theory/[topic]/theory_memo.md`
+   - `docs/theory/[topic]/assumptions.tex`
+   - `docs/theory/[topic]/results.tex`
+   - `docs/theory/[topic]/proofs.tex`
+   - `docs/theory/[topic]/notation_glossary.md`
 4. Dispatch **theorist-critic** to review through 4 sequential phases:
    - Phase 1: Claim identification (object type, target parameter, estimator, assumptions)
    - Phase 2: Proof validity (logical, measurability, expansions, identification, asymptotic distribution) — **early-stop on critical gaps**
    - Phase 3: Assumption minimality + statement calibration + notation consistency (INV-7)
    - Phase 4: Citation fidelity + linkage to empirical claims + exposition
 5. If CRITICAL issues found, iterate (max 3 rounds per three-strikes). Escalation target: User.
-6. Save review to `logs/audits/theory_[topic]_review.md`
-7. **Save decision record** → `logs/decisions/theory_[topic].md`
+6. Save review to `journal/audits/theory_[topic]_review.md`
+7. **Save decision record** → `docs/decisions/theory_[topic].md`
    Record:
    - **Decision:** The theoretical objects proved (identification, asymptotic distribution, etc.)
    - **Assumptions:** Full list with interpretation

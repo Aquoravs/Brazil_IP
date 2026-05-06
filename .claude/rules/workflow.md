@@ -12,7 +12,7 @@
 2. **Check MEMORY.md** — read any `[LEARN]` entries relevant to this task
 3. **Requirements Specification (for complex/ambiguous tasks)** — see below
 4. **Draft the plan** — what changes, which files, in what order
-5. **Save to disk** — write to `logs/plans/YYYY-MM-DD_short-description.md`
+5. **Save to disk** — write to `journal/plans/YYYY-MM-DD_short-description.md`
 6. **Present to user** — wait for approval
 7. **Exit plan mode** — only after approval
 8. **Save initial session log** — capture goal and key context while fresh
@@ -32,7 +32,7 @@
 
 **Protocol:**
 1. Use AskUserQuestion to clarify ambiguities (max 3-5 questions)
-2. Create `logs/specs/YYYY-MM-DD_description.md` using `templates/requirements-spec.md`
+2. Create `journal/specs/YYYY-MM-DD_description.md` using `templates/requirements-spec.md`
 3. Mark each requirement:
    - **MUST** (non-negotiable)
    - **SHOULD** (preferred)
@@ -53,7 +53,7 @@
 Plans survive context compression. Save every plan to:
 
 ```
-logs/plans/YYYY-MM-DD_short-description.md
+journal/plans/YYYY-MM-DD_short-description.md
 ```
 
 Format: Status (DRAFT/APPROVED/COMPLETED), approach, files to modify, verification steps.
@@ -256,11 +256,11 @@ Borrowed from Goldsmith-Pinkham's Claude Code for Economists workflow:
 Run `/checkpoint`. It handles:
 1. Auto-memory updates (user corrections, project state, references, user profile)
 2. `SESSION_REPORT.md` append per `logging.md`
-3. `logs/research_journal.md` append
+3. `journal/research_journal.md` append
 4. (Optional) Obsidian project note if `.claude/state/obsidian-config.md` is configured
 
 Also confirm before compaction:
-- Active plan is saved to disk in `logs/plans/`
+- Active plan is saved to disk in `journal/plans/`
 - Open questions are documented
 
 The pre-compact hook reminds you of this checklist.
@@ -272,7 +272,7 @@ First message should be: "Resuming after compression. Last task: [read most rece
 
 After compression or a new session, in order:
 1. **Read [`docs/PROJECT_BLUEPRINT.md`](../../docs/PROJECT_BLUEPRINT.md) — the project's argument map.** It tells you: which premises are confirmed (P-entries), which foundations (F0–F4) are still under test, what's in flight (§5), and the current Next action (§7). This is the front door of the project; everything else is detail.
-2. **Read the most recent checkpoint artifacts:** tail of `SESSION_REPORT.md`, tail of `logs/research_journal.md`, and — if `.claude/state/obsidian-config.md` exists and Obsidian MCP is connected — the latest project-note journal entry
-3. Read `CLAUDE.md` + most recent plan in `logs/plans/`
+2. **Read the most recent checkpoint artifacts:** tail of `SESSION_REPORT.md`, tail of `journal/research_journal.md`, and — if `.claude/state/obsidian-config.md` exists and Obsidian MCP is connected — the latest project-note journal entry
+3. Read `CLAUDE.md` + most recent plan in `journal/plans/`
 4. Check `git log --oneline -10` and `git diff`
 5. State what you understand the current task to be

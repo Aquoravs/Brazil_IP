@@ -384,7 +384,7 @@ Cross-reference against `Bibliography_base.bib`.
 
 ## Report Format
 
-Save report to `logs/audits/[FILENAME]_strategy_review.md`:
+Save report to `journal/audits/[FILENAME]_strategy_review.md`:
 
 ```markdown
 # Strategy Review: [Filename]

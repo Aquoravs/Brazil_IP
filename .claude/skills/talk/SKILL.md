@@ -53,7 +53,7 @@ The Storyteller follows these design principles:
 
 Compile with XeLaTeX (Beamer) or `quarto render` (Quarto).
 
-Save to `paper/talks/[format]_talk.tex` (Beamer) or `paper/quarto/[format]_talk.qmd` (Quarto).
+Save to `journal/meetings/[format]_talk.tex` (Beamer) or `paper/quarto/[format]_talk.qmd` (Quarto).
 
 **Step 3: Dispatch Storyteller-Critic**
 
@@ -67,7 +67,7 @@ After the Storyteller returns, dispatch the storyteller-critic to review across 
 | **Scope for format** | Right amount of content for the duration — not cramming a seminar into a lightning talk, not padding a short talk to seminar length |
 | **Compilation** | Does it compile cleanly without errors or warnings? |
 
-Score as advisory (non-blocking). Save report to `logs/audits/[format]_talk_review.md`.
+Score as advisory (non-blocking). Save report to `journal/audits/[format]_talk_review.md`.
 
 **Step 4: Fix Critical Issues**
 
@@ -103,7 +103,7 @@ Run visual quality checks:
 
 Automated compilation via latexmk:
 ```bash
-cd paper/talks && latexmk [file]
+cd journal/meetings/<date> && latexmk [file]
 ```
 
 For Quarto:

@@ -28,11 +28,11 @@ Workflow:
 Before drafting, read all available context:
 1. Read existing paper draft in `paper/` (if it exists)
 2. Read `master_supporting_docs/` for notes, outlines, research specs
-3. Read most recent `logs/specs/research_spec_*.md` or `logs/literature/lit_review_*.md`
+3. Read most recent `journal/specs/research_spec_*.md` or `docs/literature/lit_review_*.md`
 4. Read `.claude/references/domain-profile.md` for field conventions
 5. Check `Bibliography_base.bib` for available citations
 6. Scan `paper/tables/` and `paper/figures/` for generated output
-7. Read `logs/results_summary.md` if it exists (from Coder)
+7. Read `journal/results_summary.md` if it exists (from Coder)
 
 #### 2. Paper Type Detection
 

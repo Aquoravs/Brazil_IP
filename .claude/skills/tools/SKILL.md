@@ -32,7 +32,7 @@ cd paper && latexmk [file]
 
 For talks:
 ```bash
-cd paper/talks && latexmk [file]
+cd journal/meetings/<date> && latexmk [file]
 ```
 
 Note: `paper/latexmkrc` configures XeLaTeX, TEXINPUTS, and BIBINPUTS. Falls back to manual 3-pass if latexmk is unavailable.
@@ -130,7 +130,7 @@ Step 3: REPLACE
   - Restore saved customizations from Step 2
 
 Step 4: DO NOT TOUCH
-  - paper/, scripts/, data/, explorations/, logs/
+  - paper/, scripts/, data/, explorations/, journal/, docs/
   - CLAUDE.md, Bibliography_base.bib, README.md, .gitignore
   - Any other user content
 

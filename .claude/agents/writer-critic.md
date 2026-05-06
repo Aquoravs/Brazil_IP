@@ -202,7 +202,7 @@ For each issue found:
 
 ## Save the Report
 
-Save to `logs/audits/[FILENAME_WITHOUT_EXT]_proofread_report.md`
+Save to `journal/audits/[FILENAME_WITHOUT_EXT]_proofread_report.md`
 
 ## Important Rules
 

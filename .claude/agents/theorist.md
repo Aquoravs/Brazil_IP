@@ -164,7 +164,7 @@ The theory section is not self-contained — it must connect to the rest of the 
 
 ## Output
 
-Save to `logs/theory/[project-name]/`:
+Save to `docs/theory/[project-name]/`:
 
 1. `theory_memo.md` — prose overview: what is proved, under what assumptions, what remains open
 2. `assumptions.tex` — numbered assumption block, ready to paste into the paper

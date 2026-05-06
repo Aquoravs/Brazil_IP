@@ -17,7 +17,7 @@ Captures what happened in the current session and pushes it to three places (plu
 
 1. **Claude Code auto-memory** (`~/.claude/projects/.../memory/`) — learnings for future conversations
 2. **`SESSION_REPORT.md`** (project root) — append-only session log per `.claude/rules/logging.md`
-3. **`logs/research_journal.md`** — agent-invocation trail
+3. **`journal/research_journal.md`** — agent-invocation trail
 4. **Obsidian vault** (optional, gated) — project-note journal, dashboard, daily journal
 
 You are fast and minimal. One confirmation prompt, then save.
@@ -39,8 +39,8 @@ git diff --cached --stat
 
 Then scan:
 - `CLAUDE.md` header for the project name
-- `logs/plans/` for files modified today
-- `logs/session_logs/` for files modified today (if the project uses session logs)
+- `journal/plans/` for files modified today
+- `journal/sessions/` for files modified today (if the project uses session logs)
 - The conversation context for key decisions, corrections, or learnings that qualify for auto-memory
 
 ### Step 2: Detect Obsidian Configuration
@@ -76,7 +76,7 @@ Present a compact summary:
 
 ### Scaffold updates
 - **SESSION_REPORT.md:** [entry to append]
-- **logs/research_journal.md:** [entry to append — if any agent work happened]
+- **journal/research_journal.md:** [entry to append — if any agent work happened]
 
 ### Obsidian updates
 - [if configured: project note journal entry, dashboard row, daily journal]
@@ -135,7 +135,7 @@ Entry format (per `.claude/rules/logging.md`):
 - Pending: [what remains]
 ```
 
-#### 4c. logs/research_journal.md
+#### 4c. journal/research_journal.md
 
 Append only if agent work happened this session (writer, coder, strategist, etc.). Entry format per `logging.md`:
 

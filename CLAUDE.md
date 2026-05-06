@@ -9,7 +9,7 @@
 
 ## Core Principles
 
-- **Plan first** — enter plan mode before non-trivial tasks; save plans to `logs/plans/`
+- **Plan first** — enter plan mode before non-trivial tasks; save plans to `journal/plans/`
 - **Verify after** — compile and confirm output at the end of every task
 - **Quality gates** — weighted aggregate score; nothing ships below 80/100; see `.claude/rules/quality.md`
 - **Worker-critic pairs** — every creator has a paired critic; critics never edit files
@@ -20,8 +20,8 @@
 ## Current Focus
 
 **Phase:** exploration — Anderson-Rubin policy evaluation (see Blueprint §1 for research question, §3 for identification chain).
-**Active advisor comments:** C4 (pooled + muni-by-muni AR test), C8 (penalized methods) — `logs/meetings/2026-04-17_tracker.md`.
-**Awaiting advisor:** C6 (alternative employment / production-factor data), C7 (local deflators) — memos in `logs/data_exploration/`.
+**Active advisor comments:** C4 (pooled + muni-by-muni AR test), C8 (penalized methods) — `journal/meetings/2026-04-17/tracker.md`.
+**Awaiting advisor:** C6 (alternative employment / production-factor data), C7 (local deflators) — memos in `docs/data_memos/`.
 **Use:** `/analyze`, `/strategize`, `/discover data`, `/tools` standalone. Do **not** invoke `/new-project`.
 **Quality gating:** exploration-phase renormalization is in effect (see `.claude/rules/quality.md` §1).
 
@@ -90,9 +90,49 @@ biber main
 xelatex -interaction=nonstopmode main.tex
 xelatex -interaction=nonstopmode main.tex
 
-# Talk compilation
-cd presentations && xelatex -interaction=nonstopmode comparison_firm_agg.tex
+# Meeting slides compilation (per-meeting subfolder)
+cd journal/meetings/2026-04-22 && xelatex -interaction=nonstopmode slides_first_stage.tex
 ```
+
+---
+
+## Folder Layout
+
+```
+docs/                      ← stable knowledge (cite-able, edited in place)
+  ├── PROJECT_BLUEPRINT.md
+  ├── strategy/            ← load-bearing strategy memos
+  ├── methodology/         ← compiled LaTeX technical notes (.tex + .pdf)
+  ├── data_memos/          ← C6/C7-style data exploration conclusions
+  └── archive/             ← superseded knowledge
+
+journal/                   ← time-stamped events (append-only, dated filenames)
+  ├── research_journal.md  ← global append-only log
+  ├── knowledge.md         ← extracted conventions/findings
+  ├── plans/               ← YYYY-MM-DD_*.md
+  ├── sessions/            ← session logs (was logs/session_logs/)
+  ├── audits/
+  └── meetings/<date>/     ← notes.md + tracker.md + slides[_variant].tex + build/
+
+paper/                     ← manuscript
+  ├── main.tex
+  ├── sections/            ← section .tex files (regs.tex, etc.)
+  ├── figures/
+  ├── tables/              ← R-generated regression tables (was paper/output/)
+  └── build/               ← .pdf, .aux — gitignored except snapshots/
+
+explorations/<branch>/<sub-branch>/    ← one subfolder per branch, with output/
+  ├── README.md
+  └── <sub-branch>/
+      ├── *.R
+      └── output/
+
+scripts/R/                 ← production pipeline (unchanged)
+templates/                 ← user-facing forms
+.claude/                   ← AI assistant infrastructure (incl. .claude/templates/)
+```
+
+**Filename test:** if filename starts with a date (`YYYY-MM-DD_…`), it's an event → `journal/`. If not, it's knowledge → `docs/` or `paper/` or `scripts/`.
 
 ---
 
@@ -125,7 +165,7 @@ cd presentations && xelatex -interaction=nonstopmode comparison_firm_agg.tex
 | 51-54 | `5_estimation/` | Firm first stage, agg. firm→sector, sector first stage, second stage |
 
 **Path configuration** — all scripts use env-var-based paths via `_utils/utils.R`:
-- `BNDES_BASE` → `data/` | `BNDES_OUTPUT` → `data/processed/` | `BNDES_TABLES` → `paper/output/` | `ENCFS_MOUNT` → encrypted RAIS mount
+- `BNDES_BASE` → `data/` | `BNDES_OUTPUT` → `data/processed/` | `BNDES_TABLES` → `paper/tables/` | `ENCFS_MOUNT` → encrypted RAIS mount
 
 Helpers: `raw_path()`, `output_path()`, `tables_path()`, `project_path()`
 
@@ -167,5 +207,5 @@ Instrument-weight variants: `owner_count`, `employment`, `equal_firm`, `binary`.
 | First stage (firm) | `5_estimation/51_*` | in-progress — 8-dim spec engine |
 | First stage (sector) | `5_estimation/53_*` | in-progress — 6-dim spec engine |
 | Second stage | `5_estimation/54_*` | in-progress — reduced form, scalar/vector 2SLS |
-| Aggregation analysis | `paper/talks/comparison_firm_agg.tex` | complete |
+| Aggregation analysis | `journal/meetings/2026-03-26/slides.tex` | complete |
 | Production crosswalk | `3_instruments/30f_*` | **pending** — `policy_block_active × S3` not yet built |

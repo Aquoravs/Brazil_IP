@@ -6,7 +6,7 @@ Pooled Anderson-Rubin test of H0: BNDES sectoral reallocation has no
 first-order GDP effect, using mayor alignment shift-share instruments at
 `policy_block` granularity (4 sectors: Agro, Ind, Infra, Serv). K = 4 in the
 primary spec; tier ascent (K = 8 / K = 12) is the R3 sensitivity ladder. Full
-identification strategy in `logs/strategy/strategy_memo_ar_test.md`.
+identification strategy in `docs/strategy/ar_test_strategy.md`.
 
 ## Status
 

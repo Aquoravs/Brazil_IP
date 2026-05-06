@@ -32,7 +32,7 @@ Structure point-by-point referee responses with classification, agent routing pe
 | **MINOR** | → Writer agent | Draft fix directly |
 
 ### Step 3: Build Tracking Document
-Save to `logs/referee_response_tracker.md` with:
+Save to `journal/referee_response_tracker.md` with:
 - Summary counts per referee
 - Action items by priority (HIGH: new analysis, MEDIUM: clarification, FLAGGED: disagreements, LOW: minor)
 
@@ -52,8 +52,8 @@ Generate LaTeX response letter with:
 When DISAGREE: open with acknowledgment, provide evidence, offer partial concession, NEVER say "the referee is wrong." FLAG for user review.
 
 ### Step 7: Save Outputs
-1. Tracker: `logs/referee_response_tracker.md`
-2. Response letter: `logs/referee_response_[journal]_[date].tex`
+1. Tracker: `journal/referee_response_tracker.md`
+2. Response letter: `journal/referee_response_[journal]_[date].tex`
 3. Revised sections: `paper/sections/` (for CLARIFICATION/REWRITE items)
 
 ---

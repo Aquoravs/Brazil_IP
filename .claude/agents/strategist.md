@@ -246,7 +246,7 @@ For each prediction:
 
 ## Output
 
-Save to `logs/strategy/[project-name]/`:
+Save to `docs/strategy/[project-name]/`:
 
 1. `strategy_memo.md` — full specification (primary output)
 2. `pseudo_code.md` — specification-level pseudo-code for main estimation

@@ -2,7 +2,7 @@
 
 ## Session Logs
 
-Individual session logs saved to `logs/session_logs/YYYY-MM-DD_description.md`.
+Individual session logs saved to `journal/sessions/YYYY-MM-DD_description.md`.
 
 ### Three Triggers (all proactive)
 
@@ -48,13 +48,13 @@ When wrapping up (user says goodbye, plan was implemented, or before context com
 
 ## Quality Reports
 
-Generated only at merge time — not at every commit or PR. Save to `logs/merges/YYYY-MM-DD_[branch-name].md`.
+Generated only at merge time — not at every commit or PR. Save to `journal/merges/YYYY-MM-DD_[branch-name].md` (folder created on first use).
 
 ---
 
 ## Research Journal
 
-Append to `logs/research_journal.md` whenever an agent completes work — writing code, drafting a section, producing a review, making an editorial decision, or transitioning between phases.
+Append to `journal/research_journal.md` whenever an agent completes work — writing code, drafting a section, producing a review, making an editorial decision, or transitioning between phases.
 **Rules:** Append only. One entry per agent invocation. Include phase transitions and editorial decisions.
 
 **Entry format:**
@@ -68,7 +68,7 @@ Append to `logs/research_journal.md` whenever an agent completes work — writin
 ```
 **Why it exists:** Agents read this to understand pipeline state — the editor checks what strategist-critic scored, the orchestrator checks which phases passed, the coder-critic checks what the coder built. It's the shared context across agents.
 
-Agent outputs (reports, scripts, memos, decisions) are saved to `logs/` by the skills that produce them.
+Agent outputs are saved by category, not under a generic `logs/`: dated events go to `journal/`, knowledge memos go to `docs/`, code outputs go to `paper/tables/` or `explorations/<branch>/output/`.
 
 ---
 

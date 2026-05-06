@@ -108,38 +108,35 @@ Main LaTeX manuscript. `main.tex` is the source of truth.
 | Directory / File | Contents |
 |-----------------|----------|
 | `main.tex` | Primary paper file |
-| `regs.tex` | Current draft of the Specifications section (firm + sector first stages, aggregation derivation, multi-municipality robustness). Standalone document; **not yet `\input{}`-ed by `main.tex`** |
+| `sections/regs.tex` | Current draft of the Specifications section (firm + sector first stages, aggregation derivation, multi-municipality robustness). Standalone document; **not yet `\input{}`-ed by `main.tex`** |
 | `figures/` | Generated figures (PDF, PNG) |
 | `tables/` | Generated regression tables, organized by level: `firm/`, `sector/`, `sector_grouped/`, `agg_firm/` |
-| `meetings/` | Beamer presentations for advisor meetings |
-| `preambles/` | Shared LaTeX headers |
-| `quarto/` | Quarto RevealJS presentations |
-| `supplementary/` | Online appendix |
-| `replication/` | Replication package for journal deposit |
+| `build/` | Compiled `.pdf` and intermediate LaTeX artifacts (gitignored except `build/snapshots/`) |
 
-### `presentations/`
+### `docs/` — stable knowledge
 
-Beamer `.tex` source files and compiled PDFs for all meeting presentations.
-
-### `docs/`
-
-Design documents, reference materials, and research notes. See [`docs/README.md`](docs/README.md) for the index.
+Cite-able, edited-in-place documents. Anything not dated.
 
 | File / Directory | Contents |
 |-----------------|----------|
-| `research_state.md` | Current research state — design decisions, taxonomies, spec engine dimensions, findings, AR-test focus |
-| `doubts.md` | 9 substantive design issues with their decisions |
-| `methodology_notes/` | Formal/technical reference docs: aggregation review, Proposition 2 verification, C3/C5/C6 explainer |
-| `meetings/` | Meeting notes |
-| `archive/` | Superseded material (master_roadmap, old CLAUDE reference, shift_share notes, first_stage review, brainstorms) |
+| `PROJECT_BLUEPRINT.md` | Argument map, F-links, decisions D1–D23, next action |
+| `strategy/` | Load-bearing strategy memos (AR-test strategy, falsification, robustness, BNDES allocation logic) |
+| `methodology/` | Compiled LaTeX technical notes (aggregation catalogue, Proposition 2, C3/C5/C6 explainer) |
+| `data_memos/` | C6 (employment sources) and C7 (local deflators) memos |
+| `archive/` | Superseded material (old roadmap, brainstorms, doubts, decisions) |
 
-### `logs/`
+### `journal/` — time-stamped events
 
-| Directory | Contents |
-|-----------|----------|
-| `plans/` | Implementation plans (dated, with status) |
-| `session_logs/` | Session progress logs |
+Append-only, dated filenames. The convention: if filename starts with a date, it lives here.
+
+| Directory / File | Contents |
+|-----------------|----------|
 | `research_journal.md` | Cumulative agent invocation log |
+| `knowledge.md` | Extracted conventions and findings |
+| `plans/` | Implementation plans (`YYYY-MM-DD_*.md`, with `archive/` for completed plans) |
+| `sessions/` | Session progress logs (`YYYY-MM-DD_*.md`) |
+| `meetings/<date>/` | Per-meeting folder: `notes.md`, `tracker.md`, `slides[_variant].tex`, `build/` |
+| `audits/` | One-off audit reports |
 
 ### `explorations/`
 

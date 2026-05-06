@@ -137,7 +137,7 @@ def append_to_session_log(project_dir: str, trigger: str) -> None:
         with open(log_files[0], "a") as f:
             f.write(f"\n\n---\n")
             f.write(f"**Context compaction ({trigger}) at {datetime.now().strftime('%H:%M')}**\n")
-            f.write(f"Check git log and logs/plans/ for current state.\n")
+            f.write(f"Check git log and journal/plans/ for current state.\n")
     except IOError:
         pass
 
@@ -150,7 +150,7 @@ def format_compaction_message(plan_info: dict | None, decisions: list[str]) -> s
 
     # Context survival checklist (merged from pre-compact.sh)
     lines.append(f"{CYAN}Context Survival Checklist:{NC}")
-    lines.append("  [ ] Active plan saved to logs/plans/")
+    lines.append("  [ ] Active plan saved to journal/plans/")
     lines.append("  [ ] SESSION_REPORT.md updated")
     lines.append("  [ ] Open questions documented")
     lines.append("")

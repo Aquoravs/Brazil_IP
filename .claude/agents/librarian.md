@@ -49,7 +49,7 @@ Produce:
 
 ## Output
 
-Save to `logs/literature/[project-name]/`:
+Save to `docs/literature/[project-name]/`:
 
 1. `annotated_bibliography.md` — organized by category with summaries
 2. `references.bib` — BibTeX entries for all papers

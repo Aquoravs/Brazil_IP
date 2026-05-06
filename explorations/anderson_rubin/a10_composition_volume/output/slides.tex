@@ -1,0 +1,528 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+\usetheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{headline}{}
+\setbeamertemplate{footline}{\hfill{\usebeamerfont{footline}\insertframenumber}\hspace{0.6em}\vspace{0.4em}}
+\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\setbeamerfont{footline}{size=\scriptsize}
+\usepackage{palatino}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{makecell}
+\title{\textbf{Composition vs.\ Volume}\\[0.4em]{\large Political Alignment and Development Lending}}
+\date{May 2026}
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Main Findings}
+\begin{itemize}\setlength{\itemsep}{0.4em}
+\item \textbf{OLS:} Sector composition strongly predicts municipal GDP. Agriculture and Industry shares are positively associated with output; total loan volume is negligible.
+\item \textbf{IV:} The joint composition effect does not reject the null across most specifications. However, Industry shows individually significant positive coefficients (5\%) in Governor and Mayor+Governor tiers. Total lending also shows no consistent effect.
+\item Findings hold across both classification schemes (broad sectors and firm-size groups) and weighting approaches.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Specification Overview}
+\begin{itemize}\setlength{\itemsep}{0.35em}
+\item \textbf{Outcome:} Log municipal GDP (municipality $\times$ year panel, 2002--2017).
+\item \textbf{Two sector classifications:}
+  \begin{itemize}\setlength{\itemsep}{0.2em}
+  \item Broad policy sectors: Agriculture, Industry, Infrastructure, Services.
+  \item Firm-size groups: Micro ($\leq$9), Small (10--49), Medium (50--249), Large ($\geq$250).
+  \end{itemize}
+\item \textbf{Four specifications:}
+  \begin{itemize}\setlength{\itemsep}{0.2em}
+  \item Pure OLS: use observed sector shares and total volume.
+  \item Composition IV: instrument sector shares only; control for total volume.
+  \item Full IV: instrument both sector shares and total volume jointly.
+  \item Volume IV: instrument total volume only; use observed sector shares.
+  \end{itemize}
+\item All specifications include municipality and year fixed effects.
+\item The highest mean-share category within each classification is the reference group.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Some Observations}
+\begin{itemize}\setlength{\itemsep}{0.35em}
+\item The weights used were selected after comparing multiple candidates.
+\item The production weight (owner-count intensity, full-municipality denominator) achieved the highest and most stable Kleibergen--Paap (KP) F-statistic across control specifications ($\approx$60).
+\item Data concerns
+  \begin{itemize}\setlength{\itemsep}{0.2em}
+  \item The Agriculture sector has a lower firm-match rate with owner data (19\%) than other sectors (67--95\%), suggesting possible selection in this industry.
+  \item 14.6\% of BNDES loan observations (2.5\% by loan value) cannot be matched to RAIS employment data and fall outside the estimation sample.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Finalized Weights for the Instruments}
+\begin{itemize}\setlength{\itemsep}{0.35em}
+\item \textbf{Production weight (primary):} Weight each municipality--party cell by the number of politically affiliated firm owners, divided by the total owner count across \textit{all} firms in the municipality.
+\item \textbf{Robustness weight (complement):} Weight by whether a firm has \textit{any} aligned owner (a binary yes/no), divided by the total number of firms in the municipality.
+\item Both weights use the full local firm universe as the denominator --- including firms that never received BNDES credit.
+\item The robustness weight captures the extensive margin of alignment (some affiliated owner). The production weight captures the intensive margin (more affiliated owners = stronger signal).
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Instrument Strength and the AR Test}
+\begin{itemize}\setlength{\itemsep}{0.35em}
+\item \textbf{Total lending instrument} (Volume IV): the instrument for total BNDES volume achieves KP F $\approx$60 (production) and $\approx$48 (robustness) under FE. Relevance is strong.
+\item \textbf{Sector-composition instruments} (Composition IV): per-variable first-stage F ranges 1.9--4.8.
+\item The composition Wald F reported on the result slides is the joint test of instrument relevance for the composition system.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Production Weight: Broad Policy Sectors}
+{\footnotesize Weight: owner-count production weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\footnotesize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Pure OLS & Composition IV & Full IV & Volume IV \\
+\midrule
+Mayor & 11.86*** [<0.001] & 0.07 [0.977] & 0.06 [0.979] & 1.78 [0.148] \\
+Governor & 11.86*** [<0.001] & 2.59* [0.051] & 1.58 [0.191] & 1.00 [0.392] \\
+Mayor + Governor & 11.86*** [<0.001] & 2.32* [0.073] & 2.09* [0.099] & 2.59* [0.051] \\
+Mayor + President & 11.86*** [<0.001] & 0.29 [0.833] & 0.08 [0.969] & 1.78 [0.149] \\
+Mayor + Gov. + President & 11.86*** [<0.001] & 1.76 [0.153] & 1.55 [0.199] & 2.53* [0.055] \\
+\bottomrule
+\end{tabular}%
+}
+\vskip 0.5em
+{\footnotesize Composition Wald F [p-value]. Controls: municipality and year fixed effects.}
+\end{frame}
+
+\begin{frame}{Production Weight: Broad Sectors --- Pure OLS Coefficients}
+{\footnotesize Weight: owner-count production weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\scriptsize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Agriculture & Industry & Infrastructure & Total \\
+\midrule
+Mayor & 0.028*** [<0.001] & 0.016*** [<0.001] & -0.002 [0.649] & -2.34e-06 [0.975] \\
+Governor & 0.028*** [<0.001] & 0.016*** [<0.001] & -0.002 [0.649] & -2.34e-06 [0.975] \\
+Mayor + Governor & 0.028*** [<0.001] & 0.016*** [<0.001] & -0.002 [0.649] & -2.34e-06 [0.975] \\
+Mayor + President & 0.028*** [<0.001] & 0.016*** [<0.001] & -0.002 [0.649] & -2.34e-06 [0.975] \\
+Mayor + Gov. + President & 0.028*** [<0.001] & 0.016*** [<0.001] & -0.002 [0.649] & -2.34e-06 [0.975] \\
+\bottomrule
+\end{tabular}%
+}
+{\footnotesize Entries are coefficient estimates with p-values in brackets. Omitted category: Services.}
+\end{frame}
+
+\begin{frame}{Production Weight: Broad Sectors --- Composition IV Coefficients}
+{\footnotesize Weight: owner-count production weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\scriptsize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Agriculture & Industry & Infrastructure & Total \\
+\midrule
+Mayor & 8.755 [0.689] & -4.291 [0.658] & 5.235 [0.673] & 0.002 [0.663] \\
+Governor & 0.427 [0.341] & 0.532** [0.020] & -0.266 [0.487] & -2.48e-04 [0.136] \\
+Mayor + Governor & 0.308 [0.408] & 0.394** [0.041] & -0.212 [0.432] & -1.81e-04 [0.212] \\
+Mayor + President & 0.068 [0.841] & 0.056 [0.749] & -0.300 [0.352] & -2.95e-06 [0.984] \\
+Mayor + Gov. + President & 0.300 [0.282] & 0.246* [0.068] & -0.201 [0.353] & -1.02e-04 [0.403] \\
+\bottomrule
+\end{tabular}%
+}
+{\footnotesize Entries are coefficient estimates with p-values in brackets. Omitted category: Services.}
+\end{frame}
+
+\begin{frame}{Production Weight: Broad Sectors --- Full IV Coefficients}
+{\footnotesize Weight: owner-count production weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\scriptsize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Agriculture & Industry & Infrastructure & Total \\
+\midrule
+Mayor & 8.100 [0.673] & -3.309 [0.696] & 4.634 [0.670] & 0.030 [0.700] \\
+Governor & -0.942 [0.493] & 0.767** [0.037] & -0.235 [0.695] & 0.028 [0.215] \\
+Mayor + Governor & -0.740 [0.319] & 0.681** [0.016] & -0.168 [0.754] & 0.029* [0.050] \\
+Mayor + President & 0.076 [0.851] & 0.097 [0.629] & -0.077 [0.867] & 0.028* [0.075] \\
+Mayor + Gov. + President & -0.087 [0.802] & 0.327** [0.031] & -0.097 [0.735] & 0.020* [0.063] \\
+\bottomrule
+\end{tabular}%
+}
+{\footnotesize Entries are coefficient estimates with p-values in brackets. Omitted category: Services.}
+\end{frame}
+
+\begin{frame}{Production Weight: Broad Sectors --- Volume IV Coefficients}
+{\footnotesize Weight: owner-count production weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\scriptsize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Agriculture & Industry & Infrastructure & Total \\
+\midrule
+Mayor & 0.030 [0.111] & -0.098 [0.144] & -0.039 [0.278] & 0.044 [0.165] \\
+Governor & 0.031 [0.247] & -0.152 [0.194] & -0.057 [0.344] & 0.065 [0.164] \\
+Mayor + Governor & 0.030 [0.159] & -0.117** [0.023] & -0.045 [0.236] & 0.052* [0.055] \\
+Mayor + President & 0.030 [0.111] & -0.098 [0.147] & -0.039 [0.280] & 0.044 [0.167] \\
+Mayor + Gov. + President & 0.030 [0.159] & -0.117** [0.030] & -0.045 [0.244] & 0.052* [0.065] \\
+\bottomrule
+\end{tabular}%
+}
+{\footnotesize Entries are coefficient estimates with p-values in brackets. Omitted category: Services.}
+\end{frame}
+
+\begin{frame}{Production Weight: Firm-Size Groups}
+{\footnotesize Weight: owner-count production weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\footnotesize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Pure OLS & Composition IV & Full IV & Volume IV \\
+\midrule
+Mayor & 34.84*** [<0.001] & 0.09 [0.964] & 0.12 [0.948] & 0.85 [0.465] \\
+Governor & 34.84*** [<0.001] & 2.24* [0.081] & 1.62 [0.182] & 0.32 [0.814] \\
+Mayor + Governor & 34.84*** [<0.001] & 1.58 [0.193] & 0.92 [0.428] & 1.21 [0.303] \\
+Mayor + President & 34.84*** [<0.001] & 1.19 [0.313] & 0.59 [0.621] & 0.82 [0.480] \\
+Mayor + Gov. + President & 34.84*** [<0.001] & 1.79 [0.147] & 0.82 [0.485] & 1.21 [0.305] \\
+\bottomrule
+\end{tabular}%
+}
+\vskip 0.5em
+{\footnotesize Composition Wald F [p-value]. Controls: municipality and year fixed effects.}
+\end{frame}
+
+\begin{frame}{Production Weight: Firm-Size Groups --- Pure OLS Coefficients}
+{\footnotesize Weight: owner-count production weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\scriptsize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Small & Medium & Large & Total \\
+\midrule
+Mayor & 0.011*** [0.001] & 0.040*** [<0.001] & 0.052*** [<0.001] & -1.34e-05 [0.853] \\
+Governor & 0.011*** [0.001] & 0.040*** [<0.001] & 0.052*** [<0.001] & -1.34e-05 [0.853] \\
+Mayor + Governor & 0.011*** [0.001] & 0.040*** [<0.001] & 0.052*** [<0.001] & -1.34e-05 [0.853] \\
+Mayor + President & 0.011*** [0.001] & 0.040*** [<0.001] & 0.052*** [<0.001] & -1.34e-05 [0.853] \\
+Mayor + Gov. + President & 0.011*** [0.001] & 0.040*** [<0.001] & 0.052*** [<0.001] & -1.34e-05 [0.853] \\
+\bottomrule
+\end{tabular}%
+}
+{\footnotesize Entries are coefficient estimates with p-values in brackets. Omitted category: Micro.}
+\end{frame}
+
+\begin{frame}{Production Weight: Firm-Size Groups --- Composition IV Coefficients}
+{\footnotesize Weight: owner-count production weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\scriptsize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Small & Medium & Large & Total \\
+\midrule
+Mayor & 1.681 [0.618] & 3.116 [0.669] & -15.291 [0.666] & 0.001 [0.707] \\
+Governor & 0.695** [0.047] & 0.500 [0.639] & 2.251 [0.388] & -3.94e-04 [0.112] \\
+Mayor + Governor & 0.618* [0.094] & -0.336 [0.640] & 3.149 [0.187] & -2.67e-04 [0.439] \\
+Mayor + President & 0.328 [0.197] & -0.201 [0.557] & 0.851 [0.288] & -2.08e-05 [0.865] \\
+Mayor + Gov. + President & 0.280 [0.250] & -0.324 [0.376] & 1.575* [0.069] & -8.60e-05 [0.598] \\
+\bottomrule
+\end{tabular}%
+}
+{\footnotesize Entries are coefficient estimates with p-values in brackets. Omitted category: Micro.}
+\end{frame}
+
+\begin{frame}{Production Weight: Firm-Size Groups --- Full IV Coefficients}
+{\footnotesize Weight: owner-count production weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\scriptsize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Small & Medium & Large & Total \\
+\midrule
+Mayor & 0.136 [0.959] & -1.233 [0.853] & 7.376 [0.824] & 0.044 [0.471] \\
+Governor & 0.567 [0.281] & 0.472 [0.739] & 2.624 [0.441] & 0.029 [0.244] \\
+Mayor + Governor & 0.423 [0.410] & -0.481 [0.626] & 4.267 [0.196] & 0.035 [0.116] \\
+Mayor + President & 0.455 [0.189] & 0.121 [0.785] & -0.116 [0.912] & 0.040* [0.074] \\
+Mayor + Gov. + President & 0.241 [0.398] & 0.002 [0.995] & 0.947 [0.271] & 0.027* [0.053] \\
+\bottomrule
+\end{tabular}%
+}
+{\footnotesize Entries are coefficient estimates with p-values in brackets. Omitted category: Micro.}
+\end{frame}
+
+\begin{frame}{Production Weight: Firm-Size Groups --- Volume IV Coefficients}
+{\footnotesize Weight: owner-count production weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\scriptsize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Small & Medium & Large & Total \\
+\midrule
+Mayor & 0.003 [0.773] & -0.063 [0.183] & -0.049 [0.486] & 0.043 [0.121] \\
+Governor & -0.002 [0.896] & -0.125 [0.351] & -0.109 [0.488] & 0.069 [0.209] \\
+Mayor + Governor & 0.002 [0.877] & -0.079* [0.066] & -0.065 [0.382] & 0.050* [0.055] \\
+Mayor + President & 0.003 [0.730] & -0.058 [0.185] & -0.044 [0.486] & 0.041 [0.102] \\
+Mayor + Gov. + President & 0.002 [0.873] & -0.079* [0.066] & -0.064 [0.381] & 0.050* [0.054] \\
+\bottomrule
+\end{tabular}%
+}
+{\footnotesize Entries are coefficient estimates with p-values in brackets. Omitted category: Micro.}
+\end{frame}
+
+\begin{frame}{Bottom Line}
+\begin{itemize}\setlength{\itemsep}{0.5em}
+\item \textbf{OLS tells a misleading story.} Sector composition correlates strongly with GDP in OLS because thriving municipalities attract specific types of lending --- not because sectoral reallocation causes growth.
+\item \textbf{IV breaks the joint correlation.} Once composition is instrumented with political alignment shocks, the \textit{joint} composition effect drops to zero across both classification schemes and both weighting approaches. Individual Industry coefficients remain significant at 5\% in some tier specifications (Governor, Mayor+Governor under Composition IV and Full IV), a nuance worth investigating further.
+\item \textbf{Total lending is also not the driver.} Even when total BNDES volume is instrumented (Volume IV), there is no consistent positive effect on municipal GDP.
+\item \textbf{Implication.} Political alignment shapes \textit{who receives} credit, but the sectoral and size composition of that credit does not independently predict local economic outcomes once the endogeneity is removed.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Technical Diagnostics}
+\begin{itemize}\setlength{\itemsep}{0.4em}
+\item Omitted reference category (owner-count production weight, Broad Policy Sectors): Services.
+\item Omitted reference category (owner-count production weight, Firm-Size Groups): Micro.
+\item Omitted reference category (aligned-firm robustness weight, Broad Policy Sectors): Services.
+\item Omitted reference category (aligned-firm robustness weight, Firm-Size Groups): Micro.
+\item Share of BNDES lending not classified by firm size: 20.9\%.
+\item The instrument for total lending is constructed independently from the sector instruments (average correlation with row sum = 1.000).
+\item Agriculture sector firm-match rate: 19\% (vs.\ 67--95\% for other sectors) --- possible selection in this industry.
+\item 14.6\% of BNDES loan records (2.5\% by loan value) have no RAIS employment match and fall outside the estimation sample.
+\end{itemize}
+\end{frame}
+
+\appendix
+\section{Robustness Weights}
+
+\begin{frame}{Robustness Weight: Broad Policy Sectors}
+{\footnotesize Weight: aligned-firm robustness weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\footnotesize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Pure OLS & Composition IV & Full IV & Volume IV \\
+\midrule
+Mayor & 11.86*** [<0.001] & 0.65 [0.582] & 0.63 [0.594] & 3.46** [0.016] \\
+Governor & 11.86*** [<0.001] & 1.40 [0.240] & 0.58 [0.627] & 0.32 [0.810] \\
+Mayor + Governor & 11.86*** [<0.001] & 1.73 [0.159] & 1.11 [0.344] & 2.11* [0.096] \\
+Mayor + President & 11.86*** [<0.001] & 1.98 [0.114] & 1.47 [0.220] & 2.32* [0.073] \\
+Mayor + Gov. + President & 11.86*** [<0.001] & 1.62 [0.183] & 1.48 [0.218] & 2.10* [0.098] \\
+\bottomrule
+\end{tabular}%
+}
+\vskip 0.5em
+{\footnotesize Composition Wald F [p-value]. Controls: municipality and year fixed effects.}
+\end{frame}
+
+\begin{frame}{Robustness Weight: Broad Sectors --- Pure OLS Coefficients}
+{\footnotesize Weight: aligned-firm robustness weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\scriptsize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Agriculture & Industry & Infrastructure & Total \\
+\midrule
+Mayor & 0.028*** [<0.001] & 0.016*** [<0.001] & -0.002 [0.649] & -2.34e-06 [0.975] \\
+Governor & 0.028*** [<0.001] & 0.016*** [<0.001] & -0.002 [0.649] & -2.34e-06 [0.975] \\
+Mayor + Governor & 0.028*** [<0.001] & 0.016*** [<0.001] & -0.002 [0.649] & -2.34e-06 [0.975] \\
+Mayor + President & 0.028*** [<0.001] & 0.016*** [<0.001] & -0.002 [0.649] & -2.34e-06 [0.975] \\
+Mayor + Gov. + President & 0.028*** [<0.001] & 0.016*** [<0.001] & -0.002 [0.649] & -2.34e-06 [0.975] \\
+\bottomrule
+\end{tabular}%
+}
+{\footnotesize Entries are coefficient estimates with p-values in brackets. Omitted category: Services.}
+\end{frame}
+
+\begin{frame}{Robustness Weight: Broad Sectors --- Composition IV Coefficients}
+{\footnotesize Weight: aligned-firm robustness weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\scriptsize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Agriculture & Industry & Infrastructure & Total \\
+\midrule
+Mayor & 5.725 [0.412] & -0.230 [0.837] & 0.288 [0.855] & 3.61e-04 [0.543] \\
+Governor & -0.165 [0.789] & 0.640* [0.059] & -0.703 [0.154] & -3.04e-04 [0.206] \\
+Mayor + Governor & 0.137 [0.786] & 0.413 [0.113] & -0.660* [0.062] & -1.70e-04 [0.402] \\
+Mayor + President & 1.094 [0.293] & 0.483 [0.352] & -1.439** [0.021] & -1.17e-04 [0.741] \\
+Mayor + Gov. + President & 0.397 [0.338] & 0.285 [0.165] & -0.443* [0.090] & -1.04e-04 [0.534] \\
+\bottomrule
+\end{tabular}%
+}
+{\footnotesize Entries are coefficient estimates with p-values in brackets. Omitted category: Services.}
+\end{frame}
+
+\begin{frame}{Robustness Weight: Broad Sectors --- Full IV Coefficients}
+{\footnotesize Weight: aligned-firm robustness weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\scriptsize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Agriculture & Industry & Infrastructure & Total \\
+\midrule
+Mayor & 5.134 [0.444] & 0.356 [0.835] & -0.313 [0.882] & 0.021 [0.641] \\
+Governor & -4.575 [0.342] & 1.836 [0.210] & -0.965 [0.585] & 0.096 [0.244] \\
+Mayor + Governor & -1.690 [0.288] & 0.920* [0.082] & -1.046 [0.161] & 0.039 [0.111] \\
+Mayor + President & 1.187 [0.368] & 0.876 [0.206] & -1.629** [0.036] & 0.041 [0.131] \\
+Mayor + Gov. + President & -0.006 [0.991] & 0.397* [0.077] & -0.422 [0.126] & 0.015 [0.210] \\
+\bottomrule
+\end{tabular}%
+}
+{\footnotesize Entries are coefficient estimates with p-values in brackets. Omitted category: Services.}
+\end{frame}
+
+\begin{frame}{Robustness Weight: Broad Sectors --- Volume IV Coefficients}
+{\footnotesize Weight: aligned-firm robustness weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\scriptsize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Agriculture & Industry & Infrastructure & Total \\
+\midrule
+Mayor & 0.029*** [0.004] & -0.029 [0.531] & -0.016 [0.411] & 0.017 [0.370] \\
+Governor & 0.035 [0.628] & -0.459 [0.360] & -0.157 [0.451] & 0.184 [0.330] \\
+Mayor + Governor & 0.030 [0.192] & -0.131* [0.051] & -0.050 [0.276] & 0.057* [0.086] \\
+Mayor + President & 0.029** [0.031] & -0.060 [0.242] & -0.026 [0.321] & 0.029 [0.206] \\
+Mayor + Gov. + President & 0.030 [0.187] & -0.128* [0.055] & -0.049 [0.278] & 0.056* [0.089] \\
+\bottomrule
+\end{tabular}%
+}
+{\footnotesize Entries are coefficient estimates with p-values in brackets. Omitted category: Services.}
+\end{frame}
+
+\begin{frame}{Robustness Weight: Firm-Size Groups}
+{\footnotesize Weight: aligned-firm robustness weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\footnotesize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Pure OLS & Composition IV & Full IV & Volume IV \\
+\midrule
+Mayor & 34.84*** [<0.001] & 0.21 [0.889] & 0.02 [0.997] & 0.74 [0.526] \\
+Governor & 34.84*** [<0.001] & 0.93 [0.427] & 0.07 [0.974] & 0.19 [0.902] \\
+Mayor + Governor & 34.84*** [<0.001] & 1.68 [0.169] & 1.15 [0.326] & 1.04 [0.373] \\
+Mayor + President & 34.84*** [<0.001] & 0.68 [0.564] & 0.56 [0.644] & 0.67 [0.573] \\
+Mayor + Gov. + President & 34.84*** [<0.001] & 1.00 [0.394] & 0.60 [0.617] & 1.04 [0.373] \\
+\bottomrule
+\end{tabular}%
+}
+\vskip 0.5em
+{\footnotesize Composition Wald F [p-value]. Controls: municipality and year fixed effects.}
+\end{frame}
+
+\begin{frame}{Robustness Weight: Firm-Size Groups --- Pure OLS Coefficients}
+{\footnotesize Weight: aligned-firm robustness weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\scriptsize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Small & Medium & Large & Total \\
+\midrule
+Mayor & 0.011*** [0.001] & 0.040*** [<0.001] & 0.052*** [<0.001] & -1.34e-05 [0.853] \\
+Governor & 0.011*** [0.001] & 0.040*** [<0.001] & 0.052*** [<0.001] & -1.34e-05 [0.853] \\
+Mayor + Governor & 0.011*** [0.001] & 0.040*** [<0.001] & 0.052*** [<0.001] & -1.34e-05 [0.853] \\
+Mayor + President & 0.011*** [0.001] & 0.040*** [<0.001] & 0.052*** [<0.001] & -1.34e-05 [0.853] \\
+Mayor + Gov. + President & 0.011*** [0.001] & 0.040*** [<0.001] & 0.052*** [<0.001] & -1.34e-05 [0.853] \\
+\bottomrule
+\end{tabular}%
+}
+{\footnotesize Entries are coefficient estimates with p-values in brackets. Omitted category: Micro.}
+\end{frame}
+
+\begin{frame}{Robustness Weight: Firm-Size Groups --- Composition IV Coefficients}
+{\footnotesize Weight: aligned-firm robustness weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\scriptsize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Small & Medium & Large & Total \\
+\midrule
+Mayor & 1.902 [0.454] & 2.694 [0.518] & -11.674 [0.511] & 9.38e-04 [0.637] \\
+Governor & 0.437 [0.266] & 0.261 [0.740] & 2.366 [0.233] & -3.59e-04 [0.235] \\
+Mayor + Governor & 0.522* [0.085] & -0.084 [0.854] & 1.770 [0.255] & -1.65e-04 [0.457] \\
+Mayor + President & 0.420 [0.326] & 0.644 [0.266] & -2.637 [0.197] & 2.04e-04 [0.599] \\
+Mayor + Gov. + President & 0.300 [0.179] & -0.093 [0.740] & 0.419 [0.654] & 2.50e-06 [0.984] \\
+\bottomrule
+\end{tabular}%
+}
+{\footnotesize Entries are coefficient estimates with p-values in brackets. Omitted category: Micro.}
+\end{frame}
+
+\begin{frame}{Robustness Weight: Firm-Size Groups --- Full IV Coefficients}
+{\footnotesize Weight: aligned-firm robustness weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\scriptsize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Small & Medium & Large & Total \\
+\midrule
+Mayor & 5.123 [0.842] & 10.883 [0.861] & -49.031 [0.855] & -0.125 [0.904] \\
+Governor & 1.856 [0.861] & 9.736 [0.731] & -10.760 [0.770] & 0.475 [0.661] \\
+Mayor + Governor & 0.467 [0.267] & -0.150 [0.847] & 2.585 [0.271] & 0.035* [0.084] \\
+Mayor + President & 0.576 [0.229] & 0.492 [0.527] & -2.047 [0.383] & 0.040 [0.129] \\
+Mayor + Gov. + President & 0.358 [0.216] & 0.189 [0.705] & 0.134 [0.915] & 0.035** [0.027] \\
+\bottomrule
+\end{tabular}%
+}
+{\footnotesize Entries are coefficient estimates with p-values in brackets. Omitted category: Micro.}
+\end{frame}
+
+\begin{frame}{Robustness Weight: Firm-Size Groups --- Volume IV Coefficients}
+{\footnotesize Weight: aligned-firm robustness weight.}
+\vskip 0.25em
+\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{4pt}%
+\scriptsize%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Political tier & Small & Medium & Large & Total \\
+\midrule
+Mayor & 0.007 [0.310] & -0.013 [0.740] & 2.56e-04 [0.996] & 0.022 [0.270] \\
+Governor & -0.022 [0.591] & -0.387 [0.458] & -0.367 [0.502] & 0.179 [0.366] \\
+Mayor + Governor & 8.98e-04 [0.935] & -0.088* [0.094] & -0.074 [0.394] & 0.054* [0.076] \\
+Mayor + President & 0.006 [0.434] & -0.026 [0.520] & -0.012 [0.819] & 0.028 [0.199] \\
+Mayor + Gov. + President & 8.93e-04 [0.936] & -0.089* [0.094] & -0.074 [0.394] & 0.054* [0.076] \\
+\bottomrule
+\end{tabular}%
+}
+{\footnotesize Entries are coefficient estimates with p-values in brackets. Omitted category: Micro.}
+\end{frame}
+
+\end{document}

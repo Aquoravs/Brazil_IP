@@ -51,7 +51,7 @@ Before any work begins:
 1. **Enter plan mode** — use `EnterPlanMode`
 2. **Create the project folder structure** — `data/raw/`, `data/cleaned/`, `scripts/R/`, `paper/sections/`, `paper/figures/`, `paper/tables/`, etc.
 3. **Draft a high-level plan** — what phases are needed, estimated scope
-4. **Save to disk** — `logs/plans/YYYY-MM-DD_new-project.md`
+4. **Save to disk** — `journal/plans/YYYY-MM-DD_new-project.md`
 5. **Present to user** — wait for approval before proceeding
 6. **Exit plan mode** — only after approval
 
@@ -59,7 +59,7 @@ Before any work begins:
 
 1. **If `interactive` or no research spec exists:**
    Run `/discover interview` to produce:
-   - Research specification (`logs/specs/research_spec_*.md`)
+   - Research specification (`journal/specs/research_spec_*.md`)
    - Domain profile (`.claude/references/domain-profile.md`) — if still template
 
 2. **Run `/discover lit`** with the research topic:

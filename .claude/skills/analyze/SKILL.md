@@ -87,7 +87,7 @@ Dispatch **coder-critic** agent — run the full 12-category checklist:
 12. **Polish** — Consistent naming conventions. No magic numbers. Clean whitespace. Professional quality ready for replication package.
 
 If strategy memo exists, cross-reference code against stated design.
-Save report to `logs/audits/[script]_code_review.md`.
+Save report to `journal/audits/[script]_code_review.md`.
 
 ### Step 5: Fix Issues
 If coder-critic finds Critical or Major issues:
@@ -163,7 +163,7 @@ When `--dual [lang1,lang2]` is provided (e.g., `--dual r,python`, `--dual r,juli
    - Point estimates must match within declared tolerance
    - Standard errors must match within declared tolerance
    - Flag any divergences with exact values from both languages
-5. Save comparison report to `logs/audits/cross_language_comparison.md`
+5. Save comparison report to `journal/audits/cross_language_comparison.md`
 
 ### Replication Tolerance Approach
 

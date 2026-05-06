@@ -316,7 +316,7 @@ Use SVG or PDF for vector graphics, PNG only for raster images.
 
 ## Output
 
-- **Beamer:** `paper/talks/[format]_talk.tex`
+- **Beamer:** `journal/meetings/[format]_talk.tex`
 - **Quarto:** `paper/quarto/[format]_talk.qmd` + `paper/quarto/custom.scss`
 
 ## What You Do NOT Do
