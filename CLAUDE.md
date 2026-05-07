@@ -31,11 +31,11 @@
 
 See [`README.md`](README.md) for full variable dictionary and data documentation.
 
-**Research question:** Is the allocation of BNDES lending across municipalities GDP-optimal?
+**Research question:** Does a politically driven exogenous shock to the sectoral composition of local economic activity affect municipal GDP, beyond the aggregate volume effect?
 
 **Identifying shock:** Political turnover (mayoral elections) interacted with baseline political affiliation of firms. Sectors whose firms were connected to the incoming party gain BNDES access; those connected to the outgoing party lose it. The variation comes from national party identity × pre-existing firm-owner partisanship, not local demand shocks.
 
-**Empirical strategy:** An Anderson-Rubin test of whether politically driven reallocation of BNDES credit across sectors affects municipal GDP. The null of zero effect is the optimality benchmark. Firm-level and sector-level first-stage work was preparatory — it produced the spec engines, taxonomies, and F-stat patterns that feed the muni-level AR test.
+**Empirical strategy:** An Anderson-Rubin test of whether politically driven shifts in sectoral employment composition affect municipal GDP. The endogenous variable is the vector of sector employment shares — the most comprehensive observable proxy for the sectoral distribution of local economic activity (sector-by-municipality value added or gross output for 2002–2017 would be preferred but are unavailable). BNDES credit is the mechanism that transmits the political shock to employment composition; it is not the estimand. The volume channel — operationalised as total BNDES disbursements normalised by initial municipal GDP (a unit-free ratio; specification subject to revision after theory/math review) — is conditioned out so the test isolates the composition channel. The null of zero effect is the optimality benchmark for the sectoral structure of the local economy. Firm-level and sector-level first-stage work was preparatory — it produced the spec engines, taxonomies, and F-stat patterns that feed the muni-level AR test.
 
 **Geographic unit:** municipality (5,570) | **Time:** 2002–2017
 

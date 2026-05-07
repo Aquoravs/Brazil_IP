@@ -41,25 +41,50 @@ Proceeding to strategy design.
 
 ### What are we testing?
 
-The parameter of interest is beta in the structural equation:
+The parameter of interest is $\beta$ in the structural equation:
 
 ```
-log(GDP_mt) = alpha_m + delta_t + beta' * s_mt + epsilon_mt
+log(GDP_mt) = alpha_m + delta_t + beta' * emp_share_mt + epsilon_mt
 ```
 
-where `s_mt = (s_1mt, ..., s_Jmt)` is the vector of BNDES credit shares across J sectors in municipality m at time t, and beta is the J-vector of sector-specific GDP **semi-elasticities** with respect to BNDES share reallocation (log outcome, share-unit regressors: a one-percentage-point increase in sector j's BNDES share is associated with a 100*beta_j percent change in GDP).
+where `emp_share_mt = (emp_share_1mt, ..., emp_share_Jmt)` is the vector of **sector employment shares** in municipality m at time t (employment in sector j divided by total municipal employment), and $\beta$ is the J-vector of sector-specific GDP **semi-elasticities** with respect to compositional reallocation of employment (log outcome, share-unit regressors: a one-percentage-point increase in sector j's employment share is associated with a $100 \cdot \beta_j$ percent change in GDP).
 
-**The null hypothesis is H0: beta = 0.** Under this null, exogenous perturbations to the sectoral composition of BNDES credit have no first-order effect on municipal GDP. This is the optimality benchmark: if the policymaker is allocating credit optimally across sectors, then small politically driven reallocations are on the tangent hyperplane to the production frontier and have zero marginal GDP effect.
+**Why employment shares?** Employment is the most comprehensive observable proxy for the sectoral distribution of economic activity at the municipality level for 2002–2017. If sector-by-municipality value added or gross output were available, they would be preferable — employment understates the activity of capital-intensive sectors and overstates labour-intensive ones — but they are not. Employment is therefore the primary measure used here, and value-added-by-sector data, when reachable, would enter as robustness (see C6, A11).
 
-**The estimand is not a single scalar.** It is a joint test of J coefficients. When J = 4 (BNDES macrosectors), it is a 4-df test (or 3-df if one sector is dropped for the simplex constraint). When J = 21 (CNAE sections), it is a ~20-df test.
+**The full causal chain.** The research question concerns the last link of:
+
+> Political turnover shock → politically connected firms in some sectors receive marginally more BNDES credit → employment in those sectors expands → the sectoral composition of economic activity within the municipality shifts → municipal GDP changes.
+
+BNDES credit shares are not the estimand; they are the mechanism that transmits the political shock to employment composition. The AR test in this memo asks whether the *last* link — composition → GDP — is non-zero, when the variation in composition is driven (instrumented) by the upstream political-credit mechanism.
+
+**The null hypothesis is $H_0: \beta = 0$.** Under this null, exogenous compositional reallocation of economic activity across sectors has no first-order effect on municipal GDP. This is the optimality benchmark for the *sectoral structure of the local economy*: if the local economy is at an interior optimum with respect to sectoral composition, small politically driven reallocations are on the tangent hyperplane to the production frontier and have zero marginal GDP effect. The optimality interpretation has shifted from "BNDES credit allocation across sectors is GDP-optimal" to "the sectoral composition of economic activity is GDP-optimal at the margin."
+
+**The estimand is not a single scalar.** It is a joint test of J coefficients. At the production margin `policy_block_active × S3` (12 active bins; D16), the AR test has up to 12 degrees of freedom (or 11 if a simplex constraint forces dropping one bin in robustness). At coarser margins (4 BNDES macrosectors), it has 3–4 df; at finer margins (`cnae_section × S3`, 51 active bins), it has up to ~50 df, requiring many-instruments methods (R18, R19).
 
 ### Why the AR test?
 
-The AR test is the correct inference tool here because:
+The AR test is the correct inference tool here for three reasons:
 
-1. **Weak first stage.** The sector-level first stage (instruments predicting BNDES credit shares) has F ~ 6 for loan amounts. Standard 2SLS inference is unreliable.
-2. **No beta estimate needed.** The policy question asks whether beta = 0, not what beta equals. The AR test answers this directly.
-3. **Robustness.** The AR test has correct size regardless of first-stage strength. Under H0: beta = 0, the AR statistic follows an exact F(K, N-K) distribution regardless of instrument relevance, whereas the 2SLS Wald test relies on strong-instrument asymptotics for its critical values. This distinction is the key advantage.
+1. **Multiple instruments, joint inference.** With $K = 12$ instruments at the primary margin (and up to ~50 at the secondary `cnae_section × S3` margin), the inferential object is a joint test of $\beta = 0$ across multiple sectors. The AR test handles this naturally as a Wald test on the reduced form.
+
+2. **Valid inference regardless of instrument strength (D20).** Under $H_0: \beta = 0$, the AR statistic follows an exact $F(K, N-K)$ distribution irrespective of first-stage relevance. The 2SLS Wald test relies on strong-instrument asymptotics for its critical values; AR does not. F2 is therefore an *informativeness* check, not a validity gate (D20) — a weak first stage means the AR confidence set is wide, not that inference is biased (Andrews, Stock & Sun 2019; Dufour 1997). CLR (Moreira 2003) may complement AR in power for $K > 1$.
+
+3. **No $\hat\beta$ estimate needed.** The policy question asks whether $\beta = 0$, not what $\beta$ equals. The AR test answers this directly without producing an unstable point estimate when the first stage is weak.
+
+**Note on first-stage diagnostics under the new framing (D24).** The earlier motivation in this memo — "first-stage F ~ 6 for loan amounts, so AR is needed for weak-IV-robust inference" — no longer applies as the *primary* motivation. Under the new framing, sector employment shares are the endogenous variable, and the first stage of instruments → sector employment composition is in fact strong (F up to 265 for `employment_log`; F1 confirmed across the production margin per D15, D16). A 2SLS approach treating employment composition as endogenous would be feasible. AR is preferred because (i) we want joint inference on a multi-dimensional $\beta$ at $K = 12$ instruments; (ii) we want a procedure that remains valid even if the first stage turns out to be weak at finer aggregation margins where $K$ grows (`cnae_section × S3`, $K \approx 50$); and (iii) we want to avoid the size distortion that affects 2SLS with non-trivial $K$ relative to cluster count. The historical F ~ 6 result for BNDES loan amounts now belongs to a *mechanism check* on the credit-share channel (the upstream link of the chain), not to the primary first-stage evidence.
+
+### Volume/composition decomposition
+
+The structural equation above isolates the **composition channel** (which sectors employ workers in what proportions) but says nothing about the **volume channel** (how much total BNDES credit, normalised by initial GDP, the municipality receives). These are conceptually distinct effects, and both could move with the political turnover shock. The decomposition is operationalised in the second stage by including a volume control:
+
+```
+log(GDP_mt) = alpha_m + delta_t + beta' * emp_share_mt
+             + lambda * (bndes_total_mt / gdp_{m,0}) + epsilon_mt
+```
+
+where the volume control is current-year total BNDES disbursements normalised by initial-period municipal GDP — a unit-free ratio. The specification of this control is the working choice and is subject to revision after theory/math review of the econometrics (e.g., whether to use initial-period GDP, lagged GDP, a time-invariant scaling like average pre-period employment, or to keep BNDES in levels with population as a separate scaling). Conditioning on the volume term partials out the aggregate level effect, so $\beta$ identifies the marginal GDP effect of compositional reallocation *holding the level of BNDES activity fixed*. Whether the volume term should be entered exogenously (OLS) or instrumented — total BNDES is itself politically endogenous — is the open question A10. The four candidate approaches are: (1) Pure AR with OLS on both; (2) Partial IV instrumenting employment shares only (the **baseline per D24**); (3) Full IV instrumenting both; (4) Mixed — OLS for shares, IV for total. Approaches (1), (3), and (4) enter as robustness.
+
+The composition/volume decomposition is what makes the AR test in this memo a *test of the optimality of the sectoral structure of the local economy*, not a test of the optimality of total spending. It is the substantive payoff of the framing introduced in D24.
 
 ---
 
@@ -388,7 +413,7 @@ log(GDP_pc_mt) = alpha_m + delta_t + gamma_Agro * Z^M_Agro,mt
 
 **Robustness: Include total municipality employment (log).** This absorbs scale effects and focuses the test on the compositional channel. However, total employment may itself respond to political alignment (employment F-stats up to 265!), making it a bad control. Include as sensitivity only.
 
-**Do NOT control for total BNDES disbursements.** This is explicitly flagged as a bad control (D10 in the design decisions): total BNDES is endogenous to the political-economy mechanism.
+**Volume control: total BNDES disbursements normalised by initial municipal GDP (per D24).** The volume channel is operationalised as the unit-free ratio $\text{bndes\_total}_{mt} / \text{gdp}_{m,0}$ — current-year total BNDES disbursement to municipality m divided by initial-period municipal GDP. Including this ratio in the second stage partials out the aggregate level effect so $\beta$ identifies the marginal GDP effect of compositional reallocation holding the level of BNDES activity fixed. The earlier guidance "do not control for total BNDES disbursements" (D10 original phrasing) has been superseded by D24/A10: under the new framing, the volume term is *required* in the second stage to isolate the composition channel from the volume channel. Whether the volume term enters exogenously (OLS) or is itself instrumented — total BNDES remains politically endogenous — is the open question A10. The specification of the volume control (ratio vs. levels with separate scaling, choice of denominator, etc.) is subject to revision after theory/math review of the econometrics.
 
 ### Simplex constraint considerations
 
@@ -556,11 +581,12 @@ Note that the instruments Z^ell_jmt do not satisfy the simplex constraint (they 
 | Decision | Recommendation | Rationale |
 |----------|---------------|-----------|
 | Test type | Pooled AR (Wald test on reduced-form regression) | Correct size under weak instruments; pooling maximizes power |
+| Endogenous variable | Sector **employment shares** `emp_share_jmt = emp_jmt / sum_j emp_jmt` (D24) | Best available proxy for the sectoral composition of local economic activity for 2002–2017; BNDES credit shares are now a mechanism check on the upstream credit-reallocation link, not the primary estimand |
 | LHS | log(GDP_pc_mt) | Standard; interpretable; semi-elasticity interpretation |
-| RHS (instruments) | Z^mayor_jmt for 4 BNDES sectors (wide format) | Starts simple (K=4); levels instruments maximize non-zero variation |
+| RHS (instruments) | Z^mayor_jmt for J sectors at the chosen aggregation margin (wide format); production margin is `policy_block_active × S3` with K = 12 instruments (D16) | Levels instruments maximize non-zero variation; AR is a Wald test on the reduced form |
 | FE | muni_id + year | Standard two-way FE |
 | Clustering | Municipality | Accounts for serial correlation within municipality |
-| Controls | None beyond FE; R0a (muni-total EC) and R0b (sector-specific EC) as Tier 1 sensitivities | Identification via shock exogeneity (BHJ shock-based inference); muni-total matches muni-level outcome; sector-specific addresses the sharper but harder-to-motivate sectoral-mix threat; see Section 3.1 |
+| Controls | **Volume control** (total BNDES disbursements / initial muni GDP, a unit-free ratio) is required in the primary spec to isolate the composition channel from the volume channel (D24, A10 baseline approach (2)); R0a (muni-total exposure control) and R0b (sector-specific exposure controls) as Tier 1 sensitivities | Volume term partials out the aggregate level effect, leaving β as the GDP effect of compositional reallocation holding the level of BNDES activity fixed; exposure controls are separate sensitivities for shock-exogeneity threats (Section 3.1); volume specification subject to revision after theory/math review |
 | Muni-by-muni | Do not pursue | T=16, K=4 gives F(4,12) with ~15% power; effective df even worse due to cycle timing |
 | Grouped AR | By state (27), by BNDES quartile (4) | Heterogeneity diagnostic only; BH-adjusted or descriptive framing for 27 tests |
 | Incomplete sectors | Include all munis; report individual t-stats alongside joint F; report per-instrument cluster counts | Zeros add no information but introduce no bias |
