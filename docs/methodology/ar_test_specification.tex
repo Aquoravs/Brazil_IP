@@ -6,8 +6,11 @@
 \usepackage{enumitem}
 \usepackage{hyperref}
 \usepackage{natbib}
+\usepackage{iftex}
 \usepackage[default,regular,black]{sourceserifpro}
-\usepackage[T1]{fontenc}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+\fi
 \hypersetup{colorlinks,linkcolor={blue},citecolor={blue},urlcolor={red}}
 
 % ====== Notation macros (consistent with regs_specification.tex) ======
@@ -107,24 +110,17 @@ distinct from employment shares:
   \frac{\mathrm{BNDES}_{jmt}}{\sum_{k}\mathrm{BNDES}_{kmt}},
 \end{equation}
 where $\mathrm{BNDES}_{jmt}$ denotes BNDES disbursements to sector $j$ in
-municipality $m$ in year $t$.\footnote{The superscript ``B'' marks the BNDES
-share. When the context is unambiguous (the firm/sector first-stage scripts in
-\texttt{5\_estimation/}, where credit shares are the outcome) we drop the
-superscript and let $s_{jmt}$ refer to credit shares; in this document, with
-employment shares as the endogenous variable per D24, the unsuperscripted
-$s_{jmt}$ refers to employment shares throughout.} BNDES shares are not the
-estimand under the framing of D24; they are the upstream mechanism through
-which the political shock is transmitted to employment composition. They enter
-the analysis only as auxiliary first-stage objects.
+municipality $m$ in year $t$. BNDES shares are not the estimand under the
+framing of D24; they are the upstream mechanism through which the political
+shock is transmitted to employment composition. They enter the analysis only
+as auxiliary first-stage objects.
 
 The total-volume control is the unit-free ratio
 \begin{equation}\label{eq:vol}
   \Vol_{mt} \;\equiv\;
   \frac{\sum_{j} \mathrm{BNDES}_{jmt}}{\mathrm{GDP}_{m,t_0}},
 \end{equation}
-with $t_0$ the initial period of the panel ($t_0=2002$). The specification of
-$\Vol_{mt}$ is the working choice and is subject to revision after a
-theory/math review.
+with $t_0$ the initial period of the panel ($t_0=2002$).
 
 %% =====================================================================
 \section{The optimality test: theory}\label{sec:theory}
@@ -405,7 +401,7 @@ panel-level non-zero cell count is smaller by a factor of $\sim 4$.
 variants in terms of \emph{distinct shocks}, but the changes variant has less
 redundancy and a more transparent shock-level interpretation. By contrast, the
 levels variant has more non-zero panel cells and thus more degrees of freedom
-for the muni-year regression—at the cost of a stronger \autoref{cond:BJS1}
+for the muni-year regression--at the cost of a stronger \autoref{cond:BJS1}
 requirement (\eqref{eq:lvl-cond}).
 
 \paragraph{Operational rule.}
@@ -442,7 +438,7 @@ non-composition channels are conceivable and are addressed in turn:
   in their own firms because of confidence shocks. This would deliver a
   reduced-form effect on $s_{mt}$ via firm-level investment that is not
   mediated by BNDES credit, but it is still a \emph{composition} channel and
-  therefore part of the estimand by construction—it is not an exclusion
+  therefore part of the estimand by construction--it is not an exclusion
   violation. The estimand is the GDP effect of compositional shifts driven by
   the political shock, whether transmitted through BNDES credit or through
   partisan-firm investment.

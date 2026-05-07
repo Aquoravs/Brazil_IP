@@ -1,0 +1,32 @@
+# latexmkrc — docs/methodology
+#
+# Layout produced by `latexmk -cd <doc>.tex` (or VS Code Build):
+#   docs/methodology/<doc>.tex                  ← source
+#   docs/methodology/<doc>.pdf                  ← final PDF, beside source
+#   docs/methodology/build/<doc>.{aux,log,out,
+#                                 fls,fdb_latexmk,
+#                                 xdv,synctex.gz}
+#
+# Single source of truth for build layout. Do NOT pass -outdir / -auxdir from
+# VS Code or the command line — let this file dictate where things go.
+
+# --- Engine ------------------------------------------------------------------
+$pdf_mode = 5;  # XeLaTeX
+$xelatex  = 'xelatex -interaction=nonstopmode -file-line-error -synctex=1 %O %S';
+
+# --- Layout ------------------------------------------------------------------
+# PDF beside the .tex; everything else under build/.
+$out_dir = '.';
+$aux_dir = 'build';
+
+# --- SyncTeX -----------------------------------------------------------------
+# latexmk moves synctex.gz to $out_dir along with the PDF when $aux_dir differs.
+# We want it with the rest of the auxiliary files, so move it back after a
+# successful build. `-cd` already chdir'd into the source dir, so $src is just
+# the bare filename. `.Trim('"')` strips the surrounding double quotes that
+# latexmk adds to %R/%Y substitutions.
+$success_cmd = q{powershell -NoProfile -ExecutionPolicy Bypass -Command "$r='%R'.Trim('"'); $aux='%Y'.Trim('"'); $src = $r + '.synctex.gz'; $dst = Join-Path $aux ($r + '.synctex.gz'); if (Test-Path -LiteralPath $src) { Move-Item -LiteralPath $src -Destination $dst -Force }"};
+
+# --- Cleanup -----------------------------------------------------------------
+# Make `latexmk -c` and `latexmk -C` reach inside build/.
+$clean_ext = "synctex.gz xdv";
