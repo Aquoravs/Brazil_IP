@@ -1,0 +1,1029 @@
+\documentclass{article}
+\usepackage[top=2.3cm, bottom=2.3cm, left=2.1cm, right=2.1cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{bbm}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage[default,regular,black]{sourceserifpro}
+\usepackage[T1]{fontenc}
+\hypersetup{colorlinks,linkcolor={blue},citecolor={blue},urlcolor={red}}
+
+% ====== Notation macros (consistent with regs_specification.tex) ======
+\newcommand{\Align}{\mathrm{Align}}
+\newcommand{\FA}{\mathrm{FA}}
+\newcommand{\EC}{\mathrm{EC}}
+\newcommand{\Vol}{\mathrm{Vol}}
+\newcommand{\ind}{\mathbf{1}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\bzero}{\mathbf{0}}
+\newcommand{\iotaVec}{\boldsymbol{\iota}}
+\DeclareMathOperator{\E}{\mathbb{E}}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\Cov}{Cov}
+\DeclareMathOperator*{\plim}{plim}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\theoremstyle{definition}
+\newtheorem{condition}{Condition}
+\newtheorem{definition}{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+% Provide hyperref autoref names for theorem-like environments
+\providecommand{\conditionautorefname}{Condition}
+\providecommand{\propositionautorefname}{Proposition}
+\providecommand{\lemmaautorefname}{Lemma}
+\providecommand{\theoremautorefname}{Theorem}
+\providecommand{\definitionautorefname}{Definition}
+\providecommand{\remarkautorefname}{Remark}
+
+% Allow line breaks in \texttt for long paths
+\renewcommand{\ttdefault}{lmtt}
+\sloppy
+
+\begin{document}
+
+\title{An Anderson--Rubin Test of Sectoral-Composition Optimality\\
+       at the Municipality Level\\[2pt]
+       \large Specification, Identification, and the Reduced-Form Equivalence}
+\author{}
+\date{\today}
+\maketitle
+
+\begin{abstract}
+\noindent
+This document is the technical reference for the Anderson--Rubin (AR) optimality
+test that is the inferential object of the paper. It (i) derives the
+directional-derivative condition that grounds the null
+$H_0:\beta=\bzero$ in the envelope theorem; (ii) maps the shift-share
+identification framework of \citet{borusyak2022quasi} (BJS) onto our political-turnover
+instrument and discusses the levels-versus-changes choice formally; (iii) writes
+the instruments out from primitives, including the office-specific
+pre-election window and the two timing variants; (iv) shows that the AR test
+of $H_0:\beta=\bzero$ is exactly the joint Wald test on the instruments in the
+reduced-form GDP equation, and that this equivalence is what makes the
+estimator of script~54 a weak-instrument-robust optimality test; (v) treats
+the volume-channel control formally; and (vi) collects the inference questions
+raised by spatial correlation in shift-share designs.
+The document is intentionally compact and presupposes the construction in
+\texttt{docs/methodology/regs\_specification.tex}.
+\end{abstract}
+
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{12pt}
+
+\section*{Setup and notation}\label{sec:notation}
+
+We index municipalities by $m\in\{1,\dots,M\}$ ($M=5{,}570$), sectors by
+$j\in\{1,\dots,J\}$, years by $t\in\{2002,\dots,2017\}$, offices by
+$\ell\in\{\mathrm{M},\mathrm{G},\mathrm{P}\}$ (mayor, governor, president), and
+parties by $p$. Lower-case Latin letters $f,g$ index firms.
+
+The endogenous object is the vector of \emph{sector employment shares}
+\[
+  s_{jmt} \;\equiv\; \frac{n_{jmt}}{n_{mt}},
+  \qquad
+  n_{mt} \equiv \sum_{j=1}^{J} n_{jmt},
+  \qquad
+  \sum_{j=1}^{J} s_{jmt} \;=\; 1,
+\]
+constructed from RAIS firm--municipality--year employment counts. Stacked
+across $j$, $s_{mt}\equiv(s_{1mt},\dots,s_{Jmt})'\in\Delta^{J-1}$ lies on the
+unit simplex; $\iotaVec' s_{mt}=1$ and $\iotaVec'\Delta s_{mt}=0$ for any change.
+The outcome is municipal log real GDP, $Y_{mt}\equiv\log(\mathrm{GDP}_{mt})$, and
+$\Delta Y_{mt}\equiv Y_{mt}-Y_{m,t-1}$.
+
+We propose the following notation for BNDES sector credit shares to keep them
+distinct from employment shares:
+\begin{equation}\label{eq:bndes-share-notation}
+  s^{\mathrm{B}}_{jmt}
+  \;\equiv\;
+  \frac{\mathrm{BNDES}_{jmt}}{\sum_{k}\mathrm{BNDES}_{kmt}},
+\end{equation}
+where $\mathrm{BNDES}_{jmt}$ denotes BNDES disbursements to sector $j$ in
+municipality $m$ in year $t$.\footnote{The superscript ``B'' marks the BNDES
+share. When the context is unambiguous (the firm/sector first-stage scripts in
+\texttt{5\_estimation/}, where credit shares are the outcome) we drop the
+superscript and let $s_{jmt}$ refer to credit shares; in this document, with
+employment shares as the endogenous variable per D24, the unsuperscripted
+$s_{jmt}$ refers to employment shares throughout.} BNDES shares are not the
+estimand under the framing of D24; they are the upstream mechanism through
+which the political shock is transmitted to employment composition. They enter
+the analysis only as auxiliary first-stage objects.
+
+The total-volume control is the unit-free ratio
+\begin{equation}\label{eq:vol}
+  \Vol_{mt} \;\equiv\;
+  \frac{\sum_{j} \mathrm{BNDES}_{jmt}}{\mathrm{GDP}_{m,t_0}},
+\end{equation}
+with $t_0$ the initial period of the panel ($t_0=2002$). The specification of
+$\Vol_{mt}$ is the working choice and is subject to revision after a
+theory/math review.
+
+%% =====================================================================
+\section{The optimality test: theory}\label{sec:theory}
+%% =====================================================================
+
+\paragraph{Environment.}
+A municipal economy in $(m,t)$ allocates fixed factors across $J$ sectors with
+shares $s_{mt}\in\Delta^{J-1}$. Local output (or any local welfare proxy) is
+\[
+  Y_{mt} \;=\; Y\!\left(s_{mt};\,\theta_{mt}\right),
+\]
+where $\theta_{mt}$ collects municipality-time fundamentals (productivity,
+factor prices, infrastructure) and $Y(\cdot;\theta)$ is twice continuously
+differentiable in $s$ on the relative interior of $\Delta^{J-1}$. Externalities
+through $s_{mt}$ are admitted: the framework does not assume independence of
+the sectoral production technologies.
+
+\paragraph{The directional-derivative condition.}
+A feasible reallocation direction is any $v\in\mathbb{R}^J$ with
+$\iotaVec'v=0$, so the perturbation $s_{mt}+\varepsilon v$ remains on the
+simplex for small $\varepsilon$. At an interior optimum $s^{*}_{mt}\in
+\mathrm{int}(\Delta^{J-1})$ of $Y(\cdot;\theta_{mt})$, the first-order
+condition is
+\begin{equation}\label{eq:dirderiv}
+  \frac{\mathrm{d}}{\mathrm{d}\varepsilon} Y\!\left(s^{*}_{mt}+\varepsilon v\right)
+  \bigg|_{\varepsilon=0}
+  \;=\;
+  \nabla_{s} Y(s^{*}_{mt})\cdot v
+  \;=\;
+  0
+  \qquad\text{for every } v\perp \iotaVec.
+\end{equation}
+Equivalently, the gradient is parallel to the simplex normal, $\nabla_{s}Y\propto\iotaVec$, i.e.\ the
+social marginal returns to factors are equalized across sectors. This is the
+local-optimality benchmark.
+
+\begin{remark}[Envelope intuition]
+Equation~\eqref{eq:dirderiv} is the envelope condition for the planner's
+problem $\max_{s\in\Delta^{J-1}} Y(s;\theta)$: at an interior maximizer,
+infinitesimal feasible perturbations have zero first-order welfare effect
+\citep{samuelson1947foundations}. Rejection of~\eqref{eq:dirderiv} therefore
+identifies that the observed allocation is not at an interior maximum, and
+the sign pattern of the gradient prescribes the reallocation direction that
+would raise $Y$.
+\end{remark}
+
+\paragraph{From the gradient to a regression.}
+A first-order Taylor expansion of $Y$ around the observed allocation at
+$t-1$ yields, for any direction $\Delta s_{mt}$ with $\iotaVec'\Delta s_{mt}=0$,
+\begin{equation}\label{eq:taylor}
+  \Delta Y_{mt}
+  \;=\;
+  \nabla_{s}Y(s_{m,t-1};\theta_{m,t-1})'\,\Delta s_{mt}
+  \;+\;
+  \alpha_m + \delta_t + u_{mt}
+  \;+\;
+  O(\|\Delta s_{mt}\|^2),
+\end{equation}
+where $\alpha_m$ and $\delta_t$ absorb time-invariant municipal and common
+year-level components of $\theta_{m,t-1}$, and $u_{mt}$ is the residual.
+Define $\beta\equiv\nabla_{s}Y(s_{m,t-1};\theta_{m,t-1})$; under the
+local-optimality hypothesis~\eqref{eq:dirderiv} this gradient lies in the span
+of $\iotaVec$, so its projection onto the within-simplex subspace
+$\{v:\iotaVec'v=0\}$ is the zero vector. The structural equation in levels of
+$Y$ (with simplex-feasible $s$) is therefore
+\begin{equation}\label{eq:struct}
+  Y_{mt} \;=\; \alpha_m + \delta_t + \beta'\,s_{mt}
+            + \lambda\,\Vol_{mt} + \varepsilon_{mt},
+\end{equation}
+and the null hypothesis is
+\begin{equation}\label{eq:H0}
+  H_{0}:\quad \beta = \bzero.
+\end{equation}
+The volume term $\Vol_{mt}$ enters because the same political-turnover shock
+that perturbs the sectoral mix also perturbs the aggregate level of credit;
+$\beta$ identifies the composition channel only after the level channel has
+been partialed out. Section~\ref{sec:vol} develops this.
+
+\begin{remark}[Why a level regression rather than a difference]
+$s_{mt}$ varies across $m$ both within and across years, and $Y_{mt}$ is itself a
+level. With municipality fixed effects $\alpha_m$, equation~\eqref{eq:struct}
+identifies $\beta$ from the within-municipality time-variation of $s_{mt}$; with
+year fixed effects $\delta_t$, common trends in $Y$ are absorbed. The
+specification is equivalent up to projection to a first-difference equation in
+$\Delta Y_{mt}$ and $\Delta s_{mt}$ when $\alpha_m$ and $\delta_t$ are present;
+we keep the levels form because the data are stored as a long muni-year panel
+in which $\Vol_{mt}$ is naturally a level (initial-period denominator), and
+because the simplex constraint $\iotaVec' s_{mt}=1$ is more transparent than
+$\iotaVec'\Delta s_{mt}=0$.
+\end{remark}
+
+\paragraph{Simplex constraint.}
+Because $\iotaVec' s_{mt}=1$ holds in every $(m,t)$ cell, the regressor matrix
+of $s_{mt}$ on a constant has reduced rank. Two operationally equivalent
+solutions:
+\begin{enumerate}[leftmargin=*,nosep]
+  \item Drop one sector $j_0$ (the largest-mean sector by convention, D6)
+    and interpret each $\beta_j$ as the effect of substituting one unit of
+    employment share from $j_0$ to $j$.
+  \item Residualize $s_{mt}$ on $\iotaVec$ (within $(m,t)$ this is degenerate)
+    or, equivalently, project onto the within-simplex subspace.
+\end{enumerate}
+We adopt option~(1) throughout. All elements of the estimated $\hat\beta$
+should be read as differences relative to $j_0$, and the AR test on the
+remaining $J-1$ coefficients is invariant to the choice of $j_0$.
+
+\begin{remark}[Optional input--output adjustment]
+If the planner cares about gross output through the Leontief multiplier, one
+may replace $s_{mt}$ with the IO-adjusted shares $\tilde s_{mt}\equiv B' s_{mt}$
+where $B=(I-A)^{-1}$ for a national input--output matrix $A$. The
+local-optimality null becomes $\tilde\beta=\bzero$ in
+$Y_{mt}=\alpha_m+\delta_t+\tilde\beta'\tilde s_{mt}+\lambda\Vol_{mt}+\varepsilon_{mt}$.
+The instruments and the AR construction below carry over without modification
+because $\tilde s_{mt}$ is a known linear transformation of $s_{mt}$.
+\end{remark}
+
+%% =====================================================================
+\section{Identification strategy}\label{sec:identification}
+%% =====================================================================
+
+\subsection{The shift-share form of the instrument}
+
+Define the firm-level baseline owner-party exposure
+\(
+  \omega^{\ell}_{fp,t}
+\)
+and the sector-level exposure
+\(
+  w^{\ell}_{jmp,t}
+\)
+as in the companion methodology note
+\texttt{docs/methodology/regs\_specification.tex} (\S{}1). The
+sector-level levels instrument is
+\begin{equation}\label{eq:Z}
+  Z^{\ell}_{jmt}
+  \;\equiv\;
+  \sum_{p} w^{\ell}_{jmp,t}\,\Align^{\ell}_{mpt},
+\end{equation}
+and the changes variant is
+\begin{equation}\label{eq:dZ}
+  \Delta Z^{\ell}_{jmt}
+  \;\equiv\;
+  \sum_{p} w^{\ell}_{jmp,t}\,\Delta\Align^{\ell}_{mpt},
+  \qquad
+  \Delta\Align^{\ell}_{mpt} \equiv \Align^{\ell}_{mpt} - \Align^{\ell}_{mp,t-1}.
+\end{equation}
+$Z^{\ell}_{jmt}$ is a within-region inner product of \emph{shares}
+$w^{\ell}_{jmp,t}$ (sector-municipality exposure to party $p$, computed over
+the office-specific pre-election window) and \emph{shifts}
+$\Align^{\ell}_{mpt}$ (whether $p$ holds office $\ell$ in $m$). It is the
+sector-aggregated counterpart of the firm-level instrument
+$\FA^{\ell}_{fmt}=\sum_p \omega^{\ell}_{fp,t}\Align^{\ell}_{mpt}$ via the
+owner-count-weighted aggregation identity
+$Z^{\ell}_{jmt}=\sum_{f\in\cF^{\mathrm{pre}}_{jme}}
+(L_{f,t}/N^{\ell}_{jm,t})\FA^{\ell}_{fmt}$.
+
+\subsection{BJS conditions, mapped to our setting}
+
+\citet{borusyak2022quasi} treat shift-share IVs as IV estimators in a
+\emph{shock-level} sample, where the unit of identification is a
+$(\text{shock})$ rather than an $(m,t)$ cell. In our notation the
+``shocks'' are office-party-municipality cells $k\equiv(\ell,p,m,t)$ with
+shifts $g_k\equiv\Align^{\ell}_{mpt}$ (or $\Delta\Align^{\ell}_{mpt}$) and
+exposures $w^{\ell}_{jmp,t}$. We restate their three primitive identification
+assumptions and map each to our setting.
+
+\begin{condition}[BJS-1: Quasi-random shock assignment]\label{cond:BJS1}
+Conditional on a vector of shock-level controls $q_k$,
+\(
+  \E[g_k \mid \{w^{\ell}_{jmp,t}\}_{j},\, q_k] = \mu(q_k)
+\)
+is the same for shocks with different exposure profiles. Equivalently, in our
+panel: among $(\ell,p,m,t)$ cells with the same controls $q_k$, who is aligned
+is as good as randomly assigned with respect to municipal GDP residuals.
+\end{condition}
+
+\begin{condition}[BJS-2: Many uncorrelated shocks]\label{cond:BJS2}
+The number of effective shocks $K_{\mathrm{eff}}$ is large, and shocks are
+uncorrelated with each other after conditioning on $q_k$.
+\end{condition}
+
+\begin{condition}[BJS-3: Non-concentration of average exposure]\label{cond:BJS3}
+The Herfindahl of the average exposure weights across shocks is small, so no
+single shock drives the IV estimate.
+\end{condition}
+
+\paragraph{What each buys.}
+\autoref{cond:BJS1} is the analogue of the exclusion restriction. It is what
+allows the instrument $Z^{\ell}_{jmt}$ to be exogenous in the structural
+GDP equation. \autoref{cond:BJS2} provides the law-of-large-numbers justification
+that shock-level orthogonality of $g_k$ to municipal residuals translates into
+unit-level (muni-year) orthogonality of $Z^{\ell}_{jmt}$ to $\varepsilon_{mt}$.
+\autoref{cond:BJS3} ensures that the asymptotic distribution of the IV
+estimator is non-degenerate and not driven by a handful of large-exposure
+shocks.
+
+\paragraph{What can violate \autoref{cond:BJS1} in our setting.}
+The political-alignment shock $\Align^{\ell}_{mpt}$ is not literally random:
+parties win office because voters prefer them. Quasi-random assignment is
+plausible only after conditioning on a sufficient set $q_k$ of shock-level
+controls. The relevant candidates for $q_k$ are: (a) state-by-year fixed
+effects (so identification is within-state contests); (b) lagged municipal
+political controls (a party's pre-period vote share); (c) lagged GDP and
+employment trends (so a party that systematically wins in growing
+municipalities is not confounded with growth); and (d) sector-by-year fixed
+effects in the first stage (\autoref{sec:firststage}) so that nationwide
+sectoral cycles are absorbed at the shock level. The empirical strategy
+includes muni and year fixed effects, exposure controls $\EC^{\ell}_{jm,t}$,
+and (in robustness) a pre-period GDP trend; see \autoref{sec:fe}.
+
+\subsection{Levels versus changes: a formal sufficient condition}
+
+The same shift-share construction admits two timing variants of the shift:
+$\Align^{\ell}_{mpt}\in\{0,1\}$ in levels, or
+$\Delta\Align^{\ell}_{mpt}\in\{-1,0,+1\}$ in changes. They differ in how the
+identifying variation is distributed over time.
+
+\begin{proposition}[Sufficient conditions for the levels and changes
+instruments]\label{prop:lvlchg}
+Suppose $Y_{mt}=\alpha_m+\delta_t+\beta' s_{mt}+\lambda\Vol_{mt}+\varepsilon_{mt}$
+with $\E[\varepsilon_{mt}\mid \alpha_m,\delta_t]=0$, and let
+$\mathcal{H}_{m,t-1}\equiv\sigma(Y_{m,t'},\Vol_{m,t'},s_{m,t'};t'<t)$ be the
+pre-period information set.
+
+(i) The \emph{levels} instrument $Z^{\ell}_{jmt}$ satisfies the BJS quasi-random
+assignment condition \autoref{cond:BJS1} if, for every cycle $e_\ell$,
+\begin{equation}\label{eq:lvl-cond}
+  \E\!\left[\Align^{\ell}_{mp,e_\ell+\tau}\,\big|\,
+    \{w^{\ell}_{jmp,e_\ell}\}_{j},\,\mathcal{H}_{m,e_\ell-1},\, q_{k}\right]
+  \;=\;
+  \mu_\tau(q_k),
+  \qquad \tau\in\{1,2,3,4\},
+\end{equation}
+i.e.\ alignment status is uncorrelated with prior municipal trajectories
+conditional on $q_k$, throughout the entire post-election cycle.
+
+(ii) The \emph{changes} instrument $\Delta Z^{\ell}_{jmt}$ satisfies
+\autoref{cond:BJS1} if, for every inauguration year $t=e_\ell+1$,
+\begin{equation}\label{eq:chg-cond}
+  \E\!\left[\Delta\Align^{\ell}_{mpt}\,\big|\,
+    \{w^{\ell}_{jmp,t}\}_{j},\,\mathcal{H}_{m,t-1},\, q_{k}\right]
+  \;=\;
+  \mu(q_k),
+\end{equation}
+i.e.\ the turnover at $e_\ell$ is uncorrelated with prior trajectories
+conditional on $q_k$.
+\end{proposition}
+
+\paragraph{Discussion.}
+Equation~\eqref{eq:lvl-cond} requires conditional mean-independence of
+alignment from pre-period outcomes \emph{at every horizon} within the
+electoral term. Equation~\eqref{eq:chg-cond} requires it only \emph{at the
+moment of turnover}. The latter is empirically weaker: turnover is closer to a
+discontinuity at the election date and need only be unrelated to the
+trajectory entering the election, not to the entire path that follows. In
+practice this means the changes specification carries a milder requirement on
+$q_k$, consistent with the standard discontinuity logic.
+
+In the levels specification, $\Align^{\ell}_{mpt}$ is non-zero for the entire
+$\sim 4$-year cycle, so the pre-period control set $q_k$ must absorb anything
+that correlates persistently within a cycle with both alignment and outcomes
+(e.g.\ a slow-moving regional growth differential). Including a pre-period
+GDP trend, lagged $Y_{m,t-1}$, or muni-specific linear trends are natural
+strengthenings; the 2002-fixed baseline in $\omega^{\ell}_{fp,t}$ also reduces
+the dependence on contemporaneous alignment-cycle dynamics.
+
+\paragraph{Many-shocks count under \autoref{cond:BJS2}.}
+The effective number of shocks differs sharply between the two variants. With
+$M=5{,}570$, four mayoral cycles ($e_\ell\in\{2004,2008,2012,2016\}$) and
+$P\approx 30$ parties, the total \emph{candidate} shock count is on the order
+of $M\times P\times 4\approx 6.7\times 10^{5}$ for the mayor tier alone. The
+levels variant uses each shock for $\sim 4$ post-election years, but those four
+year-replicates contribute redundant information for shock-level inference
+(the shock value is constant within a cycle). The changes variant uses each
+shock once at inauguration, so its effective shock count is the same but its
+panel-level non-zero cell count is smaller by a factor of $\sim 4$.
+\autoref{cond:BJS2} is therefore satisfied at comparable levels by both
+variants in terms of \emph{distinct shocks}, but the changes variant has less
+redundancy and a more transparent shock-level interpretation. By contrast, the
+levels variant has more non-zero panel cells and thus more degrees of freedom
+for the muni-year regression—at the cost of a stronger \autoref{cond:BJS1}
+requirement (\eqref{eq:lvl-cond}).
+
+\paragraph{Operational rule.}
+Levels instruments are the primary specification, on grounds of statistical
+power and continuity with the existing pipeline. The changes instruments are
+the robustness specification. If the two reject in agreement, the
+substantive conclusion is robust to whichever of \eqref{eq:lvl-cond} or
+\eqref{eq:chg-cond} actually holds in the data; if they disagree, the
+discrepancy isolates exactly the part of the variation that
+\eqref{eq:lvl-cond} is asking about beyond \eqref{eq:chg-cond}.
+
+\subsection{Exclusion restriction}
+
+The exclusion restriction proper is that the instrument
+$Z^{\ell}_{jmt}$ enters $Y_{mt}$ only through the
+sectoral employment composition $s_{mt}$, after conditioning on the volume
+control $\Vol_{mt}$ and on the controls of \autoref{sec:fe}. Three
+non-composition channels are conceivable and are addressed in turn:
+\begin{enumerate}[leftmargin=*,nosep]
+\item \emph{Volume of BNDES credit.} Political alignment changes both the
+  composition and the level of BNDES credit. The level effect is partialled out
+  by $\Vol_{mt}$ in~\eqref{eq:struct}. The exclusion restriction asks that,
+  conditional on $\Vol_{mt}$, $Z^{\ell}_{jmt}$ does not drive $Y_{mt}$ through a
+  residual volume channel.
+\item \emph{Non-BNDES political channels.} A new mayor may also change
+  procurement, transfers, or local public investment in ways that move
+  GDP. \autoref{cond:BJS1} accommodates this only if those channels are
+  orthogonal to the \emph{sector-specific} pattern of $w^{\ell}_{jmp,t}$. We
+  test this in robustness as a placebo: if $Z^{\ell}_{jmt}$ predicts municipal
+  transfers or procurement after conditioning, the exclusion restriction is
+  weakened.
+\item \emph{Direct partisanship effects on private behaviour.} Even absent
+  any policy change, owners aligned with the new ruling party may invest more
+  in their own firms because of confidence shocks. This would deliver a
+  reduced-form effect on $s_{mt}$ via firm-level investment that is not
+  mediated by BNDES credit, but it is still a \emph{composition} channel and
+  therefore part of the estimand by construction—it is not an exclusion
+  violation. The estimand is the GDP effect of compositional shifts driven by
+  the political shock, whether transmitted through BNDES credit or through
+  partisan-firm investment.
+\end{enumerate}
+
+%% =====================================================================
+\section{Instrument construction}\label{sec:instrument}
+%% =====================================================================
+
+We summarize the construction; the primitives are derived in
+\texttt{regs\_specification.tex}.
+
+\paragraph{Pre-election window.}
+For office $\ell$ and year $t$, let $e_\ell(t)$ be the most recent election
+year for office $\ell$ on or before $t$. The pre-election window is
+\begin{equation}\label{eq:window}
+  T^{\ell}_{t} \;\equiv\; \big[e_\ell(t)-4,\; e_\ell(t)-1\big] \cap [2002,2017].
+\end{equation}
+Within an electoral term $T^{\ell}_t$ is constant in $t$; at cycle boundaries,
+$e_\ell(t)$ advances and $T^{\ell}_{t}$ updates. The 2003 governor/president
+cycle (whose pre-window is 1998--2001, fully outside the data) is dropped.
+
+\paragraph{Sector-municipality baseline exposure.}
+Pooled-count, owner-count-weighted (D3, D8):
+\begin{equation}\label{eq:wjmp}
+  w^{\ell}_{jmp,t}
+  \;\equiv\;
+  \frac{1}{|T^{\ell}_t|}\sum_{s\in T^{\ell}_t}
+    \frac{\sum_{f\in\cF(j,m)} L_{f,p,s}}
+         {\sum_{f\in\cF(j,m)} L_{f,s}},
+  \qquad
+  \sum_{p} w^{\ell}_{jmp,t}\le 1,
+\end{equation}
+where $\cF(j,m)$ is the firm support of cell $(j,m)$, and $L_{f,p,s}$ and
+$L_{f,s}$ are firm-level affiliated and total owner counts. The residual
+$1-\sum_{p}w^{\ell}_{jmp,t}$ is the unaffiliated-owner share, which contributes
+zero to $Z^{\ell}_{jmt}$ but enters the exposure control
+$\EC^{\ell}_{jm,t}\equiv\sum_p w^{\ell}_{jmp,t}$ that absorbs total
+political connectedness of cell $(j,m)$.
+
+\paragraph{Sector instruments and muni-level stacking.}
+Equations~\eqref{eq:Z}--\eqref{eq:dZ} define the sector-level instruments. To
+take them to the muni-year level for the AR test, we \emph{stack} sector and
+office:
+\begin{equation}\label{eq:stacked}
+  Z_{mt}
+  \;\equiv\;
+  \big( Z^{\ell}_{jmt} \big)_{\ell\in\{\mathrm{M,G,P}\},\,j=1,\dots,J}
+  \;\in\;\mathbb{R}^{K},
+  \qquad
+  K \;=\; 3\cdot J.
+\end{equation}
+At the production margin $\texttt{policy\_block\_active}\times\texttt{S3}$ with
+$J=12$ active bins, $K=36$ for the full mayor-governor-president stack and
+$K=12$ for the mayor-only specification (the primary in the strategy memo
+at \texttt{docs/strategy/ar\_test\_strategy.md}, \S{}3). At the secondary
+margin $\texttt{cnae\_section}\times\texttt{S3}$ with $J=51$ active bins,
+$K=51$ or $K=153$.
+
+\begin{remark}[Wide vs.\ aggregated muni-level instrument]
+An alternative aggregation, ``stack-and-summarize,'' would collapse
+$Z^{\ell}_{jmt}$ to a single muni-year object via
+$Z^{\ell}_{mt}=\sum_j w_j Z^{\ell}_{jmt}$ for some weights $w_j$. This reduces
+$K$ but imposes an aggregation that pre-loads which sectors matter; we treat
+it as a robustness check. The wide stacking~\eqref{eq:stacked} keeps the
+cross-sector pattern of the shock visible to the test and makes the
+``$\beta=\bzero$'' null intelligible coefficient by coefficient.
+\end{remark}
+
+%% =====================================================================
+\section{First stage}\label{sec:firststage}
+%% =====================================================================
+
+The first stage relating sectoral employment shares to the instruments is
+estimated on the muni-sector-year panel (Panel A) at the chosen aggregation
+margin:
+\begin{equation}\label{eq:fs}
+  s_{jmt}
+  \;=\;
+  \sum_{\ell}\,\pi^{\ell}_j\, Z^{\ell}_{jmt}
+  \;+\;
+  \sum_{\ell}\,\phi^{\ell}_j\,\EC^{\ell}_{jm,t}
+  \;+\;
+  \gamma_{jm} + \alpha_{jt}
+  \;+\;
+  \eta_{jmt},
+\end{equation}
+with municipality$\times$sector fixed effects $\gamma_{jm}$
+($\sim$\texttt{muni\_id\^{}cnae\_section} in fixest), sector$\times$year fixed
+effects $\alpha_{jt}$ ($\sim$\texttt{cnae\_section\^{}year}), and standard
+errors two-way clustered by $\texttt{muni\_id}$ and sector. The exposure
+control $\EC^{\ell}_{jm,t}$ absorbs the total pre-period political
+connectedness of $(j,m)$ across all parties and is the level-restricted
+analogue of \citeauthor{goldsmith2020bartik}'s share-level controls
+\citep{goldsmith2020bartik}.
+
+The first-stage F-statistic, computed via
+$\mathtt{fixest::wald(\cdot,\,keep="\char`\^Z\_")}$ on the full set of
+sector-tier instruments, is the diagnostic for $\autoref{cond:BJS3}$ and for
+F2 informativeness in our identification chain. Per D20 it is not a validity
+gate for the AR test: weak first stages widen the AR confidence set but do
+not bias inference.
+
+\begin{remark}[Stacked first stage for the AR test]
+The AR equivalence in \autoref{sec:ar} does not require the first
+stage~\eqref{eq:fs} to be estimated separately; it is internally embedded in
+the reduced-form Wald test. We document~\eqref{eq:fs} because the F-statistic
+from~\eqref{eq:fs} is the relevant power diagnostic, and because the pattern
+of $\hat\pi^{\ell}_j$ across sectors is the natural mechanism narrative.
+\end{remark}
+
+%% =====================================================================
+\section{The AR test: reduced form}\label{sec:ar}
+%% =====================================================================
+
+\subsection{Derivation}
+
+\paragraph{Step 1: Structural equation.}
+At the muni-year level, restate~\eqref{eq:struct} as
+\begin{equation}\label{eq:second}
+  Y_{mt}
+  \;=\;
+  \alpha_m + \delta_t + \beta' s_{mt}
+  \;+\;
+  \lambda\,\Vol_{mt}
+  \;+\;
+  \varepsilon_{mt}.
+\end{equation}
+Stack the $K$ sector-tier instruments as in~\eqref{eq:stacked}. Aggregate the
+sector-level first stage~\eqref{eq:fs} to the muni-year level by reading
+$s_{mt}\in\mathbb{R}^J$ as a vector and writing the muni-year first stage in
+matrix form:
+\begin{equation}\label{eq:fs-stacked}
+  s_{mt}
+  \;=\;
+  \alpha^{(s)}_m + \delta^{(s)}_t
+  \;+\;
+  \Pi\, Z_{mt}
+  \;+\;
+  \Phi\, \EC_{mt}
+  \;+\;
+  \mu\,\Vol_{mt}
+  \;+\;
+  \nu_{mt},
+\end{equation}
+where $\Pi\in\mathbb{R}^{J\times K}$ is the matrix of first-stage coefficients
+collected from~\eqref{eq:fs} after the sector-by-sector slopes have been
+expanded into the wide format aligned with~\eqref{eq:stacked}, and
+$\EC_{mt}\equiv(\EC^{\ell}_{jm,t})_{\ell,j}$ is the stacked exposure-control
+vector.
+
+\paragraph{Step 2: Reduced form by substitution.}
+Substitute~\eqref{eq:fs-stacked} into~\eqref{eq:second} and collect terms:
+\begin{align}
+  Y_{mt}
+  &= \alpha_m + \delta_t + \beta'\!\left(\alpha^{(s)}_m + \delta^{(s)}_t
+       + \Pi\, Z_{mt} + \Phi\,\EC_{mt} + \mu\,\Vol_{mt} + \nu_{mt}\right)
+       + \lambda\,\Vol_{mt} + \varepsilon_{mt} \notag \\
+  &= \tilde\alpha_m + \tilde\delta_t
+       + \underbrace{(\Pi'\beta)'}_{\equiv\,\gamma'\in\mathbb{R}^K}\, Z_{mt}
+       + \underbrace{(\Phi'\beta)'}_{\equiv\,\psi'}\, \EC_{mt}
+       + \underbrace{(\beta'\mu+\lambda)}_{\equiv\,\tilde\lambda}\,\Vol_{mt}
+       + \underbrace{\beta'\nu_{mt}+\varepsilon_{mt}}_{\equiv\,\eta_{mt}},
+       \label{eq:rf}
+\end{align}
+where $\tilde\alpha_m=\alpha_m+\beta'\alpha^{(s)}_m$ and
+$\tilde\delta_t=\delta_t+\beta'\delta^{(s)}_t$ are absorbed by the
+muni and year fixed effects. Equation~\eqref{eq:rf} is the
+\emph{reduced-form GDP equation}.
+
+\paragraph{Step 3: $H_0$ in the reduced form.}
+Under $H_{0}:\beta=\bzero$,
+\begin{equation}\label{eq:rf-null}
+  \gamma \;=\; \Pi'\beta \;=\; \bzero \in \mathbb{R}^{K},
+  \qquad
+  \psi \;=\; \Phi'\beta \;=\; \bzero,
+  \qquad
+  \tilde\lambda \;=\; \lambda.
+\end{equation}
+Equation~\eqref{eq:rf-null} is the testable content. It says that under
+$H_0$ all $K$ instruments enter the reduced-form GDP equation with zero
+coefficient. This is true \emph{regardless of $\Pi$}: the implication holds
+whether the first stage is strong, weak, or zero.
+
+\paragraph{Step 4: The AR test as the joint Wald on $Z_{mt}$.}
+Estimate
+\begin{equation}\label{eq:rf-est}
+  Y_{mt}
+  \;=\;
+  \tilde\alpha_m + \tilde\delta_t
+  + \gamma'\,Z_{mt}
+  + \psi'\,\EC_{mt}
+  + \tilde\lambda\,\Vol_{mt}
+  + \eta_{mt},
+\end{equation}
+and test
+\begin{equation}\label{eq:wald}
+  H_{0}^{\mathrm{AR}}:\quad \gamma = \bzero \quad\Longleftrightarrow\quad H_0:\;\beta=\bzero.
+\end{equation}
+The cluster-robust Wald statistic for $\gamma=\bzero$ in~\eqref{eq:rf-est} is
+the AR test statistic. Operationally:
+\begin{quote}
+\texttt{mod\_rf <- feols(log\_gdp\_pc \textasciitilde{} Z + EC + Vol \texttt{|} muni\_id + year,\\
+\hphantom{mod\_rf <- }data = dt, vcov = \textasciitilde muni\_id)}\\
+\texttt{ar\_stat <- fixest::wald(mod\_rf, keep = "\textasciicircum Z\_")\$stat}
+\end{quote}
+
+\subsection{Equivalence with the canonical AR statistic}
+
+The canonical Anderson--Rubin statistic of \citet{anderson1949estimation} for
+$H_0:\beta=\beta_0$ in the simultaneous equation $Y=X\beta+u$ with instruments
+$Z$ is
+\begin{equation}\label{eq:canonical-ar}
+  \mathrm{AR}(\beta_0)
+  \;=\;
+  \frac{(Y - X\beta_0)' P_Z (Y - X\beta_0)/K}
+       {(Y - X\beta_0)' M_Z (Y - X\beta_0)/(N-K)},
+\end{equation}
+with $P_Z=Z(Z'Z)^{-1}Z'$ and $M_Z=I-P_Z$ after projection of all variables on
+the fixed-effect space. Under correct specification and $\beta=\beta_0$,
+$\mathrm{AR}(\beta_0)\sim F_{K,\,N-K-n_{\mathrm{FE}}}$ exactly under
+homoskedasticity, and asymptotically $\chi^2_K/K$ under
+heteroskedasticity-robust forms \citep{andrews2019weak,kleibergen2002pivotal}.
+
+\begin{lemma}[Reduced-form equivalence at $\beta_0=\bzero$]\label{lem:ar-rf}
+At $\beta_0=\bzero$, the AR statistic~\eqref{eq:canonical-ar} reduces to the
+$F$-statistic for $\gamma=\bzero$ in the reduced-form
+regression~\eqref{eq:rf-est}.
+\end{lemma}
+\begin{proof}[Sketch]
+At $\beta_0=\bzero$, $Y-X\beta_0=Y$ and \eqref{eq:canonical-ar} becomes the
+ratio of the explained sum of squares of $Y$ on $Z$ (divided by $K$) to the
+residual sum of squares (divided by $N-K$), which is exactly the
+$F$-statistic for the joint significance of $Z$ in
+$Y=\gamma' Z + \mathrm{(FE)} + \eta$. With heteroskedasticity-robust /
+cluster-robust variance, the corresponding Wald form replaces the homoskedastic
+$F$ and is the cluster-robust AR statistic of
+\citet{finlay2009implementing}.
+\end{proof}
+
+\paragraph{What this buys us.}
+\autoref{lem:ar-rf} is what makes the AR optimality test cheap to implement:
+the practitioner only needs to estimate~\eqref{eq:rf-est} and run a Wald
+test on the instruments. No first stage is needed for the test; no $\hat\beta$
+needs to exist. The first stage~\eqref{eq:fs}--\eqref{eq:fs-stacked} is
+informative for power but not for size.
+
+\subsection{Weak-instrument robustness, many instruments, and CLR}
+
+The AR test has correct size under $H_0:\beta=\bzero$ for any value of $\Pi$,
+including $\Pi=0$. This follows from the fact that under $H_0$ the
+reduced-form coefficient $\gamma=\Pi'\beta$ vanishes regardless of $\Pi$. The
+2SLS Wald test is not size-correct when $\Pi$ is small, because its
+critical values rely on a non-degenerate first-stage limit
+\citep{andrews2019weak,dufour1997some}.
+
+For $K>1$, the conditional likelihood ratio (CLR) test of
+\citet{moreira2003conditional} dominates AR in power for many parameter
+configurations. We treat CLR as a complementary robustness statistic; it is
+not yet implemented in the project pipeline.
+
+For $K\to\infty$ asymptotics (the secondary margin
+$\texttt{cnae\_section}\times\texttt{S3}$ with $K\approx 50$--$150$),
+\citet{mikusheva2022many} provide the ridge-regularised jackknifed AR test that
+is valid for $K/N\to c\in(0,1)$. This is the relevant inference for the
+many-instrument robustness specification.
+
+%% =====================================================================
+\section{Volume control}\label{sec:vol}
+%% =====================================================================
+
+The volume term $\Vol_{mt}$ in~\eqref{eq:struct} partitions the political
+shock's effect on $Y_{mt}$ into a level (or volume) channel and a composition
+channel. Without it, the test of $H_0:\beta=\bzero$ would conflate the two:
+turnover both reallocates credit across sectors and changes its aggregate
+amount, and~\eqref{eq:dirderiv} concerns only the former.
+
+\paragraph{Construction.}
+\begin{equation}\label{eq:vol-explicit}
+  \Vol_{mt} \;\equiv\;
+  \frac{\sum_{j}\sum_{f\in\cF(j,m)}\mathrm{BNDES}_{fmt}}{\mathrm{GDP}_{m,2002}}
+  \;=\;
+  \frac{\mathrm{BNDES\_total}_{mt}}{\mathrm{GDP}_{m,2002}}.
+\end{equation}
+The numerator is current-period total municipal BNDES disbursements; the
+denominator is initial-period municipal GDP (2002 R\$). The ratio is unit-free
+and time-comparable across municipalities. The choice of the 2002 denominator
+fixes the scaling at a pre-treatment value, so $\Vol_{mt}$ varies in $t$ only
+through the numerator.
+
+\begin{remark}[Why a pre-treatment denominator]
+Using contemporaneous $\mathrm{GDP}_{mt}$ as the denominator would induce
+$\mathrm{cor}(\Vol_{mt},Y_{mt})\neq 0$ mechanically through the
+denominator, bias the partialling-out of the volume channel, and create a
+``bad-control'' problem for the AR test. The 2002 denominator avoids this.
+\end{remark}
+
+\paragraph{Should $\Vol_{mt}$ be instrumented?}
+$\Vol_{mt}$ is itself endogenous: the same political shocks that move sector
+shares move the aggregate. The natural instrument for $\Vol_{mt}$ is a
+muni-level aggregation of $Z^{\ell}_{jmt}$, weighted by the pre-period sector
+shares; this is the muni-level shift-share for the level channel. The four
+candidate operationalisations from the strategy memo (A10) are:
+\begin{enumerate}[leftmargin=*,nosep]
+\item \emph{Pure AR.} OLS for both $s_{mt}$ and $\Vol_{mt}$ in the reduced form
+  (i.e., neither is treated as the structural endogenous variable). The AR test
+  is on $Z_{mt}$; $\Vol_{mt}$ is included as a pre-determined control.
+\item \emph{Partial IV} (\textbf{baseline}, per D24). Treat $s_{mt}$ as
+  endogenous and instrumented by $Z_{mt}$; treat $\Vol_{mt}$ as exogenous.
+  The reduced-form AR equation~\eqref{eq:rf-est} includes $\Vol_{mt}$ on the
+  right-hand side and tests $\gamma=\bzero$ on $Z_{mt}$.
+\item \emph{Full IV.} Instrument both $s_{mt}$ and $\Vol_{mt}$. This requires a
+  separate instrument for $\Vol_{mt}$ that is not collinear with $Z_{mt}$ in
+  finite sample; the obvious candidate is a sum or PCA of $Z^{\ell}_{jmt}$
+  across $j$, but that creates near-collinearity with $Z_{mt}$ itself.
+\item \emph{Mixed.} OLS on $s_{mt}$, IV on $\Vol_{mt}$. Symmetric to (3) and
+  similarly suffers from near-collinearity.
+\end{enumerate}
+The baseline (2) is the operative specification of the
+paper. Approaches (1), (3), (4) enter as robustness. The choice between (1)
+and (2) is consequential only if $\Vol_{mt}$ is a strong correlate of
+$\varepsilon_{mt}$ \emph{after} partialling out $Z_{mt}$ and the FE; under the
+exclusion restriction this residual correlation is bounded by the strength of
+non-political confounders of total credit.
+
+\begin{remark}[The collinearity tradeoff]
+Approaches (3) and (4) deliver consistent estimators of both $\beta$ and
+$\lambda$ if a separate instrument for $\Vol_{mt}$ exists. The candidate
+$\sum_{j}Z^{\ell}_{jmt}$ collapses across sectors and discards the
+identifying variation in cross-sector tilts that is precisely what powers the
+AR test. Building a non-trivial second instrument requires new variation
+(e.g.\ a national fiscal-cycle shock that scales the BNDES envelope without
+shifting its sectoral allocation). We do not pursue this here.
+\end{remark}
+
+%% =====================================================================
+\section{Controls and fixed effects}\label{sec:fe}
+%% =====================================================================
+
+We document the role of each control / fixed effect and the assumption it
+enables.
+
+\paragraph{Municipality fixed effect $\alpha_m$.}
+Absorbs all time-invariant municipal characteristics: geography, fixed
+infrastructure stocks, time-invariant institutional quality, fixed
+sectoral-comparative-advantage components of $\theta_{m}$. With $\alpha_m$,
+identification of $\beta$ uses only \emph{within}-muni variation in
+$s_{mt}$. Required for \autoref{cond:BJS1} to be plausible: a level
+correlation between alignment frequency and economic level across
+municipalities is allowed.
+
+\paragraph{Year fixed effect $\delta_t$.}
+Absorbs national-level shocks affecting all municipalities in the same year:
+common monetary policy, national IPCA inflation, national electoral
+cycles affecting all jurisdictions simultaneously. Required so the
+identifying variation in $\Align^{\ell}_{mpt}$ is the cross-muni dispersion in
+who-rules-where in a given year, not the national alternation between Lula,
+Dilma, and Temer.
+
+\paragraph{Exposure control $\EC^{\ell}_{jm,t}$.}
+$\EC^{\ell}_{jm,t}=\sum_p w^{\ell}_{jmp,t}$ measures total pre-period political
+connectedness of $(j,m)$ at office $\ell$. It is the level-restricted analogue
+of \citeauthor{goldsmith2020bartik}'s share-controls strategy: it absorbs any
+direct effect of the share component of the SSIV that is not mediated by the
+shift component. In the AR reduced form~\eqref{eq:rf-est}, $\EC^{\ell}_{jm,t}$
+is included alongside $Z^{\ell}_{jmt}$ to remove this share-channel
+confounding from the test on $\gamma$.
+
+\paragraph{Pre-period GDP trend (robustness).}
+A muni-specific linear trend in $t$, fitted on $Y_{m,t-1}$ and earlier, can be
+included to harden \autoref{cond:BJS1} against persistent muni-level growth
+differentials that correlate with party alignment. This is the practical
+manifestation of the $q_k$ in \autoref{cond:BJS1}. We treat it as robustness
+because it costs degrees of freedom (1 parameter per municipality) and
+because the muni-by-year FE design already absorbs everything cross-cycle.
+
+\paragraph{State$\times$year fixed effect (robustness).}
+$\zeta_{s(m)t}$ where $s(m)$ is the state of $m$ absorbs governor-level shocks
+common to all municipalities in a state. Including it removes the variation
+exploited by the governor-tier instruments $Z^{\mathrm{G}}_{jmt}$, so it is
+incompatible with using all three tiers; it is included as a within-state
+robustness exercise that uses only mayor-tier instruments.
+
+\paragraph{What is not included by design.}
+We do not include lagged sector shares $s_{m,t-1}$ as controls. Doing so would
+absorb the pre-period mix and break the within-simplex projection: the
+gradient $\nabla_s Y$ is identified from changes \emph{around} the
+pre-period mix, not from levels conditional on it. This is the standard
+``Nickell bias''-style argument adapted to the simplex.
+
+%% =====================================================================
+\section{Inference}\label{sec:inference}
+%% =====================================================================
+
+\paragraph{Primary clustering.}
+Standard errors in~\eqref{eq:rf-est} are clustered by $\texttt{muni\_id}$.
+The number of clusters ($M=5{,}570$) is large relative to the parameter
+dimension and to the number of effective shocks per cycle, so cluster-robust
+inference is well-calibrated.
+\citet{finlay2009implementing} establish that the cluster-robust Wald
+statistic for $\gamma=\bzero$ in~\eqref{eq:rf-est} is the cluster-robust
+AR test, with size correctly controlled under quite general within-cluster
+dependence structures.
+
+\paragraph{Two-way clustering.}
+For the sector-level first stage~\eqref{eq:fs} we cluster two-way by
+municipality and sector. For the muni-year reduced form~\eqref{eq:rf-est}
+the natural second clustering dimension is harder: clustering by
+\emph{shock} ($\ell,p,m,t$) is collinear with the by-muni clustering, and
+clustering by year would yield only $T=16$ clusters.
+
+\paragraph{Spatial correlation.}
+\citet{adao2019shift} show that residuals in shift-share designs are
+correlated across units that share similar exposure structures (here, similar
+$w^{\ell}_{jmp,t}$ profiles). Cluster-robust SEs by $\texttt{muni\_id}$ do not
+fully internalize this correlation, and may understate uncertainty. Two
+remedies:
+\begin{enumerate}[leftmargin=*,nosep]
+\item State-level clustering as a robustness check. The $27$ Brazilian states
+  are coarse and trigger few-clusters concerns
+  \citep{carter2017asymptotic}; we use the wild cluster bootstrap
+  in this case.
+\item The Adão--Kolesár--Morales correction \citep{adao2019shift}, computed at
+  the shock level. This is the right inference under the BJS framework but is
+  not yet implemented in the pipeline.
+\end{enumerate}
+
+\paragraph{Concern: state-level governor shock and within-state correlation.}
+Within a state, all municipalities receive the same
+$\Align^{\mathrm{G}}_{mpt}$ in $t$. The SSIV variation across municipalities in
+$Z^{\mathrm{G}}_{jmt}$ then comes only from heterogeneity in
+$w^{\mathrm{G}}_{jmp,t}$, the pre-period sector-municipality exposure. If
+residuals are correlated within a state through governor-level non-BNDES
+channels (state-level transfers, court appointments, public investment),
+inference on the governor-tier instruments is the most exposed to
+\citet{adao2019shift}'s correction. Mayor-tier instruments are less exposed
+because $\Align^{\mathrm{M}}_{mpt}$ varies across municipalities. President-tier
+instruments are the most exposed because $\Align^{\mathrm{P}}_{mpt}$ is
+constant nationally in any given year and is absorbed by $\delta_t$ entirely;
+the within-tier identifying variation is purely through
+$w^{\mathrm{P}}_{jmp,t}$. We therefore report tier-specific AR statistics
+alongside the joint test.
+
+\paragraph{Effective sample size and time-series content.}
+The levels instrument $Z^{\ell}_{jmt}$ is a step function in $t$ that is
+constant within each electoral cycle. With muni and year FE, the variation
+exploited is the cross-municipality dispersion in instrument step-changes at
+cycle boundaries (mayor: 2005, 2009, 2013, 2017; governor/president: 2007,
+2011, 2015). Each municipality contributes $\sim 3$--$4$ independent step-changes
+per tier; the cross-municipality average has $\sim M\times 3$ degrees of
+freedom for the mayor tier alone. This is the relevant denominator for
+power, not the panel-level $M\times T$.
+
+%% =====================================================================
+\section{Summary}\label{sec:summary}
+%% =====================================================================
+
+The Anderson--Rubin optimality test of this paper is operationally a Wald test
+on the instruments in the reduced-form GDP regression~\eqref{eq:rf-est}. The
+substantive content is the directional-derivative condition~\eqref{eq:dirderiv}
+of \autoref{sec:theory}, which equates the local-optimality null to
+$\beta=\bzero$ in the structural equation~\eqref{eq:struct}. The reduced-form
+equivalence (\autoref{lem:ar-rf}) is what makes the test (i) weak-instrument
+robust, (ii) joint across $K$ sector-tier instruments, and (iii) implementable
+without producing a $\hat\beta$ point estimate when the first stage is weak.
+The shift-share framework of \citet{borusyak2022quasi} provides the
+identification conditions; \autoref{prop:lvlchg} states the formal sufficient
+conditions for the levels and changes timing variants and shows that the
+changes variant carries a milder requirement on pre-period dynamics. The
+volume control $\Vol_{mt}$ partials out the level channel of the political
+shock, leaving only the composition channel as the object of the test.
+Inference is cluster-robust by municipality, with state-level and
+\citet{adao2019shift} corrections in robustness.
+
+%% =====================================================================
+\appendix
+\section*{Appendix: Notation glossary}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{ll}
+\toprule
+Symbol & Object \\
+\midrule
+$m,j,t,\ell,p$ & municipality, sector, year, office, party \\
+$f$ & firm; $\cF(j,m)$ firm support of cell $(j,m)$ \\
+$s_{jmt}$ & sector $j$ employment share in $(m,t)$, $\sum_j s_{jmt}=1$ \\
+$s^{\mathrm{B}}_{jmt}$ & sector $j$ BNDES credit share in $(m,t)$ \\
+$Y_{mt}$ & log real GDP in $(m,t)$ \\
+$\beta$ & $J$-vector of GDP gradient w.r.t.\ employment shares \\
+$\Vol_{mt}$ & $\mathrm{BNDES\_total}_{mt}/\mathrm{GDP}_{m,2002}$ \\
+$T^{\ell}_{t}$ & pre-election window for office $\ell$ at year $t$, eq.\eqref{eq:window} \\
+$L_{f,p,t}$ & owners of firm $f$ affiliated with party $p$ at $t$ \\
+$\omega^{\ell}_{fp,t}$ & firm-level baseline party exposure, pooled-count \\
+$w^{\ell}_{jmp,t}$ & sector-level baseline party exposure, eq.\eqref{eq:wjmp} \\
+$\Align^{\ell}_{mpt}$ & $\ind\{\text{party } p \text{ holds office } \ell \text{ in } m \text{ at } t\}$ \\
+$\Delta\Align^{\ell}_{mpt}$ & alignment turnover ($\neq 0$ at inauguration) \\
+$Z^{\ell}_{jmt}$ & sector-tier levels instrument, eq.\eqref{eq:Z} \\
+$\Delta Z^{\ell}_{jmt}$ & sector-tier changes instrument, eq.\eqref{eq:dZ} \\
+$Z_{mt}$ & stacked muni-year instrument vector, eq.\eqref{eq:stacked}, dim.\ $K$ \\
+$\EC^{\ell}_{jm,t}$ & sector-level exposure control, $\sum_p w^{\ell}_{jmp,t}$ \\
+$\Pi$ & first-stage matrix in eq.\eqref{eq:fs-stacked} \\
+$\gamma=\Pi'\beta$ & reduced-form coefficient on $Z_{mt}$ in eq.\eqref{eq:rf-est} \\
+$\mathrm{AR},\,F_{\mathrm{AR}}$ & Anderson--Rubin statistic / $F$-form \\
+$H_0:\beta=\bzero$ & local-optimality null \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%% =====================================================================
+\begin{thebibliography}{99}
+
+\bibitem[Adão, Kolesár, and Morales(2019)]{adao2019shift}
+Ad\~ao, R., M.~Koles\'ar, and E.~Morales (2019).
+``Shift-share designs: Theory and inference,''
+\emph{Quarterly Journal of Economics} 134(4): 1949--2010.
+
+\bibitem[Anderson and Rubin(1949)]{anderson1949estimation}
+Anderson, T.~W., and H.~Rubin (1949).
+``Estimation of the parameters of a single equation in a complete system of
+stochastic equations,''
+\emph{Annals of Mathematical Statistics} 20(1): 46--63.
+
+\bibitem[Andrews, Stock, and Sun(2019)]{andrews2019weak}
+Andrews, I., J.~H. Stock, and L.~Sun (2019).
+``Weak instruments in instrumental variables regression: Theory and practice,''
+\emph{Annual Review of Economics} 11: 727--753.
+
+\bibitem[Borusyak, Hull, and Jaravel(2022)]{borusyak2022quasi}
+Borusyak, K., P.~Hull, and X.~Jaravel (2022).
+``Quasi-experimental shift-share research designs,''
+\emph{Review of Economic Studies} 89(1): 181--213.
+
+\bibitem[Carter, Schnepel, and Steigerwald(2017)]{carter2017asymptotic}
+Carter, A.~V., K.~T. Schnepel, and D.~G. Steigerwald (2017).
+``Asymptotic behavior of a $t$-test robust to cluster heterogeneity,''
+\emph{Review of Economics and Statistics} 99(4): 698--709.
+
+\bibitem[Dufour(1997)]{dufour1997some}
+Dufour, J.-M. (1997).
+``Some impossibility theorems in econometrics with applications to structural
+and dynamic models,''
+\emph{Econometrica} 65(6): 1365--1387.
+
+\bibitem[Finlay and Magnusson(2009)]{finlay2009implementing}
+Finlay, K., and L.~M. Magnusson (2009).
+``Implementing weak-instrument robust tests for a general class of
+instrumental-variables models,''
+\emph{Stata Journal} 9(3): 398--421.
+
+\bibitem[Goldsmith-Pinkham, Sorkin, and Swift(2020)]{goldsmith2020bartik}
+Goldsmith-Pinkham, P., I.~Sorkin, and H.~Swift (2020).
+``Bartik instruments: What, when, why, and how,''
+\emph{American Economic Review} 110(8): 2586--2624.
+
+\bibitem[Guggenberger and Kleibergen(2012)]{guggenberger2012generalized}
+Guggenberger, P., and F.~Kleibergen (2012).
+``A more powerful subvector Anderson--Rubin test in linear instrumental
+variables regression,''
+working paper.
+
+\bibitem[Kleibergen(2002)]{kleibergen2002pivotal}
+Kleibergen, F. (2002).
+``Pivotal statistics for testing structural parameters in instrumental
+variables regression,''
+\emph{Econometrica} 70(5): 1781--1803.
+
+\bibitem[Mikusheva and Sun(2022)]{mikusheva2022many}
+Mikusheva, A., and L.~Sun (2022).
+``Inference with many weak instruments,''
+\emph{Review of Economic Studies} 89(5): 2663--2686.
+
+\bibitem[Moreira(2003)]{moreira2003conditional}
+Moreira, M.~J. (2003).
+``A conditional likelihood ratio test for structural models,''
+\emph{Econometrica} 71(4): 1027--1048.
+
+\bibitem[Samuelson(1947)]{samuelson1947foundations}
+Samuelson, P.~A. (1947).
+\emph{Foundations of Economic Analysis}, Cambridge: Harvard University Press.
+
+\end{thebibliography}
+
+\end{document}
