@@ -52,9 +52,9 @@
 #   M, G, P, M+G, M+P, M+G+P (main family only)
 #
 # OUTPUT:
-#   Tables:   paper/tables/agg_firm_{sector_var}/agg_firm__<slug>.tex
-#   Manifest: paper/tables/agg_firm_{sector_var}/agg_firm_run_manifest.csv/.qs2
-#   Summary:  paper/tables/agg_firm_{sector_var}/agg_firm_fc_battery_summary.qs2
+#   Tables:   output/tables/agg_firm_{sector_var}/agg_firm__<slug>.tex
+#   Manifest: output/tables/agg_firm_{sector_var}/agg_firm_run_manifest.csv/.qs2
+#   Summary:  output/tables/agg_firm_{sector_var}/agg_firm_fc_battery_summary.qs2
 #
 # =============================================================================
 

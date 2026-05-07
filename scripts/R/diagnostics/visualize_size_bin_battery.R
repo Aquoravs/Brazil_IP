@@ -16,8 +16,8 @@
 #
 # Outputs:
 #   quality_reports/size_bin_battery_summary.csv            (tidy long table)
-#   paper/tables/agg_firm_size_bin/size_bin_battery_fstat.tex
-#   paper/tables/agg_firm_size_bin/size_bin_battery_coef.tex
+#   output/tables/agg_firm_size_bin/size_bin_battery_fstat.tex
+#   output/tables/agg_firm_size_bin/size_bin_battery_coef.tex
 #   paper/figures/size_bin_battery_fstat.pdf                (dodged bar plot)
 #   paper/figures/size_bin_battery_coef_forest.pdf          (forest plot with 95% CI)
 #

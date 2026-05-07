@@ -136,7 +136,7 @@ OUTPUT_DIR <- normalize_path_safe(
 
 # Regression tables output directory
 TABLES_DIR <- normalize_path_safe(
-  Sys.getenv("BNDES_TABLES", unset = file.path(PROJECT_ROOT, "paper", "tables")),
+  Sys.getenv("BNDES_TABLES", unset = file.path(PROJECT_ROOT, "output", "tables")),
   mustWork = FALSE
 )
 

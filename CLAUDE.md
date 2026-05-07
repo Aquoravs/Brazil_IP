@@ -114,12 +114,12 @@ journal/                   ← time-stamped events (append-only, dated filenames
   ├── audits/
   └── meetings/<date>/     ← notes.md + tracker.md + slides[_variant].tex + build/
 
-paper/                     ← manuscript
-  ├── main.tex
-  ├── sections/            ← section .tex files (regs.tex, etc.)
-  ├── figures/
-  ├── tables/              ← R-generated regression tables (was paper/output/)
-  └── build/               ← .pdf, .aux — gitignored except snapshots/
+paper/                     ← manuscript (exploration phase: skeleton only)
+  ├── latexmkrc
+  └── snapshots/           ← early drafts and compiled PDFs
+
+output/                    ← R pipeline output (exploratory, not paper-ready)
+  └── tables/              ← R-generated regression tables and figures (BNDES_TABLES)
 
 explorations/<branch>/<sub-branch>/    ← one subfolder per branch, with output/
   ├── README.md
@@ -165,7 +165,7 @@ templates/                 ← user-facing forms
 | 51-54 | `5_estimation/` | Firm first stage, agg. firm→sector, sector first stage, second stage |
 
 **Path configuration** — all scripts use env-var-based paths via `_utils/utils.R`:
-- `BNDES_BASE` → `data/` | `BNDES_OUTPUT` → `data/processed/` | `BNDES_TABLES` → `paper/tables/` | `ENCFS_MOUNT` → encrypted RAIS mount
+- `BNDES_BASE` → `data/` | `BNDES_OUTPUT` → `data/processed/` | `BNDES_TABLES` → `output/tables/` | `ENCFS_MOUNT` → encrypted RAIS mount
 
 Helpers: `raw_path()`, `output_path()`, `tables_path()`, `project_path()`
 

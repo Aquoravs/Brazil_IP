@@ -25,7 +25,7 @@
 #   D9  — Lead-alignment placebo [DEFERRED — requires re-running 52]
 #
 # Outputs:
-#   paper/tables/agg_firm_size_bin/sector_taxonomy_diagnostics.tex
+#   output/tables/agg_firm_size_bin/sector_taxonomy_diagnostics.tex
 #   quality_reports/sector_taxonomy_diagnostic_report.md
 #
 # Usage:

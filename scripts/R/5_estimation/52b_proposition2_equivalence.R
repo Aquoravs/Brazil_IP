@@ -22,7 +22,7 @@
 #   --dry-run            Print planned outputs and exit
 #
 # OUTPUT:
-#   Tables:    paper/tables/agg_firm[_grouped]/prop2_*.tex
+#   Tables:    output/tables/agg_firm[_grouped]/prop2_*.tex
 #   Diagnostics: prop2_equality_check.csv, prop2_sample_diagnostic.csv,
 #                prop2_tier_comparison.csv
 # ==============================================================================
