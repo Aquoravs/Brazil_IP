@@ -13,7 +13,9 @@ ensure_path('BIBINPUTS', '..//');
 # Silence — stop on errors but don't pause
 $xelatex = 'xelatex -interaction=nonstopmode %O %S';
 
-# Build in build/ (aux + synctex) and place final PDF in source directory
-$out_dir = 'build';
+# Keep the final PDF beside the source, with generated support files in build/.
+$out_dir = '.';
 $aux_dir = 'build';
-$out2_dir = '.';
+
+# latexmk moves SyncTeX to $out_dir when $aux_dir differs, so move it back.
+$success_cmd = q{powershell -NoProfile -Command "$r='%R'.Trim('"'); $aux='%Y'.Trim('"'); Move-Item -LiteralPath ($r + '.synctex.gz') -Destination (Join-Path $aux ($r + '.synctex.gz')) -Force -ErrorAction SilentlyContinue"};
