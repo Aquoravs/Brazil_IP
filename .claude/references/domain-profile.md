@@ -32,7 +32,7 @@ If no field is specified, agents default to applied economics.
 
 | Dataset | Type | Access | Notes |
 |---------|------|--------|-------|
-| BNDES indirect loans | admin (loan-level) | public | 2002–2025 in `data/raw/bndes_indirect_{auto,nonauto}/`. Loan-level granularity, mapped to firms via CNPJ. CNAE coding sometimes inconsistent with RAIS — use RAIS CNAE as authoritative (see D1). |
+| BNDES indirect loans | admin (loan-level) | public | 2002–2025 in `data/raw/bndes_indirect_{auto,nonauto}/`. Loan-level granularity, mapped to firms via CNPJ. CNAE coding indicates loan purpose and not firm sector. This information shoud come from RAIS (see D1). |
 | RAIS (Relação Anual de Informações Sociais) | admin (employer-employee) | restricted (encrypted mount) | 2002–2017. Universe of Brazilian formal-sector employment. Full firm × worker × year panel. Used to construct firm size, sector, multi-municipality presence, employment baselines. Unexploited columns: education, age bracket, wage distribution, tenure, CBO occupation (see C6). |
 | TSE elections | admin (electoral) | public | Mayor (4-year), governor (4-year), president (4-year). Used for political-affiliation instruments. `data/raw/david_ra/in_power_upd_2002_2019.qs2`. |
 | IBGE PIB Municipal | admin (national accounts) | public | Annual nominal municipal GDP, deflated to 2018 R$ via national IPCA (see C5/C7 — no muni-level deflator exists for 2002–2017). |
@@ -69,9 +69,7 @@ If no field is specified, agents default to applied economics.
 - **Multi-municipality firms** (2% of firm-years, 30% of employment) handled as robustness via `is_multi_muni == 0` subsample (D11), not dropped from main sample.
 - **2003 mayor / governor / president cycle dropped** (no pre-election data — D4).
 - **No causal language** until AR test rejects $H_0$. Until then, frame results as "first-stage strength," "predicted reallocation," "reduced-form association."
-- **Total BNDES not used as second-stage scale control** (bad-control concern — D10).
 - **Real GDP** deflated by national IPCA; metro IPCA optional robustness on metro subsample (~55% of GDP, ~13 metros) — see C5/C7.
-- **Significance stars off** when targeting AEA journals (AER, AEJ:Applied, AEJ:Policy); use confidence intervals or exact p-values. Stars on for working papers.
 
 ---
 

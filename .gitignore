@@ -41,6 +41,7 @@ Thumbs.db
 .claude/settings.local.json
 .claude/state/*
 !.claude/state/*.example
+AGENTS.md
 
 # IDE
 .vscode/
@@ -61,23 +62,18 @@ data/processed/
 *.fst
 *.rds
 
-# Keep regression tables tracked
-!paper/tables/**/*.tex
-!paper/tables/**/*.md
-!paper/tables/**/*.csv
+# R pipeline output (exploratory, not paper-ready)
+output/tables/
 
 # R scripts archive
 scripts/R/_archive/
 
 # Temporary script outputs
 tmp/
+templates/writing-pieces/
 
 # LaTeX build artifacts in specific folders
-paper/sections/build/
 docs/methodology/build/
 journal/meetings/**/build/
 explorations/**/build/
 explorations/**/output/build/
-
-# kableExtra HTML dependencies (generated, not source)
-paper/tables/**/lib*/
