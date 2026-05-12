@@ -7,7 +7,7 @@ purpose: Concise reference of decisions, conventions, and numerical findings ext
 
 # Knowledge
 
-Extracted from `logs/session_logs/archive/` (14 logs, 2026-04-02 to 2026-04-21) and `docs/archive/brainstorms/`. Each item is dated by the session that established it; full context lives in the source file.
+Extracted from historical session logs now represented under `journal/sessions/` and from `docs/archive/brainstorms/`. Each item is dated by the session that established it; full context lives in the source file when available.
 
 For active design decisions and the current research focus, see [`docs/research_state.md`](../docs/research_state.md).
 
@@ -89,7 +89,7 @@ Emp-weighted **consistently weaker** than unweighted across all outcomes and bas
 
 ### 4.5 Aggregation gap (Proposition 2)
 
-Source: `docs/methodology_notes/proposition2_failure_note.tex`.
+Source: [`docs/methodology/proposition2_failure_note.tex`](../docs/methodology/proposition2_failure_note.tex).
 
 - Used sample for reference firm spec: 43,184,682 obs (vs 44,181,405 with `y` and `x` observed; 996,723 dropped, almost all singleton firms).
 - Exact aggregation from cell sums of firm sufficient statistics matches firm-level $\hat\beta$ to within $1.1 \times 10^{-16}$.
@@ -111,7 +111,7 @@ Source: `docs/methodology_notes/proposition2_failure_note.tex`.
 
 ## 6. Data exploration outcomes (advisor C6/C7)
 
-Source: `logs/data_exploration/c6_employment_sources.md`, `logs/data_exploration/c7_local_deflators.md`. Status as of 2026-04-21: memos delivered, awaiting advisor review.
+Source: [`docs/data_memos/c6_employment_sources.md`](../docs/data_memos/c6_employment_sources.md), [`docs/data_memos/c7_local_deflators.md`](../docs/data_memos/c7_local_deflators.md). Status as of 2026-04-21: memos delivered, awaiting advisor review.
 
 ### C6 — alternative employment / production-factor data
 
@@ -159,8 +159,8 @@ These were investigated but are now superseded by the AR-test agenda; kept for t
 | For… | See… |
 |---|---|
 | Current decisions and AR-test focus | [`docs/research_state.md`](../docs/research_state.md) |
-| Advisor comment statuses (C1–C8) | [`logs/referee_response_tracker.md`](referee_response_tracker.md) |
-| Plan history (per-task) | [`logs/plans/archive/`](plans/archive/) |
-| Original session logs (full detail per task) | [`logs/session_logs/archive/`](session_logs/archive/) |
-| Audit reports | [`logs/audits/`](audits/) |
-| Data-source feasibility memos | [`logs/data_exploration/`](data_exploration/) |
+| Advisor comment statuses (C1-C8) | [`journal/meetings/2026-04-17/tracker.md`](meetings/2026-04-17/tracker.md) |
+| Plan history (per-task) | [`journal/plans/`](plans/) |
+| Session logs (full detail per task) | [`journal/sessions/`](sessions/) |
+| Audit reports | [`journal/audits/`](audits/) |
+| Data-source feasibility memos | [`docs/data_memos/`](../docs/data_memos/) |

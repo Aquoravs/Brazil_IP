@@ -1,86 +1,32 @@
-# Anderson-Rubin Baseline Exploration
+# Anderson-Rubin Exploration Index
 
-## Goal
+Purpose: index the Anderson-Rubin exploration branches and make their current research use status explicit. The project front door is [../../docs/PROJECT_BLUEPRINT.md](../../docs/PROJECT_BLUEPRINT.md); the central exploration status table is [../ACTIVE_PROJECTS.md](../ACTIVE_PROJECTS.md).
 
-Pooled Anderson-Rubin test of H0: BNDES sectoral reallocation has no
-first-order GDP effect, using mayor alignment shift-share instruments at
-`policy_block` granularity (4 sectors: Agro, Ind, Infra, Serv). K = 4 in the
-primary spec; tier ascent (K = 8 / K = 12) is the R3 sensitivity ladder. Full
-identification strategy in `docs/strategy/ar_test_strategy.md`.
+Use-status labels: diagnostic only; supports next design decision; research building block; ready for production pipeline; superseded / do not use.
 
-## Status
+## Current Gate
 
-IN PROGRESS (started 2026-04-29)
+The active gate is the theory/econometric review of [../../docs/methodology/ar_test_specification.tex](../../docs/methodology/ar_test_specification.tex). D28 defers the production-margin decision until that review is complete. No branch in this folder currently supplies production-pipeline inputs by default.
 
-## Primary Specification
+## Branches
 
-USER-MANDATED 2026-04-29:
+| Branch | Status | Research use status | Notes |
+|---|---|---|---|
+| `diagnostics/` | COMPLETED / active reference | supports next design decision | F1 support for candidate margins. `policy_block_active x S3` is the top diagnostic candidate, not the committed production margin. |
+| `a7_weight_comparison/` | COMPLETED for `policy_block`; BLOCKED for final AR graduation | research building block | Supports `w_owners_muni_univ` at `policy_block` only. Weight graduation at the final AR margin is blocked. |
+| `mass_weighted_first_stage/` | COMPLETED exploration | supports next design decision | VAR-B has signal but fails concentration guardrail; VAR-A remains conservative; DIF is a cross-office methodology candidate. |
+| `a10_composition_volume/` | DEFERRED design context | supports next design decision | Composition / volume framing remains tied to the methodology review. |
+| `ar_baseline/` | SUPERSEDED as implementation plan | superseded / do not use | Predates D24-D28 and the cross-office instrument review. Retained only for audit trail. |
+| `ar_horserace/` | SUPERSEDED / historical | superseded / do not use | Early spec comparison; do not treat as current AR guidance. |
 
-- **Outcome:** `log_gdp` (log total municipal GDP; NOT `log_gdp_pc` — that is
-  demoted to R4 sensitivity)
-- **Instruments (K = 4):**
-  `ar_Z_mayor_coalition_cycle_specific_Agro`,
-  `ar_Z_mayor_coalition_cycle_specific_Ind`,
-  `ar_Z_mayor_coalition_cycle_specific_Infra`,
-  `ar_Z_mayor_coalition_cycle_specific_Serv`
-- **Controls:** NONE (no muni FE, no year FE, no covariates)
-- **Variance estimator:** cluster-robust, clustered at `muni_id`
-- **Weight infix:** owner-count (default)
+## Production Boundary
 
-Controls ladder (sensitivities, not the primary):
+Outputs under this folder are diagnostics and research-building evidence unless a later decision explicitly graduates them, implements the relevant logic in `scripts/R/`, and verifies the result. Do not point production scripts to exploration output files.
 
-| Label | Contents |
-|-------|----------|
-| C1 | Muni FE + year FE only |
-| C2 | FE + R0a muni-total EC (`ec_total_mayor_cycle_specific`) |
-| C3 | FE + R0b sector-specific EC (four `ar_exposure_control_mayor_cycle_specific_<sector>` columns) |
-| C4 | FE + log total employment (advisory; bad-control risk per strategy memo §6 / §10) |
+## Load-Bearing References
 
-## Hypotheses to Test
-
-1. AR rejects H0 under the K = 4 no-controls primary spec (finite F-stat with
-   p < 0.10).
-2. The result survives the controls ladder: C1 (FE only), C2 (FE + muni-total
-   EC), C3 (FE + sector-specific EC) all continue to reject (or at minimum
-   fail to strongly accept H0).
-3. The result survives R2: 2002-fixed baseline weights deliver a comparable
-   F-stat to the cycle-specific baseline.
-4. Tier ascent (R3): K = 8 (mayor + gov) and K = 12 (mayor + gov + pres)
-   sharpen or sustain the result; power does not collapse under K = 12 / C3
-   (if it does, interpret as collinearity, not confound — see strategy memo
-   §3.1 and plan Open Question 5).
-5. F1 transfers placebo: primary instruments do NOT reject H0 when the outcome
-   is `log_transfers_pc`; failure would indicate instruments predict federal
-   transfers directly, violating the exclusion restriction.
-6. F2 lead-instruments placebo: instruments shifted +4 years do NOT reject H0;
-   future alignment should not predict current GDP under the null.
-7. F7 pre-period balance: primary-cycle Z values do NOT reject H0 for
-   pre-2005 municipal averages of `log_gdp_pc`, `log(population)`,
-   `log(total_employment)`; rejection would indicate pre-existing trends
-   correlated with first-cycle alignment.
-
-## Success Criteria
-
-- `ar_baseline.R` runs to completion without errors on rebuilt Panel B
-  (`muni_panel_for_regs_policy_block.qs2`).
-- Primary K = 4 no-controls AR row in `output/ar_results.csv` has finite,
-  non-missing `f_stat`, `p_value`, `df1`, `df2`, `n_obs`, `n_clusters`.
-- `output/ar_results.csv` has at least 12 spec rows.
-- `output/ar_results.tex` is a bare `tabular` environment (no float wrapper,
-  no `\caption{}`, no notes; booktabs rules only — INV-3, INV-13).
-- `output/ar_grouped_state.csv`, `output/ar_grouped_quartile.csv`, and
-  `output/ar_falsification.csv` are produced.
-- R0a (muni-total EC) and R0b (sector-specific EC) rows present and
-  non-null in `ar_results.csv`.
-- At least one F1 / F2 / F7 row present in `ar_falsification.csv`.
-- Quality score >= 80 against simplified-mode checklist (workflow.md §2).
-
-## Findings
-
-(Updated as work progresses)
-
-## Timeline
-
-- 2026-04-29: Plan approved; scaffolding created; Step 3 of implementation
-  plan complete. Steps 4–7 (script writing, Panel B patch, run, verify)
-  pending.
+- Current state: [../../docs/research_state.md](../../docs/research_state.md)
+- Decisions: [../../docs/decision_log.md](../../docs/decision_log.md)
+- Evidence map: [../../docs/evidence_index.md](../../docs/evidence_index.md)
+- Taxonomies: [../../docs/taxonomies.md](../../docs/taxonomies.md)
+- Output manifest template: [../../templates/output-manifest.md](../../templates/output-manifest.md)

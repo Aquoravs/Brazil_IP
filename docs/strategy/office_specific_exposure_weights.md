@@ -186,7 +186,7 @@ where $e_{L}(t) \equiv \max\{e_{M}(t),\ e_{G/P}(t)\}$ — the year of the most r
 
 ### Tasks
 
-1. **Build the active exposure variants** for the production margin (`policy_block_active × S3`, $J=12$). Window-axis variants (A, E, F) have no new data dependencies and are built first; gating-axis variants (B, C) require coalition rosters and are deferred:
+1. **Build the active exposure variants** for the leading candidate margin if it is committed after D28 (`policy_block_active × S3`, $J=12$). Window-axis variants (A, E, F) have no new data dependencies and are built first; gating-axis variants (B, C) require coalition rosters and are deferred:
    - Variant A *(primary)*: existing $w^{M}_{jmp,t}$ from script `3_instruments/31_*` outputs.
    - Variant E *(window robustness)*: same as A, with $T^{G/P}_t$ replacing $T^{M}_t$. New script — joins the existing owner-party-firm panel against gov/pres-election years. **No new data input.**
    - Variant F *(window robustness)*: same as A, with $T^{L}_t = [e_L(t)-4,\ e_L(t)-1]$ where $e_L(t) = \max(e_M(t),\ e_{G/P}(t))$. Tabulate $e_L(t)$ for $t\in[2002,2017]$ (one-time), then re-window the pre-period join. **No new data input.**

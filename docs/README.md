@@ -1,40 +1,28 @@
 # docs/
 
-Project-level design notes and reference material.
+Project-level design notes and reference material. Start with [`PROJECT_BLUEPRINT.md`](PROJECT_BLUEPRINT.md); it is the front door for current state, active gate, and next workflow step.
 
 ## Active
 
 | File | Contents |
 |------|----------|
-| [`research_state.md`](research_state.md) | Current research state — design decisions, taxonomies, spec engine dimensions, findings, open questions, AR-test focus |
-| [`doubts.md`](doubts.md) | 9 substantive design issues with their decisions (instrument timing, exclusion restriction, simplex, baseline year, FE choice, balanced panel, sector mismatch, bad-control concern) |
-| [`meetings/`](meetings/) | Meeting records (cross-referenced from `logs/referee_response_tracker.md`) |
-| [`methodology_notes/`](methodology_notes/) | Formal/technical reference documents — see below |
+| [`PROJECT_BLUEPRINT.md`](PROJECT_BLUEPRINT.md) | Short front door: current research question, active gate, next implementation step, and links to detailed state files. |
+| [`research_state.md`](research_state.md) | Current AR research state, identification-chain status, active / blocked tracks, and production-margin boundary. |
+| [`decision_log.md`](decision_log.md) | Append-only decision register with settled, provisional, superseded, deferred, and blocked statuses. |
+| [`evidence_index.md`](evidence_index.md) | Traceability map from claims and decisions to evidence artifacts and research use status. |
+| [`taxonomies.md`](taxonomies.md) | Sector and size taxonomy catalog, including production status and use status. |
+| [`data_memos/`](data_memos/) | C6/C7-style data-source feasibility memos. |
+| [`strategy/`](strategy/) | Load-bearing strategy memos and design rationale. Some older memos predate D28; check `research_state.md` before treating them as current guidance. |
+| [`methodology/`](methodology/) | Formal and technical LaTeX notes, including [`ar_test_specification.tex`](methodology/ar_test_specification.tex). |
 
-## `methodology_notes/`
+## Archive
 
-| File | Contents |
-|------|----------|
-| `proposition2_aggregation_review.tex/.pdf` | Formal review of the firm ↔ sector aggregation claim; identifies the 5 conditions for numerical equivalence; distinguishes $Z$ (owner-count) from $\overline{\mathrm{FA}}$ (equal-firm). Was at `paper/review_aggregation.tex`; **not currently `\input{}`-ed by `paper/main.tex`** |
-| `proposition2_failure_note.tex/.pdf` | Numeric verification of Proposition 2 on the reference firm spec (44M obs, B vs A samples, exact identity check, mean-regression gap) + plain-language C1–C6 walkthrough |
-| `conditions_C3_C5_C6_explained.tex/.pdf` | Math + intuition for C3 (firm immobility), C5 (fixed cell composition), C6 (within-cell heterogeneity, irreducible on real data) |
-
-## `archive/`
-
-Historical material superseded by current files. Kept for traceability — substance preserved in `research_state.md` and `logs/knowledge.md`.
-
-| File | Why archived |
-|------|--------------|
-| `master_roadmap.md` | 2026-03-12; references `paper/draft.tex` (now `main.tex`) and presentation paths that have moved; open decisions overlap with `logs/referee_response_tracker.md` |
-| `old_CLAUDE_reference.md` | Pre-migration project doc using `BNDES/politicsregs/` paths; superseded by `INSTRUCTIONS.md` + `README.md` after the 2026-04-02 migration |
-| `shift_share.md` | Updated shift-share spec; mostly superseded by `paper/regs.tex` (formal LaTeX) and `README.md` (pipeline mapping); validation rules preserved in `research_state.md` §7 |
-| `first_stage_review.md` | Critical review of first-stage results (4 questions, recommendations). Findings preserved in `research_state.md` §6 and `logs/knowledge.md` §4. Recommendations are **secondary** — current focus has moved to AR test |
-| `brainstorms/` | 5 brainstorms on firm-sector disconnect (implemented), affiliation diagnostics (implemented), fast Beamer table export (implemented), sector instrument weighting (implemented), AR test ideas (active — feeds C4/C8) |
+Historical material superseded by current files. Kept for traceability; current status should be checked in [`research_state.md`](research_state.md), [`decision_log.md`](decision_log.md), and [`../journal/knowledge.md`](../journal/knowledge.md).
 
 ## Cross-references
 
-- Project overview, file layout, variable dictionary → [`../README.md`](../README.md)
-- AI-agent-facing config and commands → [`../INSTRUCTIONS.md`](../INSTRUCTIONS.md)
-- Authoritative draft of Section 5 (Specifications) → [`../paper/regs.tex`](../paper/regs.tex) (not yet integrated into `main.tex`)
-- Implementation knowledge from session logs → [`../logs/knowledge.md`](../logs/knowledge.md)
-- Advisor comment tracker (C1–C8) → [`../logs/referee_response_tracker.md`](../logs/referee_response_tracker.md)
+- Project overview, file layout, variable dictionary -> [`../README.md`](../README.md)
+- AI-agent-facing config and commands -> [`../CLAUDE.md`](../CLAUDE.md)
+- Active exploration status -> [`../explorations/ACTIVE_PROJECTS.md`](../explorations/ACTIVE_PROJECTS.md)
+- Implementation knowledge from session logs -> [`../journal/knowledge.md`](../journal/knowledge.md)
+- Advisor meeting trackers -> [`../journal/meetings/`](../journal/meetings/)

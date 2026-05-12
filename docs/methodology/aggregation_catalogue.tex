@@ -118,7 +118,7 @@ Per blueprint decision~D14 (\texttt{docs/PROJECT\_BLUEPRINT.md}~\S6), an aggrega
 \section{Sector taxonomies (the $j$ dimension)}
 \label{sec:taxonomies}
 
-Several admissible firm-side taxonomies exist or are planned. The current production margin is \texttt{policy\_block\_active} $\times$ S3 size bins, with \texttt{cnae\_section} $\times$ S3 as robustness (D16/D17 in \texttt{docs/PROJECT\_BLUEPRINT.md}~\S6); older sector-only margins remain useful for comparison and legacy spec engines.
+Several admissible firm-side taxonomies exist or are planned. D28 defers the production-margin decision pending the theoretical/econometric review. The current leading F1 diagnostic candidate is \texttt{policy\_block\_active} $\times$ S3 size bins, with \texttt{cnae\_section} $\times$ S3 as secondary robustness evidence (D16/D28 in \texttt{docs/decision\_log.md}); older sector-only margins remain useful for comparison and legacy spec engines.
 
 \small
 \begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.21\textwidth}
@@ -142,13 +142,13 @@ Several admissible firm-side taxonomies exist or are planned. The current produc
 
 \texttt{policy\_block} & 4 active blocks + XX tag & \texttt{30e\_build\_policy\_block\_mapping.R} & \textbf{ACTIVE}. Hand-coded CNAE$\to$\{Agro, Ind, Infra, Serv, XX\}; downstream \texttt{--sector-var=policy\_block} scripts drop XX (K, O, T, U). F1 confirmed (D15). \\
 
-\texttt{policy\_block\_active} & 4 (Agro, Ind, Infra, Serv) & \texttt{30e\_...} (filtered) & \textbf{PRODUCTION sector dimension}. Same as \texttt{policy\_block} after dropping XX residual. F1 confirmed (D15); crossed with S3 size bins as the current primary AR production margin (D16). \\
+\texttt{policy\_block\_active} & 4 (Agro, Ind, Infra, Serv) & \texttt{30e\_...} (filtered) & \textbf{ACTIVE candidate component}. Same as \texttt{policy\_block} after dropping XX residual. F1 confirmed (D15); crossing with S3 remains production-pending under D28. \\
 
 \texttt{size\_bin} & S3 or S4 absolute bins; legacy terciles & \texttt{30c\_build\_size\_bin\_mapping.R} & \textbf{ADMISSIBLE} standalone per D17, but not the preferred production margin. Current preferred S3 thresholds are MPME 0--49, Media 50--499, Grande 500+ employees; legacy script 30c used national terciles. \\
 
 \texttt{bndes\_sector\_size\_bin} & 12 (4$\times$3) & \texttt{30d\_build\_sector\_size\_bin\_mapping.R} & \textbf{ROBUSTNESS}. Tercile-within-macro. Addresses advisor comment C3. \\
 
-\texttt{policy\_block\_active} $\times$ S3 & 12 & {\small follow-on production crosswalk pending} & \textbf{PRIMARY AR production margin} per D16. Active policy blocks crossed with absolute size bins MPME/Media/Grande. \\
+\texttt{policy\_block\_active} $\times$ S3 & 12 & {\small follow-on production crosswalk pending} & \textbf{TOP F1 DIAGNOSTIC CANDIDATE}. Active policy blocks crossed with absolute size bins MPME/Media/Grande; not committed as the production margin under D28. \\
 
 \texttt{cnae\_section} $\times$ S3 & 51 active bins & {\small follow-on robustness wiring pending} & \textbf{SECONDARY ROBUSTNESS} per D16. CNAE sections crossed with absolute size bins; XX-style inactive sections excluded from the active treatment set. \\
 
@@ -377,7 +377,7 @@ The aggregation catalogue (\cref{sec:taxonomies,sec:weights,sec:aggregation,sec:
 \end{table}
 
 \paragraph{Reading the table.}
-The script-31/34/41/53 sector-only pipeline is currently wired for \texttt{cnae\_section}, \texttt{sector\_group}/\texttt{custom\_sector}, and \texttt{policy\_block}; size-crossed D16 production margins require follow-on wiring. Treat \cref{tab:summary} as a catalogue of design status, not as a guarantee that every row is accepted by every spec engine.
+The script-31/34/41/53 sector-only pipeline is currently wired for \texttt{cnae\_section}, \texttt{sector\_group}/\texttt{custom\_sector}, and \texttt{policy\_block}; size-crossed D16 candidate margins require follow-on wiring if they are committed after D28. Treat \cref{tab:summary} as a catalogue of design status, not as a guarantee that every row is accepted by every spec engine.
 
 \paragraph{Pointers to scripts.}
 \begin{itemize}[leftmargin=2em, itemsep=1pt]

@@ -99,7 +99,7 @@ cd journal/meetings/2026-04-22 && xelatex -interaction=nonstopmode slides_first_
 ## Folder Layout
 
 ```
-docs/                      ← stable knowledge (cite-able, edited in place)
+docs/                      ← stable project knowledge (research use status labeled in place)
   ├── PROJECT_BLUEPRINT.md
   ├── strategy/            ← load-bearing strategy memos
   ├── methodology/         ← compiled LaTeX technical notes (.tex + .pdf)
@@ -110,7 +110,7 @@ journal/                   ← time-stamped events (append-only, dated filenames
   ├── research_journal.md  ← global append-only log
   ├── knowledge.md         ← extracted conventions/findings
   ├── plans/               ← YYYY-MM-DD_*.md
-  ├── sessions/            ← session logs (was logs/session_logs/)
+  ├── sessions/            ← session logs
   ├── audits/
   └── meetings/<date>/     ← notes.md + tracker.md + slides[_variant].tex + build/
 
@@ -118,7 +118,7 @@ paper/                     ← manuscript (exploration phase: skeleton only)
   ├── latexmkrc
   └── snapshots/           ← early drafts and compiled PDFs
 
-output/                    ← R pipeline output (exploratory, not paper-ready)
+output/                    ← R pipeline output (exploratory; not final paper artifacts by default)
   └── tables/              ← R-generated regression tables and figures (BNDES_TABLES)
 
 explorations/<branch>/<sub-branch>/    ← one subfolder per branch, with output/
@@ -169,7 +169,7 @@ templates/                 ← user-facing forms
 
 Helpers: `raw_path()`, `output_path()`, `tables_path()`, `project_path()`
 
-**Pipeline caveat (2026-05-05):** existing scripts do not yet implement the production margin `policy_block_active × S3`. Script `30f_build_policy_block_size_mapping.R` is pending; downstream consumers are scripts 31, 34, and 41.
+**Pipeline caveat (2026-05-12):** existing scripts do not yet implement a committed post-D28 production margin. `policy_block_active × S3` is the top F1 diagnostic candidate, not the settled production margin; any 30f-style crosswalk and downstream consumers remain pending until the theory/econometric review settles the margin.
 
 ---
 
@@ -208,4 +208,4 @@ Instrument-weight variants: `owner_count`, `employment`, `equal_firm`, `binary`.
 | First stage (sector) | `5_estimation/53_*` | in-progress — 6-dim spec engine |
 | Second stage | `5_estimation/54_*` | in-progress — reduced form, scalar/vector 2SLS |
 | Aggregation analysis | `journal/meetings/2026-03-26/slides.tex` | complete |
-| Production crosswalk | `3_instruments/30f_*` | **pending** — `policy_block_active × S3` not yet built |
+| Production crosswalk | `3_instruments/30f_*` | **blocked** — no post-D28 production margin committed yet |

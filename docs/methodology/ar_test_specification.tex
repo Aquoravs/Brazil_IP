@@ -13,7 +13,7 @@
 \fi
 \hypersetup{colorlinks,linkcolor={blue},citecolor={blue},urlcolor={red}}
 
-% ====== Notation macros (consistent with regs_specification.tex) ======
+% ====== Notation macros ======
 \newcommand{\Align}{\mathrm{Align}}
 \newcommand{\FA}{\mathrm{FA}}
 \newcommand{\EC}{\mathrm{EC}}
@@ -74,8 +74,9 @@ reduced-form GDP equation, and that this equivalence is what makes the
 estimator of script~54 a weak-instrument-robust optimality test; (v) treats
 the volume-channel control formally; and (vi) collects the inference questions
 raised by spatial correlation in shift-share designs.
-The document is intentionally compact and presupposes the construction in
-\texttt{docs/methodology/regs\_specification.tex}.
+The document is intentionally compact and self-contained: all primitive
+objects (firm-level owner counts, party-exposure weights, cross-office
+shifts, and instruments) are defined here.
 \end{abstract}
 
 \setlength{\parskip}{6pt}
@@ -86,7 +87,18 @@ The document is intentionally compact and presupposes the construction in
 We index municipalities by $m\in\{1,\dots,M\}$ ($M=5{,}570$), sectors by
 $j\in\{1,\dots,J\}$, years by $t\in\{2002,\dots,2017\}$, offices by
 $\ell\in\{\mathrm{M},\mathrm{G},\mathrm{P}\}$ (mayor, governor, president), and
-parties by $p$. Lower-case Latin letters $f,g$ index firms.
+parties by $p$. Lower-case Latin letters $f,g$ index firms. Let $s(m)$
+denote the state of municipality $m$. Cross-office channels are indexed by
+$c\in\{\mathrm{M},\,\mathrm{M{\cdot}P},\,\mathrm{M{\cdot}G},\,\mathrm{M{\cdot}G{\cdot}P}\}$.
+
+For office $\ell$ and year $t$, let $e_\ell(t)$ denote the most recent election
+year for office $\ell$ on or before $t$. The pre-election window is
+\begin{equation}\label{eq:window}
+  T^{\ell}_{t} \;\equiv\; \big[e_\ell(t)-4,\; e_\ell(t)-1\big] \cap [2002,2017].
+\end{equation}
+Within an electoral term, $T^{\ell}_t$ is constant in $t$; at cycle boundaries,
+$e_\ell(t)$ advances and $T^{\ell}_{t}$ updates. The 2003 governor/president
+cycle (whose pre-window is 1998--2001, fully outside the data) is dropped.
 
 The endogenous object is the vector of \emph{sector employment shares}
 \[
@@ -110,10 +122,8 @@ distinct from employment shares:
   \frac{\mathrm{BNDES}_{jmt}}{\sum_{k}\mathrm{BNDES}_{kmt}},
 \end{equation}
 where $\mathrm{BNDES}_{jmt}$ denotes BNDES disbursements to sector $j$ in
-municipality $m$ in year $t$. BNDES shares are not the estimand under the
-framing of D24; they are the upstream mechanism through which the political
-shock is transmitted to employment composition. They enter the analysis only
-as auxiliary first-stage objects.
+municipality $m$ in year $t$. BNDES shares are the upstream mechanism through which the political
+shock is transmitted to employment composition.
 
 The total-volume control is the unit-free ratio
 \begin{equation}\label{eq:vol}
@@ -128,33 +138,42 @@ with $t_0$ the initial period of the panel ($t_0=2002$).
 
 \paragraph{Environment.}
 A municipal economy in $(m,t)$ allocates fixed factors across $J$ sectors with
-shares $s_{mt}\in\Delta^{J-1}$. Local output (or any local welfare proxy) is
+the vector of shares $s_{mt} = (s_{1mt},\dots,s_{Jmt})' \in\Delta^{J-1}$.
+Local output (or any local welfare proxy) is
 \[
   Y_{mt} \;=\; Y\!\left(s_{mt};\,\theta_{mt}\right),
 \]
-where $\theta_{mt}$ collects municipality-time fundamentals (productivity,
-factor prices, infrastructure) and $Y(\cdot;\theta)$ is twice continuously
-differentiable in $s$ on the relative interior of $\Delta^{J-1}$. Externalities
-through $s_{mt}$ are admitted: the framework does not assume independence of
-the sectoral production technologies.
+where $\theta_{mt}$ collects municipality-time fundamentals
+unaffected by an infinitesimal reallocation of sector shares (e.g.,
+pre-existing productivity, prices, and infrastructure). We require $Y(\cdot;\theta)$ to be twice continuously
+differentiable in $s$ on the relative interior of $\Delta^{J-1}$.
 
 \paragraph{The directional-derivative condition.}
-A feasible reallocation direction is any $v\in\mathbb{R}^J$ with
+Let $\iotaVec\equiv(1,\dots,1)'\in\mathbb{R}^{J}$ denote the all-ones vector. A feasible reallocation direction is any $v\in\mathbb{R}^J$ with
 $\iotaVec'v=0$, so the perturbation $s_{mt}+\varepsilon v$ remains on the
 simplex for small $\varepsilon$. At an interior optimum $s^{*}_{mt}\in
-\mathrm{int}(\Delta^{J-1})$ of $Y(\cdot;\theta_{mt})$, the first-order
+\mathrm{int}(\Delta^{J-1})$\footnote{Here $\mathrm{int}(\Delta^{J-1})$ denotes
+the relative interior of the simplex: all sector shares are strictly positive.
+Cells with zero employment in one or more sectors are boundary points, where
+the analogous optimality condition is a Kuhn--Tucker inequality rather than
+the equality in~\eqref{eq:dirderiv}.} of $Y(\cdot;\theta_{mt})$, the first-order
 condition is
 \begin{equation}\label{eq:dirderiv}
   \frac{\mathrm{d}}{\mathrm{d}\varepsilon} Y\!\left(s^{*}_{mt}+\varepsilon v\right)
   \bigg|_{\varepsilon=0}
+  \;=\;
+  \sum_{j=1}^{J}
+  \frac{\partial Y(s^*_{mt})}{\partial s_j} v_j
   \;=\;
   \nabla_{s} Y(s^{*}_{mt})\cdot v
   \;=\;
   0
   \qquad\text{for every } v\perp \iotaVec.
 \end{equation}
-Equivalently, the gradient is parallel to the simplex normal, $\nabla_{s}Y\propto\iotaVec$, i.e.\ the
-social marginal returns to factors are equalized across sectors. This is the
+Equivalently, the gradient is parallel to $\iotaVec$, the vector normal
+(orthogonal) to all feasible reallocation directions, $\nabla_{s}Y\propto
+\iotaVec$, i.e.\ the social marginal returns to factors are equalized across
+sectors. This is the
 local-optimality benchmark.
 
 \begin{remark}[Envelope intuition]
@@ -168,48 +187,135 @@ would raise $Y$.
 \end{remark}
 
 \paragraph{From the gradient to a regression.}
-A first-order Taylor expansion of $Y$ around the observed allocation at
-$t-1$ yields, for any direction $\Delta s_{mt}$ with $\iotaVec'\Delta s_{mt}=0$,
+Let $\Delta s_{mt}\equiv s_{mt}-s_{m,t-1}$, with
+$\iotaVec'\Delta s_{mt}=0$. Since $Y(\cdot;\theta_{m,t-1})$ is twice
+continuously differentiable, Taylor's theorem (first-order Taylor expansion)
+around $s_{m,t-1}$ gives
 \begin{equation}\label{eq:taylor}
-  \Delta Y_{mt}
+  Y(s_{mt};\theta_{m,t-1}) - Y(s_{m,t-1};\theta_{m,t-1})
   \;=\;
   \nabla_{s}Y(s_{m,t-1};\theta_{m,t-1})'\,\Delta s_{mt}
-  \;+\;
-  \alpha_m + \delta_t + u_{mt}
-  \;+\;
-  O(\|\Delta s_{mt}\|^2),
+  \;+\; R_{mt},
+  \qquad
+  R_{mt}=O(\|\Delta s_{mt}\|^2).
 \end{equation}
-where $\alpha_m$ and $\delta_t$ absorb time-invariant municipal and common
-year-level components of $\theta_{m,t-1}$, and $u_{mt}$ is the residual.
-Define $\beta\equiv\nabla_{s}Y(s_{m,t-1};\theta_{m,t-1})$; under the
-local-optimality hypothesis~\eqref{eq:dirderiv} this gradient lies in the span
-of $\iotaVec$, so its projection onto the within-simplex subspace
-$\{v:\iotaVec'v=0\}$ is the zero vector. The structural equation in levels of
-$Y$ (with simplex-feasible $s$) is therefore
-\begin{equation}\label{eq:struct}
-  Y_{mt} \;=\; \alpha_m + \delta_t + \beta'\,s_{mt}
-            + \lambda\,\Vol_{mt} + \varepsilon_{mt},
+Observed GDP changes also include changes in fundamentals between $t-1$ and
+$t$. Adding and subtracting $Y(s_{mt};\theta_{m,t-1})$ gives the exact
+decomposition
+\[
+  Y(s_{mt};\theta_{mt}) - Y(s_{m,t-1};\theta_{m,t-1})
+  =
+  \Delta Y_{mt}
+  =
+  \underbrace{Y(s_{mt};\theta_{m,t-1})-Y(s_{m,t-1};\theta_{m,t-1})}
+    _{\text{share-composition change at fixed fundamentals}}
+  +
+  \underbrace{Y(s_{mt};\theta_{mt})-Y(s_{mt};\theta_{m,t-1})}
+    _{\text{fundamental change at the new shares}}.
+\]
+Substituting the Taylor expansion for the first bracket yields
+\begin{equation}\label{eq:observed-change}
+  \Delta Y_{mt}
+  =
+  \nabla_{s}Y(s_{m,t-1};\theta_{m,t-1})'\Delta s_{mt}
+  +R_{mt}+D_{mt},
+  \qquad
+  D_{mt}\equiv
+  Y(s_{mt};\theta_{mt})-Y(s_{mt};\theta_{m,t-1}).
 \end{equation}
-and the null hypothesis is
-\begin{equation}\label{eq:H0}
-  H_{0}:\quad \beta = \bzero.
-\end{equation}
-The volume term $\Vol_{mt}$ enters because the same political-turnover shock
-that perturbs the sectoral mix also perturbs the aggregate level of credit;
-$\beta$ identifies the composition channel only after the level channel has
-been partialed out. Section~\ref{sec:vol} develops this.
 
-\begin{remark}[Why a level regression rather than a difference]
-$s_{mt}$ varies across $m$ both within and across years, and $Y_{mt}$ is itself a
-level. With municipality fixed effects $\alpha_m$, equation~\eqref{eq:struct}
-identifies $\beta$ from the within-municipality time-variation of $s_{mt}$; with
-year fixed effects $\delta_t$, common trends in $Y$ are absorbed. The
-specification is equivalent up to projection to a first-difference equation in
-$\Delta Y_{mt}$ and $\Delta s_{mt}$ when $\alpha_m$ and $\delta_t$ are present;
-we keep the levels form because the data are stored as a long muni-year panel
-in which $\Vol_{mt}$ is naturally a level (initial-period denominator), and
-because the simplex constraint $\iotaVec' s_{mt}=1$ is more transparent than
-$\iotaVec'\Delta s_{mt}=0$.
+Under local optimality, the first-order composition term is zero, but observed
+GDP changes need not be zero: they may still reflect changes in fundamentals
+$D_{mt}$ and the approximation error $R_{mt}$.
+
+Thus the empirical test is not whether $\Delta Y_{mt}$ is zero. It is whether the component of $\Delta s_{mt}$ induced by the instruments predicts $\Delta Y_{mt}$ after conditioning on controls. This is valid only if the instruments are orthogonal to the residual components containing $D_{mt}$, $R_{mt}$, gradient heterogeneity, and measurement error.
+
+Equation~\eqref{eq:observed-change} and the logic described above directly motivate a first-difference equation,
+\begin{equation}\label{eq:diff-struct}
+  \Delta Y_{mt}
+  \;=\;
+  \beta'\Delta s_{mt}
+  + \rho'\Delta X_{mt}
+  + e^{\Delta}_{mt},
+\end{equation}
+where $\beta$ is interpreted as a common projected composition gradient in the
+within-simplex subspace. The residual $e^{\Delta}_{mt}$ contains unabsorbed
+fundamental changes $D_{mt}$, the Taylor remainder $R_{mt}$, heterogeneity in
+the local gradient, and measurement error. The vector $X_{mt}$ collects the relevant controls.
+
+\paragraph{The projected-gradient interpretation in levels.}
+The directional-derivative condition~\eqref{eq:dirderiv} is a pointwise
+statement: at an interior optimum, the gradient is parallel to $\iotaVec$ at
+that point. The decomposition~\eqref{eq:observed-change} bridges from the
+pointwise condition to a regression in $\Delta Y$ via Taylor expansion at the
+cell-specific $s_{m,t-1}$. A second bridge, expanding around a common
+reference allocation $\bar s$ in the relative interior of the simplex,
+delivers a regression in levels:
+\begin{equation}\label{eq:taylor-lvl}
+  Y(s_{mt};\theta_{mt})
+  \;=\;
+  Y(\bar s;\theta_{mt})
+  \;+\;
+  \nabla_{s} Y(\bar s;\theta_{mt})'\,(s_{mt}-\bar s)
+  \;+\; \tilde R_{mt},
+  \qquad
+  \tilde R_{mt}=O(\|s_{mt}-\bar s\|^{2}).
+\end{equation}
+Project the cell-level gradient $\nabla_{s} Y(\bar s;\theta_{mt})$ onto a
+common within-simplex gradient $\beta$ and rearrange:
+\begin{equation}\label{eq:lvl-decomp}
+\begin{split}
+  Y_{mt}
+  \;=\;
+  & \beta'\,s_{mt}
+  +\underbrace{[Y(\bar s;\theta_{mt})-\beta'\bar s]}_{\text{(A) cell-specific level}} \\
+  & +\underbrace{(\nabla_{s} Y(\bar s;\theta_{mt})-\beta)'(s_{mt}-\bar s)}_{\text{(B) gradient heterogeneity}}
+  +\underbrace{\tilde R_{mt}}_{\text{(C) Taylor remainder}}.
+\end{split}
+\end{equation}
+Absorbing (A)--(C) and measurement error into a single residual $e^{L}_{mt}$
+yields the levels analogue of~\eqref{eq:diff-struct},
+\begin{equation}\label{eq:lvl-struct}
+  Y_{mt}
+  \;=\;
+  \beta'\,s_{mt}
+  \;+\; \rho'\,X_{mt}
+  \;+\; e^{L}_{mt},
+\end{equation}
+where $\beta$ is the same within-simplex projected composition gradient as
+in~\eqref{eq:diff-struct} and $X_{mt}$ collects the relevant controls.
+
+Equations~\eqref{eq:diff-struct} and~\eqref{eq:lvl-struct} test the same null using different residual structures. None is a-priori
+small in the raw cross-section. Both nonetheless deliver the same null,
+\begin{equation}\label{eq:H0}
+  H_{0}:\quad \beta = \bzero,
+\end{equation}
+the empirical counterpart of the directional-derivative
+condition~\eqref{eq:dirderiv}: at an interior local optimum, the cell-level
+gradient lies in the span of $\iotaVec$, its projection onto the
+within-simplex subspace $\{v:\iotaVec' v=0\}$ is zero, and with the simplex
+normalization below the corresponding $\beta$ vanishes.
+
+\begin{remark}[Why the Taylor scale is smaller than it looks]\label{rem:late}
+\eqref{eq:lvl-decomp} appears to require the linearization to hold over the
+full cross-sectional spread of Brazilian sectoral mixes, where
+$\|s_{mt}-\bar s\|^{2}$ is large. It does not.
+
+Municipality fixed effects absorb each muni's own average composition.
+By the time the instrument acts, the cross-Brazilian dispersion is gone.
+The shift-share instrument then moves $s_{mt}$ by only a few percentage
+points. The linear approximation only needs to hold locally---over the
+small neighborhood the instrument explores within each municipality. This
+is the same demand the differences form makes.
+
+Two interpretive consequences. \emph{(i)} When cell-level gradients are
+heterogeneous, $\hat\beta$ is an Imbens--Angrist-style weighted average of
+$\nabla_{s} Y(\bar s;\theta_{mt})$, weighted by IV-induced variation in
+each cell. $H_{0}:\beta=\bzero$ therefore tests ``the IV-weighted average
+gradient is zero,'' not a literal pointwise optimum at every $(m,t)$.
+\emph{(ii)} The differences and levels specifications use different weights
+and different evaluation points. Agreement between them is robustness;
+disagreement locates gradient heterogeneity across the simplex.
 \end{remark}
 
 \paragraph{Simplex constraint.}
@@ -217,7 +323,7 @@ Because $\iotaVec' s_{mt}=1$ holds in every $(m,t)$ cell, the regressor matrix
 of $s_{mt}$ on a constant has reduced rank. Two operationally equivalent
 solutions:
 \begin{enumerate}[leftmargin=*,nosep]
-  \item Drop one sector $j_0$ (the largest-mean sector by convention, D6)
+  \item Drop one sector $j_0$
     and interpret each $\beta_j$ as the effect of substituting one unit of
     employment share from $j_0$ to $j$.
   \item Residualize $s_{mt}$ on $\iotaVec$ (within $(m,t)$ this is degenerate)
@@ -227,55 +333,464 @@ We adopt option~(1) throughout. All elements of the estimated $\hat\beta$
 should be read as differences relative to $j_0$, and the AR test on the
 remaining $J-1$ coefficients is invariant to the choice of $j_0$.
 
-\begin{remark}[Optional input--output adjustment]
-If the planner cares about gross output through the Leontief multiplier, one
-may replace $s_{mt}$ with the IO-adjusted shares $\tilde s_{mt}\equiv B' s_{mt}$
-where $B=(I-A)^{-1}$ for a national input--output matrix $A$. The
-local-optimality null becomes $\tilde\beta=\bzero$ in
-$Y_{mt}=\alpha_m+\delta_t+\tilde\beta'\tilde s_{mt}+\lambda\Vol_{mt}+\varepsilon_{mt}$.
-The instruments and the AR construction below carry over without modification
-because $\tilde s_{mt}$ is a known linear transformation of $s_{mt}$.
-\end{remark}
 
 %% =====================================================================
 \section{Identification strategy}\label{sec:identification}
 %% =====================================================================
 
-\subsection{The shift-share form of the instrument}
+We operationalize the levels equation~\eqref{eq:lvl-struct} as a panel
+projection that absorbs the cell-specific level $Y(\bar s;\theta_{mt})$
+(channel~(A) of~\eqref{eq:lvl-decomp}) into municipality and year fixed
+effects---valid to the extent that this object is approximately additive
+in $(m,t)$ as $\alpha_m+\delta_t$---and partials out the level (volume)
+channel of the political shock with the volume control $\Vol_{mt}$ defined
+in~\eqref{eq:vol}. The resulting levels equation is
+\begin{equation}\label{eq:struct}
+  Y_{mt} \;=\; \alpha_m + \delta_t + \beta'\,s_{mt}
+            + \lambda\,\Vol_{mt} + \varepsilon_{mt},
+\end{equation}
+where $\beta$ is the same within-simplex projected composition gradient as
+in~\eqref{eq:diff-struct} and~\eqref{eq:lvl-struct}, and $\varepsilon_{mt}$
+is the residual $e^{L}_{mt}$ after the FE-and-volume partialling. The volume
+term enters because the same political-turnover shock that perturbs the
+sectoral mix also perturbs the aggregate level of credit; $\beta$ identifies
+the composition channel only after the volume channel has been partialed out.
+Identification of $\beta$ further requires the instrument to be orthogonal
+to the residuals---a condition formalized
+through the BJS framework below. Section~\ref{sec:vol} develops the volume
+control; \autoref{sec:fe} treats the remaining controls.
 
-Define the firm-level baseline owner-party exposure
-\(
+\begin{remark}[Why a level regression rather than a difference]
+We adopt~\eqref{eq:struct} as the primary specification because each tier's alignment $\Align^{\ell}_{mpt}$ is generally constant within an electoral cycle for most municipalities and turns over at the inauguration
+year (mid-cycle changes through impeachment-style processes are too rare
+to drive identification). The first-difference instrument
+$\Delta\Align^{\ell}_{mpt}$ is therefore a one-period pulse at
+$t=e_\ell+1$ and is mechanically zero in years $\tau\in\{2,3,4\}$ of the
+cycle. This risks missing the bulk of the response as the shock can produce effect any time within the term, not just at inauguration.\footnote{Another reason to prefer the levels specification is that the policy timing (BNDES allocation, firm hiring, and the resulting composition response) can unfold over the full term, not at inauguration alone.} The levels instrument
+$\Align^{\ell}_{mpt}$ keeps the shock active for the entire cycle, so the
+shift-share can predict $s_{mt}$ in any of the four post-election years in
+which the response materializes; the differences instrument throws away,
+by construction, the variation in years $\tau\in\{2,3,4\}$.
+\end{remark}
+
+\subsection{Cross-office channel structure}\label{subsec:cross-office}
+
+The political-economy mechanism through which BNDES allocation responds
+to party alignment is \emph{cross-office}---it bites when the same party (or its electoral coalition) holds power simultaneously at the mayoral office and at one or more higher tiers. The
+mayor controls the local interface with BNDES (procurement, BNDES Card
+take-up at municipal counters, signaling to firms about which projects
+will be supported), but the bulk of BNDES disbursement decisions are made
+at the regional or national level, where governors and the federal
+executive have leverage. A firm in municipality $m$ aligned with party
+$p$ realizes an effective political-credit advantage when both ends of
+the intermediation chain align:
+\begin{itemize}[leftmargin=*,nosep]
+  \item the mayor of $m$ belongs to $p$ (local gatekeeping); \emph{and}
+  \item either (i) the president belongs to $p$ or to a formal coalition
+    partner of $p$ (national allocation favoring coalition-aligned
+    municipalities), \emph{or} (ii) the governor of $s(m)$ belongs to
+    $p$ or its coalition (state-level discretion over BNDES regional
+    offices and over the state apparatus that complements federal
+    credit programs).
+\end{itemize}
+A national-only or governor-only alignment that does not pass through a
+sympathetic mayor lacks the local intermediary required for
+sector-specific credit to land in $m$ and is not expected to drive
+$s_{mt}$. We therefore restrict the instrument set to channels that
+\emph{contain mayoral alignment as a factor}.
+
+Operationally, define the cross-office shifts
+\begin{align}
+  \Align^{\mathrm{M{\cdot}P}}_{mpt}
+    &\equiv \Align^{\mathrm{M}}_{mpt}\cdot\Align^{\mathrm{P}}_{pt},
+    \label{eq:align-MP}\\
+  \Align^{\mathrm{M{\cdot}G}}_{mpt}
+    &\equiv \Align^{\mathrm{M}}_{mpt}\cdot\Align^{\mathrm{G}}_{s(m),pt},
+    \label{eq:align-MG}\\
+  \Align^{\mathrm{M{\cdot}G{\cdot}P}}_{mpt}
+    &\equiv \Align^{\mathrm{M}}_{mpt}\cdot\Align^{\mathrm{G}}_{s(m),pt}
+            \cdot\Align^{\mathrm{P}}_{pt},
+    \label{eq:align-MGP}
+\end{align}
+where $\Align^{\mathrm{P}}_{pt}=1$ if party $p$ is in the federal
+presidential coalition (leading party or formal coalition partner) at
+time $t$, and $\Align^{\mathrm{G}}_{s(m),pt}=1$ if $p$ is in the
+gubernatorial coalition of state $s(m)$ at $t$. The coalition definition
+on the higher tiers reflects that BNDES allocation under any given
+mandate is shared across coalition members, not monopolized by the
+leading party. The pure $\Align^{\mathrm{M}}_{mpt}$ represents the standalone mayoral channel (capturing local-only
+political capital, e.g.\ municipal procurement and local-bank
+signaling).
+
+\paragraph{Office-specificity of Brazilian coalitions.}
+Brazilian electoral coalitions (\emph{coligações}) are formed
+\emph{per office per election}: the coalition supporting a presidential
+candidate is a distinct legal object from the coalition supporting a
+gubernatorial candidate in any given state, and from the coalition
+supporting a mayoral candidate in any given municipality. Constitutional
+Amendment 52/2006 (modifying Art.\ 17, \S1) explicitly guarantees party
+autonomy ``without obligatory linkage between candidacies at national,
+state, district or municipal level.'' Two parties allied for a mayoral
+race in muni $m$ may run on rival slates for the gubernatorial race in
+state $s(m)$ in the same election cycle, and either configuration may
+be unrelated to their national-presidential alignment. We therefore
+treat $\Align^{\mathrm{M}}$, $\Align^{\mathrm{G}}$, and
+$\Align^{\mathrm{P}}$ as separately measured objects, each defined from
+the office-specific \emph{electoral coalition} (the registered
+\emph{coligação} on the candidate slate of office $\ell$ at election
+$e_\ell$).
+
+Before EC 52/2006, TSE Resolution 20.993/2002 imposed
+\emph{verticalização} on the 2002 and 2006 elections, requiring
+state-level coalitions to align with the national presidential
+coalition. Within the 2002--2017 sample window, this constraint binds
+the 2002 and 2006 electoral cycles (gubernatorial inaugurations 2003 and
+2007; post-election years 2003--2010).
+
+\subsection{Firm-level primitives}\label{subsec:firm-primitives}
+
+Here we define the firm-level primitives from which the sector-level exposures $w^{\ell}_{jmp,t}$ and firm-level instruments $\FA^{c}_{fmt}$ are built. The firm-level construction is the basis for the
+
+\paragraph{Owner counts and firm support.}
+Let $L_{f,p,t}$ denote the number of owners of firm $f$ affiliated with
+party $p$ at time $t$, and $L_{f,t}$ the total number of owners of firm
+$f$ at time $t$ (including owners not affiliated with any party), so
+that $\sum_{p} L_{f,p,t}\le L_{f,t}$. Let $\cF(j,m)$ denote the firm
+support of cell $(j,m)$: the set of firms that ever appear in sector
+$j$, municipality $m$ over the panel. The pre-period firm support
+associated with mayoral inauguration year $e_{\mathrm{M}}$ is
+\[
+  \cF^{\mathrm{pre}}_{jm,e_{\mathrm{M}}}
+  \;\equiv\;
+  \big\{\, f\in\cF(j,m) : L_{f,s}>0
+       \text{ for some } s\in T^{\mathrm{M}}_{e_{\mathrm{M}}} \,\big\},
+\]
+i.e.\ the firms in $(j,m)$ active at least one year of the mayoral
+pre-election window.
+
+\paragraph{Firm-level baseline party exposure.}
+The baseline exposure of firm $f$ to party $p$ for office $\ell$ at year
+$t$ pools affiliated and total owner counts across the pre-election
+window:
+\begin{equation}\label{eq:omega-firm}
   \omega^{\ell}_{fp,t}
-\)
-and the sector-level exposure
-\(
-  w^{\ell}_{jmp,t}
-\)
-as in the companion methodology note
-\texttt{docs/methodology/regs\_specification.tex} (\S{}1). The
-sector-level levels instrument is
-\begin{equation}\label{eq:Z}
-  Z^{\ell}_{jmt}
   \;\equiv\;
-  \sum_{p} w^{\ell}_{jmp,t}\,\Align^{\ell}_{mpt},
-\end{equation}
-and the changes variant is
-\begin{equation}\label{eq:dZ}
-  \Delta Z^{\ell}_{jmt}
-  \;\equiv\;
-  \sum_{p} w^{\ell}_{jmp,t}\,\Delta\Align^{\ell}_{mpt},
+  \frac{\sum_{s\in T^{\ell}_{t}} L_{f,p,s}}
+       {\sum_{s\in T^{\ell}_{t}} L_{f,s}},
   \qquad
-  \Delta\Align^{\ell}_{mpt} \equiv \Align^{\ell}_{mpt} - \Align^{\ell}_{mp,t-1}.
+  \sum_{p} \omega^{\ell}_{fp,t} \;\le\; 1.
 \end{equation}
-$Z^{\ell}_{jmt}$ is a within-region inner product of \emph{shares}
-$w^{\ell}_{jmp,t}$ (sector-municipality exposure to party $p$, computed over
-the office-specific pre-election window) and \emph{shifts}
-$\Align^{\ell}_{mpt}$ (whether $p$ holds office $\ell$ in $m$). It is the
-sector-aggregated counterpart of the firm-level instrument
-$\FA^{\ell}_{fmt}=\sum_p \omega^{\ell}_{fp,t}\Align^{\ell}_{mpt}$ via the
-owner-count-weighted aggregation identity
-$Z^{\ell}_{jmt}=\sum_{f\in\cF^{\mathrm{pre}}_{jme}}
-(L_{f,t}/N^{\ell}_{jm,t})\FA^{\ell}_{fmt}$.
+This pooled-count construction weights each owner-year observation
+equally rather than each calendar year equally: a year in which firm
+$f$ has many owners contributes more to the baseline than a year in
+which it has few. Equivalently, $\omega^{\ell}_{fp,t}$ is the
+owner-year-weighted average of the annual affiliation shares
+$L_{f,p,s}/L_{f,s}$. The residual $1-\sum_{p}\omega^{\ell}_{fp,t}$ is
+the unaffiliated-owner share at the firm level. The exposure is
+office-specific because the pre-election window $T^{\ell}_{t}$ is, but
+does not vary across municipalities.
+
+\paragraph{Firm-level cross-office instrument.}
+For channel $c\in\{\mathrm{M},\mathrm{M{\cdot}P},\mathrm{M{\cdot}G},
+\mathrm{M{\cdot}G{\cdot}P}\}$, the firm-level cross-office instrument
+is
+\begin{equation}\label{eq:FA-firm}
+  \FA^{c}_{fmt}
+  \;\equiv\;
+  \sum_{p}\,\omega^{\mathrm{M}}_{fp,t}\,\Align^{c}_{mpt},
+\end{equation}
+i.e.\ firm $f$'s mayoral baseline exposure inner-producted with the
+channel-$c$ shift in municipality $m$ at time $t$. We use the mayoral
+exposure $\omega^{\mathrm{M}}_{fp,t}$ uniformly across channels; the
+substantive justification is in \autoref{rem:weights} below.
+
+\paragraph{Sector-level baseline exposure.}
+The sector-level baseline exposure aggregates firm-level
+exposures~\eqref{eq:omega-firm} across firms within $(j,m)$ using
+owner-count weights, with the office-$\ell$ pre-election window:
+\begin{equation}\label{eq:wjmp}
+  w^{\ell}_{jmp,t}
+  \;\equiv\;
+  \frac{1}{|T^{\ell}_t|}\sum_{s\in T^{\ell}_t}
+    \frac{\sum_{f\in\cF(j,m)} L_{f,p,s}}
+         {\sum_{f\in\cF(j,m)} L_{f,s}},
+  \qquad
+  \sum_{p} w^{\ell}_{jmp,t}\le 1.
+\end{equation}
+The residual $1-\sum_{p}w^{\ell}_{jmp,t}$ is the unaffiliated-owner
+share of cell $(j,m)$, which contributes zero to $Z^{\ell}_{jmt}$ but
+enters the exposure control
+$\EC^{\ell}_{jm,t}\equiv\sum_p w^{\ell}_{jmp,t}$ that absorbs total
+political connectedness of $(j,m)$.
+
+\paragraph{Owner-count normalizer.}
+Let
+\begin{equation}\label{eq:N-norm}
+  N^{\ell}_{jm,t}
+  \;\equiv\;
+  \sum_{f\in\cF(j,m)} L_{f,t},
+\end{equation}
+the total number of owners across firms in cell $(j,m)$ at time $t$.
+
+\paragraph{Sector exposure as owner-count-weighted firm average.}
+Substituting~\eqref{eq:omega-firm} into~\eqref{eq:wjmp} and rearranging
+gives the equivalent representation
+\begin{equation}\label{eq:wjmp-as-avg}
+  w^{\ell}_{jmp,t}
+  \;=\;
+  \sum_{f\in\cF(j,m)}
+       \frac{L_{f,t}}{N^{\ell}_{jm,t}}\,\omega^{\ell}_{fp,t}.
+\end{equation}
+The sector-level baseline party exposure is the owner-count-weighted
+average of firm-level exposures across the firm support
+$\cF(j,m)$.\footnote{The simple (equal-firm-weight) average
+$\bar\omega^{\ell}_{jmp,t}\equiv |\cF(j,m)|^{-1}\sum_{f}\omega^{\ell}_{fp,t}$
+differs from~\eqref{eq:wjmp-as-avg} whenever firm-level exposure
+$\omega^{\ell}_{fp,t}$ covaries with firm size $L_{f,t}$. Owner-count
+weighting matches the empirical mass of political exposure in the cell
+and is the construction used throughout the pipeline.}
+Equation~\eqref{eq:wjmp-as-avg} is the bridge between the firm-level
+instrument~\eqref{eq:FA-firm} and the sector-level instruments of the
+next subsection.
+
+\subsection{The shift-share form of the cross-office instruments}
+
+Building on the firm-level instrument~\eqref{eq:FA-firm} and the
+sector-level baseline exposure~\eqref{eq:wjmp}, the four sector-level
+levels instruments are
+\begin{align}
+  Z^{\mathrm{M}}_{jmt}
+    &\equiv \sum_{p} w^{\mathrm{M}}_{jmp,t}\,\Align^{\mathrm{M}}_{mpt},
+    \label{eq:Z-M}\\
+  Z^{\mathrm{M{\cdot}P}}_{jmt}
+    &\equiv \sum_{p} w^{\mathrm{M}}_{jmp,t}\,\Align^{\mathrm{M{\cdot}P}}_{mpt},
+    \label{eq:Z-MP}\\
+  Z^{\mathrm{M{\cdot}G}}_{jmt}
+    &\equiv \sum_{p} w^{\mathrm{M}}_{jmp,t}\,\Align^{\mathrm{M{\cdot}G}}_{mpt},
+    \label{eq:Z-MG}\\
+  Z^{\mathrm{M{\cdot}G{\cdot}P}}_{jmt}
+    &\equiv \sum_{p} w^{\mathrm{M}}_{jmp,t}\,\Align^{\mathrm{M{\cdot}G{\cdot}P}}_{mpt}.
+    \label{eq:Z-MGP}
+\end{align}
+For backward compatibility with the rest of the document we let
+$Z^{c}_{jmt}$ denote a generic channel
+$c\in\{\mathrm{M},\mathrm{M{\cdot}P},\mathrm{M{\cdot}G},
+\mathrm{M{\cdot}G{\cdot}P}\}$ and $\Align^{c}_{mpt}$ its shift. The
+changes variant is
+\begin{equation}\label{eq:dZ}
+  \Delta Z^{c}_{jmt}
+  \;\equiv\;
+  \sum_{p} w^{\mathrm{M}}_{jmp,t}\,\Delta\Align^{c}_{mpt},
+  \qquad
+  \Delta\Align^{c}_{mpt} \equiv \Align^{c}_{mpt}-\Align^{c}_{mp,t-1},
+\end{equation}
+which is non-zero in any year in which any of the offices entering $c$
+turns over.
+
+\begin{remark}[Mayoral exposure for all channels]\label{rem:weights}
+We use the mayoral exposure $w^{\mathrm{M}}_{jmp,t}$ for all four
+cross-office instruments. The mayor is the local intermediary in every
+channel, so the sector-municipality exposure to ``politically active
+firms'' is naturally a mayor-relative object. A coalition-specific
+alternative $w^{c}_{jmp,t}$ that counts only owners affiliated with
+parties in the relevant federal/state coalition during the mayoral
+pre-election window would concentrate exposure on the channel-relevant
+subset and possibly improve first-stage power. The cost is a more
+complex \autoref{cond:BJS1}: the exposure shares would inherit a
+presidential- or gubernatorial-cycle dependence that the mayor-only
+$w^{\mathrm{M}}$ does not have. We adopt $w^{\mathrm{M}}$ as the primary
+specification for cleanliness of identification and treat the
+coalition-specific construction as a robustness exercise.
+\end{remark}
+
+\paragraph{The owner-count-weighted aggregation identity.}
+Each $Z^{c}_{jmt}$ is a within-region inner product of \emph{shares}
+$w^{\mathrm{M}}_{jmp,t}$ (sector-municipality exposure to party $p$, on
+the mayoral pre-election window) and \emph{shifts} $\Align^{c}_{mpt}$
+(whether $p$ controls the offices defining $c$ at time $t$). It is the
+sector-aggregated counterpart of the firm-level
+instrument~\eqref{eq:FA-firm}: substituting~\eqref{eq:wjmp-as-avg}
+into~\eqref{eq:Z-M}--\eqref{eq:Z-MGP} and reordering sums gives
+\begin{equation}\label{eq:agg-identity}
+  Z^{c}_{jmt}
+  \;=\;
+  \sum_{p} w^{\mathrm{M}}_{jmp,t}\,\Align^{c}_{mpt}
+  \;=\;
+  \sum_{p}\Bigg[\sum_{f\in\cF^{\mathrm{pre}}_{jm,e_{\mathrm{M}}}}
+       \frac{L_{f,t}}{N^{\mathrm{M}}_{jm,t}}\,\omega^{\mathrm{M}}_{fp,t}\Bigg]
+       \Align^{c}_{mpt}
+  \;=\;
+  \sum_{f\in\cF^{\mathrm{pre}}_{jm,e_{\mathrm{M}}}}
+       \frac{L_{f,t}}{N^{\mathrm{M}}_{jm,t}}\,\FA^{c}_{fmt}.
+\end{equation}
+The sector instrument is a weighted average of the firm-level
+instruments across firms in the pre-period support, with weights given
+by each firm's share of total owner-counts in the cell. The
+identity~\eqref{eq:agg-identity} verifies diagnostically: collapsing
+firm instruments by these weights recovers the sector instrument.
+
+\subsection{Mass-weighted exposure alternatives}\label{subsec:mass-weighted}
+
+The intensity-based exposure $w^{\mathrm{M}}_{jmp,t}$ in~\eqref{eq:wjmp}
+normalizes owner-party counts \emph{within} each $(j,m)$ cell, so it
+captures the intensity of political affiliation in the cell but discards
+information about the cell's mass in the local economy. For predicting
+sector employment shares $s_{jmt}$ this is a known weakness of the
+intensity-only shift-share~\eqref{eq:Z-M}--\eqref{eq:Z-MGP}: a small cell
+with a high aligned-fraction generates a large instrument value but can
+move little employment when credit arrives, while a large cell with a
+moderate aligned-fraction can move a lot. This subsection records two
+alternative exposure specifications, both predetermined on
+$T^{\mathrm{M}}_{t}$ and both preserving the shift-share decomposition,
+that bring mass back into the share component.
+
+\paragraph{Pre-window employment primitives.}
+Let $E_{f,t}$ denote firm $f$'s employment at time $t$. Define the
+pre-window firm employment, sector-muni pre-window employment, and muni
+pre-window employment as the natural averages over the mayoral
+pre-election window $T^{\mathrm{M}}_t$:
+\begin{equation}\label{eq:Ebar}
+  \bar E_{f,t}\;\equiv\;
+   \frac{1}{|T^{\mathrm{M}}_t|}\sum_{s\in T^{\mathrm{M}}_t} E_{f,s},
+  \qquad
+  \bar E_{jm,t}\;\equiv\;\sum_{f\in\cF(j,m)} \bar E_{f,t},
+  \qquad
+  \bar E_{m,t}\;\equiv\;\sum_{j'} \bar E_{j'm,t}.
+\end{equation}
+The pre-window matches the one used for owner-party counts
+in~\eqref{eq:omega-firm} and~\eqref{eq:wjmp}, so the predetermination
+argument that justifies $w^{\mathrm{M}}_{jmp,t}$ extends without
+modification to any object built from $\bar E$.
+
+\paragraph{Variant A: muni-relative aligned-owner share.}
+The first variant keeps the owner-count primitives but replaces the
+within-cell normalization in~\eqref{eq:wjmp} with a muni-level
+normalization over affiliated owners. Let
+\(
+  \bar L_{jmp,t}\equiv\sum_{s\in T^{\mathrm{M}}_t}
+    \sum_{f\in\cF(j,m)} L_{f,p,s}
+\)
+be the pre-window owner-years in $(j,m)$ affiliated with party $p$, and
+\(
+  \bar L^{\mathrm{affil}}_{m,t}\equiv\sum_{j'}\sum_{p'}\bar L_{j'mp',t}
+\)
+the muni-level pre-window total of owner-years affiliated with any party.
+Define
+\begin{equation}\label{eq:w-own-rel}
+  \tilde w^{\mathrm{own}}_{jmp,t}
+   \;\equiv\;
+   \frac{\bar L_{jmp,t}}{\bar L^{\mathrm{affil}}_{m,t}},
+   \qquad
+   \tilde Z^{c,\mathrm{own}}_{jmt}
+   \;\equiv\;
+   \sum_p \tilde w^{\mathrm{own}}_{jmp,t}\,\Align^{c}_{mpt}.
+\end{equation}
+The share $\tilde w^{\mathrm{own}}_{jmp,t}$ is the fraction of the
+muni's politically-engaged pre-window owner-mass that sits in sector
+$j$ at party $p$; it carries information about cell size through
+$\bar L_{jmp,t}$ that the intensity $w^{\mathrm{M}}_{jmp,t}$ discards.
+Both numerator and denominator are pre-window quantities, so
+$\tilde w^{\mathrm{own}}_{jmp,t}$ is channel-independent (consistent
+with~\autoref{rem:weights}) and predetermined relative to the shift
+$\Align^{c}_{mpt}$. Across sectors, $\sum_j \tilde Z^{c,\mathrm{own}}_{jmt}
+\in[0,1]$ equals the muni's share of pre-window affiliated owners that
+lean toward coalition-$c$ parties.
+
+\paragraph{Variant B: muni-relative aligned-employment share.}
+The second variant replaces owner-mass by employment-mass at every
+aggregation level. Using the firm-level
+instrument~\eqref{eq:FA-firm}, define
+\begin{equation}\label{eq:Z-emp-rel}
+  \tilde Z^{c,\mathrm{emp}}_{jmt}
+   \;\equiv\;
+   \frac{\displaystyle\sum_{f\in\cF(j,m)} \bar E_{f,t}\,\FA^{c}_{fmt}}
+        {\bar E_{m,t}}.
+\end{equation}
+This is the pre-window employment of firms in $(j,m)$ whose owners lean
+toward coalition-$c$ parties (with $\FA^{c}_{fmt}\in[0,1]$ as the
+per-firm alignment-intensity weight), expressed as a fraction of the
+muni's total pre-window employment. The same object admits the
+shift-share decomposition
+\begin{equation}\label{eq:Z-emp-rel-ss}
+  \tilde Z^{c,\mathrm{emp}}_{jmt}
+   \;=\;
+   \sum_p \tilde w^{\mathrm{emp}}_{jmp,t}\,\Align^{c}_{mpt},
+   \qquad
+   \tilde w^{\mathrm{emp}}_{jmp,t}
+   \;\equiv\;
+   \frac{\displaystyle\sum_{f\in\cF(j,m)} \bar E_{f,t}\,\omega^{\mathrm{M}}_{fp,t}}
+        {\bar E_{m,t}}.
+\end{equation}
+The share admits a size-times-intensity decomposition
+\begin{equation}\label{eq:w-emp-decomp}
+  \tilde w^{\mathrm{emp}}_{jmp,t}
+   \;=\;
+   \underbrace{\frac{\bar E_{jm,t}}{\bar E_{m,t}}}_{\text{sector size}}\;\;
+   \underbrace{\bar\omega^{\mathrm{M},E}_{jmp,t}}_{\text{employment-weighted intensity}},
+   \qquad
+   \bar\omega^{\mathrm{M},E}_{jmp,t}\;\equiv\;
+   \sum_{f\in\cF(j,m)} \frac{\bar E_{f,t}}{\bar E_{jm,t}}\,
+   \omega^{\mathrm{M}}_{fp,t},
+\end{equation}
+in which $\bar\omega^{\mathrm{M},E}_{jmp,t}$ is the
+employment-weighted within-cell average of firm-level intensities ---
+the direct analogue of~\eqref{eq:wjmp-as-avg} with owner-count weights
+replaced by employment weights. Both factors are pre-window and
+channel-independent; the shift sits exclusively in
+$\Align^{c}_{mpt}$ as in the base spec.
+
+\paragraph{Comparison of A and B.}
+The variants address different facets of the mass-weighting concern.
+Variant~A modifies the across-sector scaling: muni-level political
+mass is allocated to sectors in proportion to where the aligned
+\emph{owners} are. Variant~B modifies \emph{both} the firm-to-sector
+aggregation~\eqref{eq:wjmp-as-avg} and the across-sector scaling,
+replacing owner-mass by \emph{employment-mass} everywhere. The two
+coincide in within-muni ranking only when firm-level employment is
+proportional to owner counts; in industry-towns, where a small number
+of large employers carry most of the employment but a minority of the
+owners, Variant~B will rank sectors differently from Variant~A and
+from the base intensity spec. Variant~B is preferred on the
+mechanism-fit argument that the conversion of credit to hires
+operates through firm size in employment, not in owners; Variant~A is
+the conservative analogue that preserves the owner-count primitives
+already used throughout~\eqref{eq:omega-firm}--\eqref{eq:wjmp-as-avg}.
+
+\paragraph{BJS conditions.}
+\autoref{cond:BJS1} and~\autoref{cond:BJS2} carry through for both
+variants under the same argument as~\eqref{eq:Z-M}--\eqref{eq:Z-MGP}:
+the shift $\Align^{c}_{mpt}$ is unchanged, and the share components
+are pre-window objects.~\autoref{cond:BJS3} is the condition where
+the variants can deviate from the base spec, because muni-relative
+normalization concentrates exposure on large-mass cells; the
+Herfindahl $\sum_j (\tilde Z^{c,\bullet}_{jmt})^2$ should be reported
+alongside the base-spec Herfindahl in robustness diagnostics, since
+industry-towns load disproportionately on a single sector under
+Variants~A and B.
+
+\paragraph{Exposure controls.}
+The base-spec exposure control $\EC^{\ell}_{jm,t}\equiv\sum_p
+w^{\ell}_{jmp,t}$ adapts mechanically:
+$\widetilde\EC^{\mathrm{own}}_{jm,t}\equiv
+\sum_p \tilde w^{\mathrm{own}}_{jmp,t}$ is cell $(j,m)$'s share of
+muni affiliated owners under Variant~A, and
+$\widetilde\EC^{\mathrm{emp}}_{jm,t}\equiv
+\sum_p \tilde w^{\mathrm{emp}}_{jmp,t}$ its employment-mass analogue
+under Variant~B. The muni-level political-mass scales
+$\log\bar L^{\mathrm{affil}}_{m,t}$ (Variant~A) and $\log\bar E_{m,t}$
+(Variant~B) are added to the controls in~\eqref{eq:struct} to absorb
+the level of muni political mass without absorbing the across-sector
+tilt that identifies $\beta$.
+
+\paragraph{Implementation.}
+We treat the intensity-based
+instruments~\eqref{eq:Z-M}--\eqref{eq:Z-MGP} as the base specification
+and report $\tilde Z^{c,\mathrm{own}}_{jmt}$ and
+$\tilde Z^{c,\mathrm{emp}}_{jmt}$ alongside in first-stage and AR
+robustness tables. The three specifications are non-nested but share
+the same identification skeleton; differences across them are
+informative about which mass concept actually predicts sector
+employment shares in the data.
 
 \subsection{BJS conditions, mapped to our setting}
 
@@ -333,10 +848,17 @@ and (in robustness) a pre-period GDP trend; see \autoref{sec:fe}.
 
 \subsection{Levels versus changes: a formal sufficient condition}
 
-The same shift-share construction admits two timing variants of the shift:
-$\Align^{\ell}_{mpt}\in\{0,1\}$ in levels, or
-$\Delta\Align^{\ell}_{mpt}\in\{-1,0,+1\}$ in changes. They differ in how the
-identifying variation is distributed over time.
+The same shift-share construction admits two timing variants of the
+shift, applied to each channel
+$c\in\{\mathrm{M},\mathrm{M{\cdot}P},\mathrm{M{\cdot}G},\mathrm{M{\cdot}G{\cdot}P}\}$:
+$\Align^{c}_{mpt}\in\{0,1\}$ in levels, or
+$\Delta\Align^{c}_{mpt}\in\{-1,0,+1\}$ in changes. They differ in how the
+identifying variation is distributed over time. Let $E_c$ denote the set
+of inauguration years for any office defining $c$:
+$E_{\mathrm{M}}=\{2005,2009,2013,2017\}$, while
+$E_{\mathrm{M{\cdot}P}}=E_{\mathrm{M{\cdot}G}}=
+E_{\mathrm{M{\cdot}G{\cdot}P}}=\{2003,2005,2007,2009,\ldots,2017\}$ is
+the union of mayoral and gubernatorial/presidential inaugurations.
 
 \begin{proposition}[Sufficient conditions for the levels and changes
 instruments]\label{prop:lvlchg}
@@ -345,58 +867,114 @@ with $\E[\varepsilon_{mt}\mid \alpha_m,\delta_t]=0$, and let
 $\mathcal{H}_{m,t-1}\equiv\sigma(Y_{m,t'},\Vol_{m,t'},s_{m,t'};t'<t)$ be the
 pre-period information set.
 
-(i) The \emph{levels} instrument $Z^{\ell}_{jmt}$ satisfies the BJS quasi-random
-assignment condition \autoref{cond:BJS1} if, for every cycle $e_\ell$,
+(i) The \emph{levels} instrument $Z^{c}_{jmt}$ satisfies the BJS
+quasi-random assignment condition \autoref{cond:BJS1} if, between
+consecutive inauguration dates $e,e'\in E_c$ with $e<e'$,
 \begin{equation}\label{eq:lvl-cond}
-  \E\!\left[\Align^{\ell}_{mp,e_\ell+\tau}\,\big|\,
-    \{w^{\ell}_{jmp,e_\ell}\}_{j},\,\mathcal{H}_{m,e_\ell-1},\, q_{k}\right]
+  \E\!\left[\Align^{c}_{mp,e+\tau}\,\big|\,
+    \{w^{\mathrm{M}}_{jmp,e}\}_{j},\,\mathcal{H}_{m,e-1},\, q_{k}\right]
   \;=\;
   \mu_\tau(q_k),
-  \qquad \tau\in\{1,2,3,4\},
+  \qquad \tau=1,\dots,e'-e,
 \end{equation}
-i.e.\ alignment status is uncorrelated with prior municipal trajectories
-conditional on $q_k$, throughout the entire post-election cycle.
+i.e.\ the channel-$c$ alignment status is uncorrelated with prior
+municipal trajectories conditional on $q_k$, throughout the entire
+post-inauguration interval.
 
-(ii) The \emph{changes} instrument $\Delta Z^{\ell}_{jmt}$ satisfies
-\autoref{cond:BJS1} if, for every inauguration year $t=e_\ell+1$,
+(ii) The \emph{changes} instrument $\Delta Z^{c}_{jmt}$ satisfies
+\autoref{cond:BJS1} if, for every $t\in E_c$,
 \begin{equation}\label{eq:chg-cond}
-  \E\!\left[\Delta\Align^{\ell}_{mpt}\,\big|\,
-    \{w^{\ell}_{jmp,t}\}_{j},\,\mathcal{H}_{m,t-1},\, q_{k}\right]
+  \E\!\left[\Delta\Align^{c}_{mpt}\,\big|\,
+    \{w^{\mathrm{M}}_{jmp,t}\}_{j},\,\mathcal{H}_{m,t-1},\, q_{k}\right]
   \;=\;
   \mu(q_k),
 \end{equation}
-i.e.\ the turnover at $e_\ell$ is uncorrelated with prior trajectories
+i.e.\ each channel-$c$ turnover is uncorrelated with prior trajectories
 conditional on $q_k$.
 \end{proposition}
 
 \paragraph{Discussion.}
 Equation~\eqref{eq:lvl-cond} requires conditional mean-independence of
-alignment from pre-period outcomes \emph{at every horizon} within the
-electoral term. Equation~\eqref{eq:chg-cond} requires it only \emph{at the
-moment of turnover}. The latter is empirically weaker: turnover is closer to a
-discontinuity at the election date and need only be unrelated to the
-trajectory entering the election, not to the entire path that follows. In
-practice this means the changes specification carries a milder requirement on
-$q_k$, consistent with the standard discontinuity logic.
+the channel-$c$ alignment from pre-period outcomes \emph{at every horizon}
+within the relevant inter-inauguration interval.
+Equation~\eqref{eq:chg-cond} requires it only \emph{at the moments of
+turnover}. The latter is empirically weaker: turnover is closer to a
+discontinuity at each election date and need only be unrelated to the
+trajectory entering that election, not to the entire path that follows.
 
-In the levels specification, $\Align^{\ell}_{mpt}$ is non-zero for the entire
-$\sim 4$-year cycle, so the pre-period control set $q_k$ must absorb anything
-that correlates persistently within a cycle with both alignment and outcomes
-(e.g.\ a slow-moving regional growth differential). Including a pre-period
-GDP trend, lagged $Y_{m,t-1}$, or muni-specific linear trends are natural
-strengthenings; the 2002-fixed baseline in $\omega^{\ell}_{fp,t}$ also reduces
-the dependence on contemporaneous alignment-cycle dynamics.
+\paragraph{Inheritance from the product structure.}
+For the cross-office channels $c\in\{\mathrm{M{\cdot}P},
+\mathrm{M{\cdot}G},\mathrm{M{\cdot}G{\cdot}P}\}$ the shift
+$\Align^{c}_{mpt}$ is a product of tier-specific shifts. A sufficient
+primitive condition for~\eqref{eq:lvl-cond}--\eqref{eq:chg-cond} is that
+each component $\Align^{\mathrm{M}}_{mpt}$, $\Align^{\mathrm{G}}_{s(m),pt}$,
+$\Align^{\mathrm{P}}_{pt}$ separately satisfies the corresponding
+mean-independence condition \emph{and} that the components are
+conditionally independent given $q_k$:
+\begin{equation}\label{eq:prod-indep}
+  \E\!\left[\Align^{\mathrm{M}}_{mpt}\,\Align^{\mathrm{P}}_{pt}\,\big|\,
+    \mathcal{H}_{m,t-1},q_k\right]
+  \;=\;
+  \E\!\left[\Align^{\mathrm{M}}_{mpt}\,\big|\,
+    \mathcal{H}_{m,t-1},q_k\right]\cdot
+  \E\!\left[\Align^{\mathrm{P}}_{pt}\,\big|\,q_k\right],
+\end{equation}
+and analogously for $\Align^{\mathrm{G}}$ and the triple product.
+Substantively this rules out strategic anticipation: for instance, the
+mayoral election outcome in $m$ must not be systematically aligned with
+the federal incumbent's coattail strength beyond what $q_k$ already
+absorbs. Including state$\times$year fixed effects and pre-period vote
+shares in $q_k$ is the natural way to discharge this condition.
+
+\paragraph{Verticalização caveat for cycles 2002 and 2006.}
+The product-independence assumption~\eqref{eq:prod-indep} is partially
+violated for the 2002 and 2006 electoral cycles by TSE's
+\emph{verticalização} rule (Resolution 20.993/2002, in force until EC
+52/2006 took effect for the 2010 elections). During those cycles, state
+gubernatorial coalitions were required to mirror the national presidential
+coalition, so $\Align^{\mathrm{G}}_{s(m),pt}$ and $\Align^{\mathrm{P}}_{pt}$
+are not conditionally independent in the BJS sense: their joint distribution
+collapses toward perfect alignment by legal construction. The mechanical
+consequence is that $Z^{\mathrm{M{\cdot}G}}_{jmt}$ and $Z^{\mathrm{M{\cdot}P}}_{jmt}$
+are more highly correlated for cycles 2002 and 2006 than for cycles 2010
+and 2014, and the joint AR test on the four-channel cross-office stack pools
+verticalizado and non-verticalizado identifying variation. Two practical
+responses: (i) report the joint AR statistic with a footnote flagging
+the verticalização period; (ii) report a robustness AR test restricted
+to cycles 2010 and 2014 (post-verticalização sample), where
+\eqref{eq:prod-indep} is constitutionally protected (EC 52/2006).
+
+\paragraph{Within-cycle persistence (levels).}
+In the levels specification for the pure mayoral channel,
+$\Align^{\mathrm{M}}_{mpt}$ is non-zero for the entire $\sim 4$-year
+mayoral cycle, so $q_k$ must absorb anything that correlates persistently
+within a cycle with both alignment and outcomes (e.g.\ a slow-moving
+regional growth differential). Including a pre-period GDP trend, lagged
+$Y_{m,t-1}$, or muni-specific linear trends are natural strengthenings;
+the 2002-fixed baseline in $\omega^{\mathrm{M}}_{fp,t}$ also reduces the
+dependence on contemporaneous alignment-cycle dynamics. For the cross-office
+channels, the inter-inauguration intervals are at most two years, so the
+within-interval persistence requirement is correspondingly weaker: the
+levels-versus-changes gap shrinks for $c\in\{\mathrm{M{\cdot}P},
+\mathrm{M{\cdot}G},\mathrm{M{\cdot}G{\cdot}P}\}$.
 
 \paragraph{Many-shocks count under \autoref{cond:BJS2}.}
-The effective number of shocks differs sharply between the two variants. With
-$M=5{,}570$, four mayoral cycles ($e_\ell\in\{2004,2008,2012,2016\}$) and
-$P\approx 30$ parties, the total \emph{candidate} shock count is on the order
-of $M\times P\times 4\approx 6.7\times 10^{5}$ for the mayor tier alone. The
-levels variant uses each shock for $\sim 4$ post-election years, but those four
-year-replicates contribute redundant information for shock-level inference
-(the shock value is constant within a cycle). The changes variant uses each
-shock once at inauguration, so its effective shock count is the same but its
-panel-level non-zero cell count is smaller by a factor of $\sim 4$.
+The effective number of shocks differs sharply between the two variants.
+With $M=5{,}570$, four mayoral cycles
+($e_{\mathrm{M}}\in\{2004,2008,2012,2016\}$) and $P\approx 30$ parties,
+the total \emph{candidate} shock count is on the order of $M\times P\times
+4\approx 6.7\times 10^{5}$ for the pure mayoral channel. The levels
+variant uses each shock for $\sim 4$ post-election years, but for the
+pure mayoral channel those four year-replicates contribute redundant
+information for shock-level inference (the shift is constant within a
+cycle). The changes variant uses each shock once at inauguration, so its
+effective shock count is the same but its panel-level non-zero cell count
+is smaller by a factor of $\sim 4$. For the cross-office channels the
+``constant within cycle'' redundancy is already broken---the shift can
+flip mid-mayoral-term at the gubernatorial/presidential
+inauguration---so the levels-variant cell count is roughly $2\times$
+rather than $4\times$ the changes-variant count, and the levels-versus-changes
+shock-level redundancy is correspondingly smaller.
 \autoref{cond:BJS2} is therefore satisfied at comparable levels by both
 variants in terms of \emph{distinct shocks}, but the changes variant has less
 redundancy and a more transparent shock-level interpretation. By contrast, the
@@ -448,64 +1026,69 @@ non-composition channels are conceivable and are addressed in turn:
 \section{Instrument construction}\label{sec:instrument}
 %% =====================================================================
 
-We summarize the construction; the primitives are derived in
-\texttt{regs\_specification.tex}.
-
-\paragraph{Pre-election window.}
-For office $\ell$ and year $t$, let $e_\ell(t)$ be the most recent election
-year for office $\ell$ on or before $t$. The pre-election window is
-\begin{equation}\label{eq:window}
-  T^{\ell}_{t} \;\equiv\; \big[e_\ell(t)-4,\; e_\ell(t)-1\big] \cap [2002,2017].
-\end{equation}
-Within an electoral term $T^{\ell}_t$ is constant in $t$; at cycle boundaries,
-$e_\ell(t)$ advances and $T^{\ell}_{t}$ updates. The 2003 governor/president
-cycle (whose pre-window is 1998--2001, fully outside the data) is dropped.
-
-\paragraph{Sector-municipality baseline exposure.}
-Pooled-count, owner-count-weighted (D3, D8):
-\begin{equation}\label{eq:wjmp}
-  w^{\ell}_{jmp,t}
-  \;\equiv\;
-  \frac{1}{|T^{\ell}_t|}\sum_{s\in T^{\ell}_t}
-    \frac{\sum_{f\in\cF(j,m)} L_{f,p,s}}
-         {\sum_{f\in\cF(j,m)} L_{f,s}},
-  \qquad
-  \sum_{p} w^{\ell}_{jmp,t}\le 1,
-\end{equation}
-where $\cF(j,m)$ is the firm support of cell $(j,m)$, and $L_{f,p,s}$ and
-$L_{f,s}$ are firm-level affiliated and total owner counts. The residual
-$1-\sum_{p}w^{\ell}_{jmp,t}$ is the unaffiliated-owner share, which contributes
-zero to $Z^{\ell}_{jmt}$ but enters the exposure control
-$\EC^{\ell}_{jm,t}\equiv\sum_p w^{\ell}_{jmp,t}$ that absorbs total
-political connectedness of cell $(j,m)$.
+This section assembles the sector-channel
+instruments~\eqref{eq:Z-M}--\eqref{eq:Z-MGP} into the muni-year stack
+used by the AR test, and documents the cycle-alignment structure of
+the exposure weights.
 
 \paragraph{Sector instruments and muni-level stacking.}
-Equations~\eqref{eq:Z}--\eqref{eq:dZ} define the sector-level instruments. To
-take them to the muni-year level for the AR test, we \emph{stack} sector and
-office:
+Equations~\eqref{eq:Z-M}--\eqref{eq:dZ} define the sector-level cross-office
+instruments. To take them to the muni-year level for the AR test, we
+\emph{stack} sector and channel:
 \begin{equation}\label{eq:stacked}
   Z_{mt}
   \;\equiv\;
-  \big( Z^{\ell}_{jmt} \big)_{\ell\in\{\mathrm{M,G,P}\},\,j=1,\dots,J}
+  \big( Z^{c}_{jmt} \big)_{c\in\mathcal{C},\,j=1,\dots,J}
   \;\in\;\mathbb{R}^{K},
   \qquad
-  K \;=\; 3\cdot J.
+  K \;=\; |\mathcal{C}|\cdot J,
 \end{equation}
-At the production margin $\texttt{policy\_block\_active}\times\texttt{S3}$ with
-$J=12$ active bins, $K=36$ for the full mayor-governor-president stack and
-$K=12$ for the mayor-only specification (the primary in the strategy memo
-at \texttt{docs/strategy/ar\_test\_strategy.md}, \S{}3). At the secondary
-margin $\texttt{cnae\_section}\times\texttt{S3}$ with $J=51$ active bins,
-$K=51$ or $K=153$.
+where $\mathcal{C}\subseteq\{\mathrm{M},\mathrm{M{\cdot}P},
+\mathrm{M{\cdot}G},\mathrm{M{\cdot}G{\cdot}P}\}$ is the active channel
+set. For the currently leading post-D28 candidate margin
+$\texttt{policy\_block\_active}\times\texttt{S3}$ with $J=12$ active bins,
+$K=48$ for the full four-channel cross-office stack
+($\mathcal{C}=\{\mathrm{M},\mathrm{M{\cdot}P},\mathrm{M{\cdot}G},
+\mathrm{M{\cdot}G{\cdot}P}\}$), $K=36$ for the three-channel cross-office
+stack omitting the triple ($\mathcal{C}=\{\mathrm{M},\mathrm{M{\cdot}P},
+\mathrm{M{\cdot}G}\}$), and $K=12$ for the pure-mayoral specification
+($\mathcal{C}=\{\mathrm{M}\}$). At the secondary candidate margin
+$\texttt{cnae\_section}\times\texttt{S3}$ with $J=51$ active bins,
+$K\in\{51,153,204\}$ for the three nested specifications.
+
+\paragraph{Cycle alignment and exposure weights.}
+Mayoral elections and gubernatorial/presidential elections sit on
+disjoint four-year cycles ($e_{\mathrm{M}}\in\{2004,2008,2012,2016\}$
+versus $e_{\mathrm{G}}=e_{\mathrm{P}}\in\{2002,2006,2010,2014\}$).
+Because governors and the president share the same election year, the
+pre-election windows $T^{\mathrm{G}}_{t}$ and $T^{\mathrm{P}}_{t}$
+defined in~\eqref{eq:window} coincide and so $w^{\mathrm{G}}_{jmp,t}
+=w^{\mathrm{P}}_{jmp,t}$ when both are constructed on the common
+four-year window. Within any mayoral term, exactly one
+gubernatorial/presidential turnover occurs (at $t=e_{\mathrm{M}}+2$), so
+each cross-office shift has at most two within-mayoral-term changes: one at
+the mayoral inauguration $e_{\mathrm{M}}+1$ and one at the
+gubernatorial/presidential inauguration $e_{\mathrm{M}}+3$.
+
+\begin{remark}[Channel-set selection]\label{rem:channel-set}
+The four-channel stack is the most aggressive specification and is the
+natural primary if the triple-cross-office shift $\Align^{\mathrm{M{\cdot}G{\cdot}P}}$
+has enough non-zero panel cells to identify $\beta$. The three-channel
+stack drops the triple in case it is too thin (full-coalition alignment
+is the rarest configuration: it requires the firm-affiliated party to
+hold mayor, governor, and the federal coalition simultaneously). The
+pure-mayoral specification is the conservative comparison and continuity
+with the existing pipeline.
+\end{remark}
 
 \begin{remark}[Wide vs.\ aggregated muni-level instrument]
 An alternative aggregation, ``stack-and-summarize,'' would collapse
-$Z^{\ell}_{jmt}$ to a single muni-year object via
-$Z^{\ell}_{mt}=\sum_j w_j Z^{\ell}_{jmt}$ for some weights $w_j$. This reduces
-$K$ but imposes an aggregation that pre-loads which sectors matter; we treat
-it as a robustness check. The wide stacking~\eqref{eq:stacked} keeps the
-cross-sector pattern of the shock visible to the test and makes the
-``$\beta=\bzero$'' null intelligible coefficient by coefficient.
+$Z^{c}_{jmt}$ to a single muni-year object via
+$Z^{c}_{mt}=\sum_j w_j Z^{c}_{jmt}$ for some weights $w_j$. This reduces
+$K$ but imposes an aggregation that pre-loads which sectors matter; we
+treat it as a robustness check. The wide stacking~\eqref{eq:stacked}
+keeps the cross-sector pattern of the shock visible to the test and
+makes the ``$\beta=\bzero$'' null intelligible coefficient by coefficient.
 \end{remark}
 
 %% =====================================================================
@@ -543,12 +1126,31 @@ gate for the AR test: weak first stages widen the AR confidence set but do
 not bias inference.
 
 \begin{remark}[Stacked first stage for the AR test]
-The AR equivalence in \autoref{sec:ar} does not require the first
-stage~\eqref{eq:fs} to be estimated separately; it is internally embedded in
-the reduced-form Wald test. We document~\eqref{eq:fs} because the F-statistic
+The first stage~\eqref{eq:fs} need not be estimated separately to conduct the
+AR test: as the next section shows, it is internally embedded in the
+reduced-form Wald test. We document~\eqref{eq:fs} here because the F-statistic
 from~\eqref{eq:fs} is the relevant power diagnostic, and because the pattern
 of $\hat\pi^{\ell}_j$ across sectors is the natural mechanism narrative.
 \end{remark}
+
+\paragraph{Why the cross-office form solves the FE-absorption problem.}
+The standalone tier shifts $\Align^{\mathrm{G}}$ and $\Align^{\mathrm{P}}$
+have weak cross-municipality variation that survives the standard FE
+structure $\gamma_{jm}+\alpha_{jt}$ in~\eqref{eq:fs}: $\Align^{\mathrm{P}}_{pt}$
+is constant across $m$ at fixed $t$ (a national indicator), and
+$\Align^{\mathrm{G}}_{s(m),pt}$ is constant within each (state,$t$) cell.
+In a tier-stacked instrument $Z^{\mathrm{P}}_{jmt}$ or
+$Z^{\mathrm{G}}_{jmt}$, all surviving identifying variation must come from
+heterogeneity in the pre-period exposure shares $w^{\ell}_{jmp,t}$, which
+are themselves persistent and largely absorbed by $\gamma_{jm}$. The
+cross-office shifts in~\eqref{eq:align-MP}--\eqref{eq:align-MGP} inherit the
+full cross-municipality variation of $\Align^{\mathrm{M}}$ and gate it on
+the higher-tier coalition state, producing instruments with rich
+cross-muni \emph{and} cross-time variation that survive any plausible FE
+structure short of muni$\times$year FE (which would absorb the endogenous
+variable itself). This is a mechanical reason---in addition to the
+substantive one above---to prefer the cross-office instruments to the
+additive tier stack.
 
 %% =====================================================================
 \section{The AR test: reduced form}\label{sec:ar}
@@ -866,31 +1468,43 @@ remedies:
   not yet implemented in the pipeline.
 \end{enumerate}
 
-\paragraph{Concern: state-level governor shock and within-state correlation.}
-Within a state, all municipalities receive the same
-$\Align^{\mathrm{G}}_{mpt}$ in $t$. The SSIV variation across municipalities in
-$Z^{\mathrm{G}}_{jmt}$ then comes only from heterogeneity in
-$w^{\mathrm{G}}_{jmp,t}$, the pre-period sector-municipality exposure. If
-residuals are correlated within a state through governor-level non-BNDES
-channels (state-level transfers, court appointments, public investment),
-inference on the governor-tier instruments is the most exposed to
-\citet{adao2019shift}'s correction. Mayor-tier instruments are less exposed
-because $\Align^{\mathrm{M}}_{mpt}$ varies across municipalities. President-tier
-instruments are the most exposed because $\Align^{\mathrm{P}}_{mpt}$ is
-constant nationally in any given year and is absorbed by $\delta_t$ entirely;
-the within-tier identifying variation is purely through
-$w^{\mathrm{P}}_{jmp,t}$. We therefore report tier-specific AR statistics
-alongside the joint test.
+\paragraph{Concern: state-level correlation and the cross-office channels.}
+The standalone tier instruments $Z^{\mathrm{G}}_{jmt}$ and
+$Z^{\mathrm{P}}_{jmt}$ have weak cross-municipality variation that
+survives the standard FE structure---$\Align^{\mathrm{P}}_{pt}$ is
+constant across municipalities at any $t$ and so is absorbed by
+$\delta_t$, and $\Align^{\mathrm{G}}_{s(m),pt}$ is constant within each
+(state,$t$) cell---which is the mechanical reason we drop them from the
+primary stack in favor of the cross-office shifts of
+\autoref{subsec:cross-office}. The cross-office instruments
+$Z^{\mathrm{M{\cdot}P}}_{jmt}$, $Z^{\mathrm{M{\cdot}G}}_{jmt}$, and
+$Z^{\mathrm{M{\cdot}G{\cdot}P}}_{jmt}$ inherit the cross-municipality
+variation of $\Align^{\mathrm{M}}_{mpt}$ and gate it on the higher-tier
+coalition state, so they survive any plausible FE structure short of
+muni$\times$year FE. The Adão--Kolesár--Morales correction
+\citep{adao2019shift} remains the right inference under the BJS
+framework when within-state residual correlation is a concern; it is
+applied at the shock level, where shocks now correspond to
+channel-party-municipality-time cells $k=(c,p,m,t)$. We report
+\emph{channel-specific} AR statistics for each $c\in\mathcal{C}$ alongside
+the joint test, with the pure-mayoral statistic as the conservative
+benchmark and the cross-office statistics as the mechanism-relevant
+hypotheses.
 
 \paragraph{Effective sample size and time-series content.}
-The levels instrument $Z^{\ell}_{jmt}$ is a step function in $t$ that is
-constant within each electoral cycle. With muni and year FE, the variation
-exploited is the cross-municipality dispersion in instrument step-changes at
-cycle boundaries (mayor: 2005, 2009, 2013, 2017; governor/president: 2007,
-2011, 2015). Each municipality contributes $\sim 3$--$4$ independent step-changes
-per tier; the cross-municipality average has $\sim M\times 3$ degrees of
-freedom for the mayor tier alone. This is the relevant denominator for
-power, not the panel-level $M\times T$.
+The levels instrument $Z^{c}_{jmt}$ is a step function in $t$ that is
+piecewise constant between consecutive elements of $E_c$. With muni and
+year FE, the variation exploited is the cross-municipality dispersion in
+instrument step-changes at the inauguration boundaries: for the pure
+mayoral channel, mayoral inaugurations $\{2005,2009,2013,2017\}$; for the
+cross-office channels, the union of mayoral and gubernatorial/presidential
+inaugurations $\{2003,2005,2007,\ldots,2017\}$. Each municipality
+contributes $\sim 3$--$4$ independent step-changes for the pure mayoral
+channel and $\sim 7$--$8$ for each cross-office channel; the
+cross-municipality average has $\sim M\times 3$ degrees of freedom for
+the mayoral channel and $\sim M\times 7$ for each cross-office channel.
+This is the relevant denominator for power, not the panel-level
+$M\times T$.
 
 %% =====================================================================
 \section{Summary}\label{sec:summary}
@@ -924,20 +1538,24 @@ Inference is cluster-robust by municipality, with state-level and
 Symbol & Object \\
 \midrule
 $m,j,t,\ell,p$ & municipality, sector, year, office, party \\
-$f$ & firm; $\cF(j,m)$ firm support of cell $(j,m)$ \\
+$f$ & firm \\
+$\cF(j,m),\,\cF^{\mathrm{pre}}_{jm,e}$ & firm support of $(j,m)$ / pre-period support at inauguration $e$ \\
 $s_{jmt}$ & sector $j$ employment share in $(m,t)$, $\sum_j s_{jmt}=1$ \\
 $s^{\mathrm{B}}_{jmt}$ & sector $j$ BNDES credit share in $(m,t)$ \\
 $Y_{mt}$ & log real GDP in $(m,t)$ \\
 $\beta$ & $J$-vector of GDP gradient w.r.t.\ employment shares \\
 $\Vol_{mt}$ & $\mathrm{BNDES\_total}_{mt}/\mathrm{GDP}_{m,2002}$ \\
 $T^{\ell}_{t}$ & pre-election window for office $\ell$ at year $t$, eq.\eqref{eq:window} \\
-$L_{f,p,t}$ & owners of firm $f$ affiliated with party $p$ at $t$ \\
-$\omega^{\ell}_{fp,t}$ & firm-level baseline party exposure, pooled-count \\
+$L_{f,p,t},\,L_{f,t}$ & owners of firm $f$ affiliated with party $p$ / total owners at $t$ \\
+$\omega^{\ell}_{fp,t}$ & firm-level baseline party exposure, pooled-count, eq.\eqref{eq:omega-firm} \\
+$N^{\ell}_{jm,t}$ & owner-count normalizer in cell $(j,m)$, eq.\eqref{eq:N-norm} \\
 $w^{\ell}_{jmp,t}$ & sector-level baseline party exposure, eq.\eqref{eq:wjmp} \\
+$\FA^{c}_{fmt}$ & firm-level cross-office instrument for channel $c$, eq.\eqref{eq:FA-firm} \\
 $\Align^{\ell}_{mpt}$ & $\ind\{\text{party } p \text{ holds office } \ell \text{ in } m \text{ at } t\}$ \\
 $\Delta\Align^{\ell}_{mpt}$ & alignment turnover ($\neq 0$ at inauguration) \\
-$Z^{\ell}_{jmt}$ & sector-tier levels instrument, eq.\eqref{eq:Z} \\
-$\Delta Z^{\ell}_{jmt}$ & sector-tier changes instrument, eq.\eqref{eq:dZ} \\
+$\Align^{c}_{mpt}$ & cross-office shift for channel $c$, eqs.\eqref{eq:align-MP}--\eqref{eq:align-MGP} \\
+$Z^{c}_{jmt}$ & sector-channel levels instrument, eqs.\eqref{eq:Z-M}--\eqref{eq:Z-MGP} \\
+$\Delta Z^{c}_{jmt}$ & sector-channel changes instrument, eq.\eqref{eq:dZ} \\
 $Z_{mt}$ & stacked muni-year instrument vector, eq.\eqref{eq:stacked}, dim.\ $K$ \\
 $\EC^{\ell}_{jm,t}$ & sector-level exposure control, $\sum_p w^{\ell}_{jmp,t}$ \\
 $\Pi$ & first-stage matrix in eq.\eqref{eq:fs-stacked} \\
@@ -971,6 +1589,11 @@ Andrews, I., J.~H. Stock, and L.~Sun (2019).
 Borusyak, K., P.~Hull, and X.~Jaravel (2022).
 ``Quasi-experimental shift-share research designs,''
 \emph{Review of Economic Studies} 89(1): 181--213.
+
+\bibitem[Borusyak, Hull, and Jaravel(2025)]{borusyak2025practical}
+Borusyak, K., P.~Hull, and X.~Jaravel (2025).
+``A practical guide to shift-share instruments,''
+\emph{Journal of Economic Perspectives} 39(1): 181--204.
 
 \bibitem[Carter, Schnepel, and Steigerwald(2017)]{carter2017asymptotic}
 Carter, A.~V., K.~T. Schnepel, and D.~G. Steigerwald (2017).
