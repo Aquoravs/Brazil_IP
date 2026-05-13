@@ -1,0 +1,4 @@
+spec,K,n_obs,ar_F,ar_p,rejects_5pc,first_stage_joint_F,dropped_instruments
+baseline,9,89009,4.19163639733565,1.95850082213835e-05,TRUE,7841005.05012736,""
+drop_top1,8,89009,3.36610695103187,0.000728240184278472,TRUE,14732617.2461644,Z_gov_coalition_cycle_specific_Infra
+drop_top2,7,89009,2.72213907667779,0.0080217921635627,TRUE,,Z_gov_coalition_cycle_specific_Infra;Z_mayor_coalition_cycle_specific_Ind

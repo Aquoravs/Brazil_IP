@@ -1,0 +1,6 @@
+margin,office,cnae_section,instrument,n_obs,beta_hat,se,t_stat,p_value,rejects_5pc,status
+cnae_section,pres,T,Z_pres_coalition_cycle_specific_T,8768,0.19032572354397,0.111257077708997,1.71068418713804,0.0872935029749705,FALSE,ok
+cnae_section,mayor,P,Z_mayor_coalition_cycle_specific_P,32740,0.00258666964862362,0.0601142407029016,0.0430292326473445,0.965680435596885,FALSE,ok
+cnae_section,gov,P,Z_gov_coalition_cycle_specific_P,32740,0.0383378831936779,0.025929992088218,1.47851503630415,0.139350794463709,FALSE,ok
+cnae_section,pres,E,Z_pres_coalition_cycle_specific_E,24783,-0.538797024305845,0.165208606967664,-3.26131328261428,0.00112016795374754,TRUE,ok
+cnae_section,pres,P,Z_pres_coalition_cycle_specific_P,32740,-0.10364321741252,0.0436788192330105,-2.37284842476215,0.0176997595850136,TRUE,ok

@@ -1,7 +1,7 @@
 ---
 title: Project Blueprint
 status: front door
-date: 2026-05-12
+date: 2026-05-13
 purpose: Short entry point for the current research state, active gate, and next workflow step.
 ---
 
@@ -33,13 +33,17 @@ The estimand is the GDP effect of sectoral employment-share composition. BNDES c
 
 ## Current Phase
 
-**Phase:** exploration, focused on the Anderson-Rubin municipal policy evaluation.
+**Phase:** exploration, transitioning into documentation. The Anderson-Rubin municipal policy evaluation is now production-ready at the `policy_block` primary margin with `cnae_section` as side-by-side robustness (D29, 2026-05-13).
 
-**Active focus:** finish the theoretical and econometric review in [ar_test_specification.tex](methodology/ar_test_specification.tex). The draft currently develops cross-office instruments and maps the shift-share conditions to this setting, but the review is not yet the basis for production changes.
+**Active focus:** Phase 4 documentation. E4.1 (methodology PDF update) and E4.3 (memo) bring the front-door artifacts in line with the firm-support hybrid implementation completed in Phases 2 and 3.
 
-**Immediate blocker:** D28 defers the production margin decision until the theoretical/econometric review is complete. Until then, F2 informativeness, weight graduation, and production crosswalk work are blocked.
+**Production AR results (graduated 2026-05-13):**
+- `policy_block`: AR F = 4.37, p = 2e-4, K = 12 effective instruments. Drop-top-1 and drop-top-2 substitutes pass.
+- `cnae_section`: AR F = 2.05, p = 2.1e-4 (side-by-side robustness).
 
-**Next implementation step:** finish the theoretical/econometric review, then decide the production margin, then build the production crosswalk / rerun F2 / graduate weights.
+**Remaining deferred:** D28 still defers the `policy_block_active x S3` production margin and the matching size-crossed weight graduation. F3 exclusion/placebo work is PARTIAL (presidential residual flagged; mayor clean; governor resolved as specification artifact).
+
+**Next implementation step:** complete Phase 4 documentation. Then choose one of: (a) further pre-trend documentation, (b) AKM SE implementation for `ssaggregate` (flagged in C2.1.5 critic; advisory), or (c) revisit the deferred `policy_block_active x S3` graduation.
 
 ## Current Method State
 
@@ -47,25 +51,24 @@ The inferential framework is an Anderson-Rubin test of the local-optimality null
 
 Current working method facts:
 
-- Endogenous object: sector employment shares.
-- Volume channel: total BNDES disbursements divided by initial municipal GDP, still provisional pending review.
+- Endogenous object: sector employment shares on the RAIS contemporaneous-unbalanced skeleton, with per-cell BHJ §4.4 slack control carried through to the muni panel (D29).
+- Volume channel: primary control = `total_bndes_real / initial_gdp_m,0` on RAIS-merged productive-firm disbursements; split-volume robustness adds non-RAIS productive, FI, and public components separately (D30).
+- Exposure weights: frozen on `[e(t)-4, e(t)-1]`, Variant A primary (D27, D29).
 - Instrument draft: cross-office channels `M`, `MP`, `MG`, and `MGP` are in the methodology draft.
-- F2 status: power/informativeness check, not a validity gate under AR.
-- Exclusion and denominator/weight issues remain partial and tracked in F3/F4.
+- F-link status: F1 CONFIRMED at graduated margins; F2 CONFIRMED at `policy_block` primary (F=4.37) and `cnae_section` robustness (F=2.05); F3 PARTIAL (pre-trend characterization complete; presidential residual flagged; mayor clean; governor resolved as specification artifact); F4 PARTIAL — `policy_block x S3` weight graduation still BLOCKED per D28.
+- Implementation: stage 32c (new) feeds modified stages 41/53/54.
 
 ## Production Margin Status
 
-The production margin is **not committed** under D28.
-
-`policy_block_active x S3` is the top F1 candidate from diagnostics. It is **not** the committed production margin. Do not describe it as production-ready or as the settled AR margin.
-
-Working dimensions for the next decision are:
+D29 graduates `policy_block` as primary and `cnae_section` as side-by-side robustness on 2026-05-13. The `policy_block_active x S3` size-crossed margin remains deferred under D28.
 
 | Dimension | Status | Notes |
 |---|---|---|
-| `policy_block_active` | active candidate component | Four active BNDES blocks: Agro, Ind, Infra, Serv. |
+| `policy_block` | **production primary (graduated 2026-05-13, D29)** | Four BNDES policy blocks: Agro, Ind, Infra, Serv. Production AR F=4.37, p=2e-4, K=12 effective. |
+| `cnae_section` | **production robustness (graduated 2026-05-13, D29)** | Side-by-side with `policy_block`. AR F=2.05, p=2.1e-4. |
+| `policy_block_active` | active candidate component | Four active BNDES blocks; not graduated as a standalone margin. |
 | S3 | active candidate component | Three firm-size bins: MPME, Media, Grande. |
-| `policy_block_active x S3` | top F1 candidate only | Requires production crosswalk and post-review decision. |
+| `policy_block_active x S3` | top F1 candidate only; deferred per user (D28, 2026-05-12) | Size-crossed graduation paused. |
 | `cnae_section x S3` | secondary robustness candidate | Higher instrument count; may need many-instrument attention. |
 
 See [taxonomies.md](taxonomies.md) for the detailed taxonomy catalog.
@@ -74,14 +77,19 @@ See [taxonomies.md](taxonomies.md) for the detailed taxonomy catalog.
 
 | Track | Status | Next action |
 |---|---|---|
-| Track 1: theoretical/econometric review | ACTIVE | Complete review of [ar_test_specification.tex](methodology/ar_test_specification.tex). |
-| Track 2: production margin | BLOCKED | Decide the margin only after Track 1. |
-| Track 3: production crosswalk | BLOCKED | Build the selected crosswalk after the margin is committed. |
-| Track 4: F2 rerun | BLOCKED | Rerun sector first-stage / AR informativeness diagnostics at the committed margin. |
-| Track 5: weight graduation | BLOCKED | Decide whether `w_owners_muni_univ` or a successor graduates at the committed margin. |
+| Track 1: theoretical/econometric review | ACTIVE | Phase 4 E4.1 methodology PDF update in flight. |
+| Track 2: production margin | PARTIAL (D29 graduates `policy_block` + `cnae_section`; `policy_block_active x S3` deferred per D28) | Document graduated margins in E4.1; revisit deferred margin later if needed. |
+| Track 3: production crosswalk | COMPLETED for hybrid | Stage 32c (new) -> 41/53/54 implemented and verified in Phase 2/3. |
+| Track 4: F2 rerun | COMPLETED at graduated margins | F=4.37 (`policy_block`); F=2.05 (`cnae_section`). |
+| Track 5: weight graduation | PARTIAL | `w_owners_muni_univ` graduated at `policy_block` (A7); size-crossed graduation still BLOCKED per D28. |
 | Muni-by-muni AR | DEFERRED | Pooled AR remains the active path. |
 | A6 project-CNAE cross-tab | OPTIONAL / DEFERRED | Descriptive only; not a production-margin input. |
 | C6/C7 data extensions | AWAITING ADVISOR | See data memos linked from [CLAUDE.md](../CLAUDE.md). |
+| A-RAIS-Negativa-access | OPEN (user 2026-05-12) | User to check whether RAIS Negativa is included in the project's restricted-access RAIS extract. If available, would tighten the Owner-only 7.64% Negativa-recoverable upper bound documented in Phase 0 A0.1. Out of scope until access status is confirmed. |
+| A-AKM-ssaggregate-SE-correction | OPEN (advisory, 2026-05-13) | Flagged in C2.1.5 critic. Full AKM standard-error correction for `ssaggregate` not implemented in current production pipeline; current SEs are AR-robust but do not propagate the shock-level uncertainty. Advisory, not blocking. |
+| A-Stage53-emp_share-weak | OPEN (disclosure, 2026-05-13) | Flagged in C2.3 critic. Stage 53 first-stage F on `emp_share` is weak; disclosed in the methodology PDF and relied on AR-robust inference. Not blocking under AR. |
+| Owner-only employment | CLOSED (2026-05-12) | Phase 0 A0.5 complete. **User's prior supported.** Owner-only observations employment-mass upper bound on contemporaneous $n_{mt}$ = 1.83% (median impute, all OO) / 0.63% (P25 impute, ever-RAIS subset). 62.2% of OO firms in cells where RAIS median is 1-4 employees; 83.2% appear in a single year; 13.3% never in RAIS. Feeds limitations section of `ar_test_specification.tex`. Caveat: bound is on formal employment, not value-added. |
+| Private vs. all loans (D5-op) | IMPLEMENTED (2026-05-13, refined by D30) | Confirmed 2026-05-12; implemented in Phase 3 (D3.1 + C2.2-supplement + D3.3). Exposure weights use private productive firms only; volume control uses RAIS-merged productive-firm disbursements primary, with non-RAIS productive / FI / public splits as robustness. Script 11 drops the PRIVADA filter and tags `recipient_class`. |
 
 ## Production Pipeline Caveat
 
@@ -97,9 +105,22 @@ Any taxonomy requiring a new production crosswalk is production-ready only after
 ## Research Logic To Preserve
 
 - F0: candidate margins must be recognizable firm-side allocation margins.
-- F1: diagnostics support candidate margins, especially `policy_block_active x S3`, but only as decision evidence.
-- F2: informativeness is blocked until the committed margin and instrument form exist.
-- F3: exclusion/placebo work is partial.
-- F4: A7 supports `w_owners_muni_univ` at `policy_block`, but weight graduation at the final margin is still blocked.
+- F1: CONFIRMED for graduated margins (`policy_block` primary, `cnae_section` robustness per D29). `policy_block_active x S3` remains a diagnostic top candidate.
+- F2: CONFIRMED at the graduated margins — F=4.37 at `policy_block` (K=12 effective, p=2e-4); F=2.05 at `cnae_section` (p=2.1e-4). Stage 53 first-stage F on `emp_share` is weak (A-Stage53-emp_share-weak); inference is AR-robust.
+- F3: PARTIAL — pre-trend characterization complete; presidential residual flagged; mayor clean; governor resolved as specification artifact.
+- F4: PARTIAL — A7 supports `w_owners_muni_univ` at `policy_block`. `policy_block x S3` size-crossed weight graduation still BLOCKED per D28.
+
+## Active Explorations
+
+| Branch | Status |
+|---|---|
+| `explorations/anderson_rubin/active_denominator/` | COMPLETED for Phase 1 + 1.5-1.8 + C2.1.5 sub-task; production pipeline now consumes this work. Ready for archive or promotion. |
+| `explorations/firm_universe/rais_coverage_audit/` | COMPLETED. |
+| `explorations/firm_universe/bndes_recipient_audit/` | COMPLETED. |
+| `explorations/anderson_rubin/mass_weighted_first_stage/` | Open (diagnostic). |
+
+## Next Action
+
+Phase 4 documentation (in flight). After E4.1 (methodology PDF) and E4.3 (memo) complete, the blueprint front-door is up to date and the project is ready for the next research-question step — likely (a) further pre-trend documentation, (b) AKM SE implementation, or (c) the deferred `policy_block x S3` production margin work.
 
 Do not relitigate the econometrics in this front door. Update the detailed state files when decisions change, then keep this file short.

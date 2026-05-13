@@ -1,0 +1,4 @@
+test,office,z_set,n_obs,n_munis,k_instruments,joint_F,joint_p,rejects_5pc
+B1.7.2_office_decomp_cleaned,pres,pres_minus_E_P,55614,5570,17,1.46296663348037,0.097703884584088,FALSE
+B1.7.2_office_decomp_cleaned,gov,full,55614,5570,19,2.47031838912694,0.000366458851404602,TRUE
+B1.7.2_office_decomp_cleaned,mayor,full,55614,5570,19,0.726789435483253,0.794684440306348,FALSE

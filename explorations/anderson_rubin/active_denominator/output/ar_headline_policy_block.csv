@@ -1,0 +1,2 @@
+margin,variant,outcome,flavor,fe_spec,K,n_obs,n_munis,n_collinear,ar_F,ar_p,rejects_5pc,first_stage_joint_F,phase1_cnae_section_ar_F,phase1_cnae_section_ar_p_note,phase1_cnae_section_fs_F
+policy_block,contemporaneous,log_gdp,MGP,muni_year,9,89009,5570,0,4.19163639733565,1.95850082213835e-05,TRUE,7841005.05012736,2.69,<1e-10,19.98

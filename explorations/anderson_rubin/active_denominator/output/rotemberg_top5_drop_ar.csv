@@ -1,0 +1,3 @@
+spec,K,n_obs,ar_F,ar_p,rejects_5pc,share_top5_weight,top5_instruments
+baseline,57,89009,2.69164260301487,9.13001304482286e-11,TRUE,0.507052208275206,Z_pres_coalition_cycle_specific_T;Z_mayor_coalition_cycle_specific_P;Z_gov_coalition_cycle_specific_P;Z_pres_coalition_cycle_specific_E;Z_pres_coalition_cycle_specific_P
+drop_top5,52,89009,1.62333950156684,0.00299431555813801,TRUE,,""

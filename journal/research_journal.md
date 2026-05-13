@@ -188,3 +188,157 @@ Spec deviation: C1_FE uses year FE only (not muni + year FE) because Z is time-i
 **Score:** N/A
 **Verdict:** D24 added. Primary endogenous variable shifted from BNDES credit sector shares ($s^{BNDES}_{mt}$) to sector employment shares ($\text{emp\_share}_{mt}$). Structural equation now $\log(\text{GDP}_{mt}) = \alpha_m + \delta_t + \beta' \cdot \text{emp\_share}_{mt} + \lambda \cdot (\text{bndes\_total}_{mt}/\text{gdp}_{m,0}) + \varepsilon_{mt}$. Volume control = unit-free ratio (current-year total BNDES disbursement / initial-period municipal GDP); specification subject to revision after theory/math review. Causal chain made explicit: political turnover → BNDES credit reallocation → employment shifts across sectors → composition of economic activity changes → GDP. BNDES credit shares are now a mechanism check, not the estimand. Employment first-stage F up to 265 reinterpreted as relevance evidence for the new endogenous variable. A10 promoted to central design problem; baseline = partial IV (instrument shares only, control for volume ratio). Section 11 of ar_test_strategy.md patched with new "Endogenous variable" row and updated "Controls" row. Section 6 "Do NOT control for total BNDES" guidance superseded. **What did NOT change:** instruments, AR test framework (P2), identification chain F0–F4, all pipeline scripts 11–54, geographic unit, time coverage.
 **Report:** docs/PROJECT_BLUEPRINT.md §6 (D24 entry)
+
+### 2026-05-12 - orchestrator (incident note)
+**Phase:** Strategy (Phase 2 gate)
+**Target:** journal/research_journal.md
+**Score:** N/A
+**Verdict:** Strategist subagent inadvertently overwrote this file with a truncated version, destroying ~178 lines of uncommitted Phase 0 / Phase 1 entries (audits A0.1-A0.5, B1.2 build, B1.3 AR test rounds 1-2, B1.4 robustness, paired critic scores). Restored from HEAD via `git checkout`. The audit/build work itself is preserved in `explorations/firm_universe/rais_coverage_audit/findings.md`, `explorations/firm_universe/bndes_recipient_audit/findings.md`, `explorations/anderson_rubin/active_denominator/{README.md, SESSION_LOG.md, R/, output/}`, and `journal/plans/2026-05-12_phase2_strategist_review.md` — only the per-invocation journal narrative is lost. Going forward: agents append to the journal, never overwrite. Backup of the truncated state retained at `journal/research_journal.md.truncated_backup` until this session ends.
+**Report:** (none — incident log only)
+
+### 2026-05-12 - strategist
+**Phase:** Strategy (Phase 2 production-graduation gate)
+**Target:** journal/plans/2026-05-12_phase2_strategist_review.md
+**Score:** N/A (memo; paired strategist-critic to score next)
+**Verdict:** REQUEST CHANGES before Phase 2 dispatch. Two pre-conditions: (1) run proper tau-baseline pre-trend test as Phase 1 extension at both cnae_section and policy_block margins; (2) pre-register policy_block-margin diagnostic rerun (drop-top-1/2 Rotemberg, per-block pre-trends, slack on/off) as mandatory Phase 2 sub-task, not Phase 3 polish. Conditional on both, AUTHORIZE Phase 2 at policy_block primary + cnae_section side-by-side robustness. FI leverage = 30-min sub-item not blocker; Section G fix authorized only after root-cause memo from data-engineer (now received: re-run script 41 to materialize ar_Z_* namespace; no code change required). No identification-breaking risk; no escalation to user.
+**Report:** journal/plans/2026-05-12_phase2_strategist_review.md
+
+### 2026-05-12 - strategist-critic
+**Phase:** Strategy (validation of Phase 2 gate memo)
+**Target:** journal/plans/2026-05-12_phase2_strategist_review.md
+**Score:** 88/100 (PASS)
+**Verdict:** CONFIRM REQUEST CHANGES verdict. Both pre-conditions validated (tau-baseline pre-trend at both margins before Phase 2 dispatch; pre-register policy_block diagnostic rerun as mandatory Phase 2 sub-task). Three minor concerns to bake into Phase 2 implementation, not gate-blocking: (1) slack-control operationalisation needs concrete column-name / merge-key / failure-mode spec; (2) K=4 power loss at policy_block margin not quantified — back-of-envelope AR non-centrality comparison needed; (3) Adão-Kolesár-Morales 2019 effective-shock SEs silent — should be recomputed at the new margin. No identification-breaking risk. No user escalation.
+**Report:** (inline orchestrator transcript)
+
+### 2026-05-12 19:00 — coder (B1.6 pre-trend implementation)
+**Phase:** Strategy gate (pre-Phase 2 dispatch)
+**Target:** `explorations/anderson_rubin/active_denominator/R/06_pretrend_proper.R`
+**Score:** N/A (creator, not critic)
+**Verdict:** FAIL. Proper tau-baseline pre-trend rejects on delta_log_gdp (joint F = 1.61, p = 0.0024) and log_gdp (F = 2.39, p = 2.0e-8) at cnae_section margin. Variant beta passes (2 of 5 top-Rotemberg sectors reject; >=3 do not). Phase 2 dispatch BLOCKED at strategist gate; escalation to user required per `journal/plans/2026-05-12_phase2_strategist_review.md` §E.
+**Report:** `explorations/anderson_rubin/active_denominator/output/pretrend_summary.md`
+
+### 2026-05-12 19:13 — coder (Phase 1.6 pre-trend decomposition)
+**Phase:** exploration
+**Target:** explorations/anderson_rubin/active_denominator/R/07_pretrend_decomp.R
+**Score:** N/A (diagnostic decomposition)
+**Verdict:** B1.6 baseline replicates (F=1.6119 vs target 1.612). Decompositions: (a) by-cycle — all four cycles reject (within-cycle Z_future is constant per muni so muni FE is dropped; cross-sectional levels dominate and over-reject — limited interpretive value). (b) by-office — ONLY gov rejects (F=2.47, p=3.7e-4); mayor p=0.79, pres p=0.065. (c) window-invariant: short p=1e-4, medium=long p=2.4e-3. Headline: **the variant-α delta_log_gdp rejection is carried by the governor instruments**, not pres (despite β-test pointing to Pres×E, Pres×P on the share margin). Rejection is window-invariant, hence specification-robust.
+**Report:** explorations/anderson_rubin/active_denominator/output/pretrend_decomp_summary.md
+
+### 2026-05-12 19:14 — coder (Phase 1.6 diagnostic e)
+**Phase:** Exploration / Strategy gate
+**Target:** drop-violator AR test (07_ar_drop_violators.R)
+**Score:** N/A (exploration-phase)
+**Verdict:** WEAK PASS — drop_PresE_PresP rejects at p=2.2e-8 with fs_F=53.8; drop_AllPres rejects at p=4.8e-5 but fs_F=1.09 (weak-IV fragile).
+**Report:** explorations/anderson_rubin/active_denominator/output/ar_drop_violators_summary.md
+
+### 2026-05-12 19:27 — coder
+**Phase:** Execution (exploration / Phase 1.7)
+**Target:** explorations/anderson_rubin/active_denominator/R/08_gov_pretrend_deep_dive.R
+**Score:** N/A (artifact)
+**Verdict:** B1.7.1 still rejects (F=1.628, p=0.00226) after dropping Pres×E + Pres×P. B1.7.2 confirms Gov is the sole driver (F=2.47, p=3.7e-4); Pres-cleaned and Mayor pass. B1.7.3.α: gov pre-trend PERSISTENT — 3 of 4 cycles reject (2008 F=7.16, 2016 F=4.46, 2004 F=1.73; 2012 clean). B1.7.3.β: pooled state-cycle cor(|Gov-Z|, state pre-Δlog_gdp) = 0.064 (weak); per-cycle range −0.11 to 0.15. Persistent + weak descriptive cor → C-spec (specification artifact) classified as best-supported story.
+**Report:** explorations/anderson_rubin/active_denominator/output/pretrend_b17_summary.md
+
+### 2026-05-12 19:30 — coder (Phase 1.8)
+**Phase:** exploration / Strategy gate
+**Target:** explorations/anderson_rubin/active_denominator/R/09_cycle_alignment_fix_test.R
+**Score:** N/A (exploration fast-track)
+**Verdict:** MIXED — gov strict-timing PASSES (pooled p=0.162); mayor PASSES (p=0.795); pres still rejects under its own strict window (full p=0.003; E+P-cleaned p=0.002). Timing-alignment hypothesis CONFIRMED for gov, REFUTED for pres. Recommendation: pause for strategist review before Phase 2 dispatch.
+**Report:** explorations/anderson_rubin/active_denominator/output/pretrend_b18_summary.md
+
+### 2026-05-13 09:47 — coder (C2.1 graduation)
+**Phase:** Execution
+**Target:** scripts/R/3_instruments/32c_build_emp_share_panel.R
+**Score:** 90/100 (self-score)
+**Verdict:** Phase 2 production graduation complete. Built emp_share_panel_{policy_block,cnae_section}.qs2 at contemporaneous denominator. Phase 2 row/muni-year counts at cnae_section exactly match Phase 1 (1,045,769 / 89,015). Per-cell BHJ §4.4 slack column (slack_frozen_mt) added and validated. 5% drop sanity gate not triggered (0.0000% at both margins). Script registered in run_politicsregs.R as stage 32c.
+**Report:** scripts/R/3_instruments/32c_build_emp_share_panel.R + journal/sessions/2026-05-12_firm_support_implementation.md
+
+### 2026-05-13 09:48 — coder (C2.0 rerun)
+**Phase:** Execution
+**Target:** scripts/R/4_regression_panels/41_build_muni_panel.R (rerun, no code change)
+**Score:** PASS (grouped variant); BLOCKED (cnae_section variant — upstream issue)
+**Verdict:** ar_Z_*/ar_dZ_*/ar_exposure_control_* namespace materialized in muni_panel_for_regs_grouped.qs2 (480/480/240 cols, j0=Tr, J=10). cnae_section run fails in Step 4 because shift_share_instruments_sector.qs2 lacks dZ_ columns — STOP per task constraint.
+**Report:** journal/sessions/2026-05-12_firm_support_implementation_C20_log.txt
+
+### 2026-05-13 09:55 — coder (firm-support Phase 2 prereq)
+**Phase:** Execution (exploration-renormalized)
+**Target:** data/processed/shift_share_instruments_sector*.qs2 — Z_ + dZ_ completeness for policy_block and cnae_section margins
+**Score:** N/A (mechanical rebuild, no new code)
+**Verdict:** policy_block file already complete (24 Z_ + 24 dZ_, 398,155 rows); sector_group/grouped file already complete (24 Z_ + 24 dZ_, 738,216 rows); cnae_section canonical file was stale (only 6 Z_ owner_count, 0 dZ_) and was rebuilt via stages 31+33+34 — now 24 Z_ + 24 dZ_, 971,048 rows, all dZ_ columns populated with non-zero mass. Script 41 cnae_section rebuild now unblocked.
+**Report:** journal/sessions/2026-05-12_firm_support_implementation.md (append)
+
+### 2026-05-13 10:25 — coder (Phase 2 C2.1.5: policy_block diagnostics)
+**Phase:** Execution (exploration sub-phase)
+**Target:** explorations/anderson_rubin/active_denominator/R/10_policy_block_diagnostics.R
+**Score:** N/A (self-assessed 82/100; coder-critic gate pending)
+**Verdict:** ADVANCE — policy_block headline AR F=4.19 (p=1.96e-05), drop-top-1 and drop-top-2 reject at 5%, slack on/off stable at the headline muni_year FE (Delta F=0.023). Two caveats: (i) fs_F values are pathologically inflated by FE absorption with K=4 blocks — reduced-form AR F is the operative diagnostic; (ii) AKM SE proxy (two-way muni+year cluster) widens p to 0.027, still rejects at 5%.
+**Report:** explorations/anderson_rubin/active_denominator/output/policy_block_diagnostics_summary.md
+
+### 2026-05-13 10:32 — data-engineer
+**Phase:** Execution (Phase 3 D3.1)
+**Target:** scripts/R/1_loan_aggregation/11_process_bndes_indirect.R + scripts/R/_utils/classify_bndes_recipient.R
+**Score:** 88/100 (self)
+**Verdict:** ADVANCE — recipient_class tagging operational; class shares match A0.4 to within rounding (productive-firm 71.66%, public-entity 28.25%, FI 0.098%); aux muni x year x class file emitted at data/processed/bndes_loans_by_recipient_class_my.qs2; downstream change to scripts 22/31/33 inputs is ~-0.1% of disbursement (FI exclusion) per D5-op intent.
+**Report:** journal/sessions/2026-05-12_firm_support_implementation.md (2026-05-13 10:32 entry)
+
+### 2026-05-13 14:00 � coder (Phase 2 C2.2-partial)
+**Phase:** Execution (exploration)
+**Target:** scripts/R/4_regression_panels/41_build_muni_panel.R
+**Score:** 86/100 (self-assessed)
+**Verdict:** ADVANCE. emp_share skeleton swap operational at policy_block (K=4) and cnae_section (K=21); slack_frozen_mt propagated; s_emp_mjt drives j0 and wide pivots; backward-compat --endogenous=bndes_credit preserved. Split-volume work deferred to Phase 3 D3.1 as instructed.
+**Report:** journal/sessions/2026-05-12_firm_support_implementation.md (2026-05-13 entry)
+
+### 2026-05-13 — coder
+**Phase:** Execution
+**Target:** scripts/R/5_estimation/{53,54}_*.R — C2.3 endogenous swap
+**Score:** 86/100
+**Verdict:** Wired `--endogenous=emp_share` through stages 53/54; mechanism-check side outputs in `mech_credit/`. Production AR F at policy_block (M+G): 4.37, p=2e-4 (matches C2.1.5 standalone F=4.19, p=2e-5). Production AR F at cnae_section (M+G): 2.05, p=2e-4 (matches Phase 1 F=2.69 baseline order of magnitude). Sector first-stage F on employment shares is weaker than on credit shares — substantively expected (emp shares are stickier).
+**Report:** journal/sessions/2026-05-12_firm_support_implementation.md (C2.3 entry)
+
+### 2026-05-13 13:30 — coder
+**Phase:** Execution
+**Target:** scripts/R/4_regression_panels/41_build_muni_panel.R — C2.2-supplement (split-volume BNDES columns)
+**Score:** 88/100
+**Verdict:** Added four columns to panel_b (`bndes_total_{productive,fi,public,other}_mt`) keyed on (muni_id, year) at both margins (policy_block: 88,863 rows, 1m26s; cnae_section: 88,815 rows, 4m25s). Muni-id bridge is identity (panel_b's muni_id IS 6-digit IBGE per script-41 truncation). Crosswalk: 5,322 munis, 0 unmatched. `other` class confirmed 0 R$. Backward-compat verified. SUM-CHECK ESCALATION: productive vs existing `total_bndes_real` differs by up to 1.22e12 R$ at 10,580 muni-years — `total_bndes_real` is the gross aggregate (productive+FI+public), the D3.1 PRIVADA-lift did not propagate into script-22 reconstruction. Stage 54 must use `bndes_total_productive_mt` explicitly for the volume control.
+**Report:** journal/sessions/2026-05-12_firm_support_implementation.md (2026-05-13 entry)
+
+### 2026-05-13 11:15 — coder (Phase 3 propagation pass)
+**Phase:** Execution / propagation
+**Target:** scripts 22, 41 (×2 margins); halted before 53/54
+**Score:** N/A — escalation
+**Verdict:** ESCALATE — sum-check residual (1.223e12 R$, 10,322 muni-years) unchanged after script-22 rebuild. Direct diagnostic: bndes_total_productive_mt (39.85 T R$) > total_bndes_real (23.21 T R$) by 16.6 T R$ in aggregate. Sign of delta is negative — productive-side mass exceeds reconstructed total. Universe divergence between post-D3.1 script-11 PRIVADA lift and script-22's firm-year-muni reconstruction. NOT staleness. Routing to strategist-critic.
+**Report:** logs/step4_diagnostic.log, logs/step2_script41_policyblock.log, logs/step3_script41_cnaesection.log
+
+### 2026-05-13 — coder
+**Phase:** Execution (exploration)
+**Target:** scripts/R/4_regression_panels/41_build_muni_panel.R
+**Score:** 92/100
+**Verdict:** Added bndes_total_productive_nonRAIS_mt residual column and renamed bndes_total_productive_mt → bndes_total_productive_all_mt per user adjudication 2026-05-13 (four-way volume split with total_bndes_real as primary). Both margins rebuilt; identity check holds exactly; productive_nonRAIS aggregate = 16.63 T R$ (matches expected 16.6 T).
+**Report:** journal/sessions/2026-05-12_firm_support_implementation.md
+
+### 2026-05-13 11:35 — coder (D3.3)
+**Phase:** Execution
+**Target:** scripts/R/5_estimation/54_sector_second_stage.R
+**Score:** 90/100
+**Verdict:** Wired --volume-control={joint,split} in stage 54. Joint = total_bndes_real/initial_gdp; split = four ratios (prod_RAIS, prod_nonRAIS, FI, public)/initial_gdp; other=0 skipped. Joint sanity checks match C2.3 (policy_block 4.37→4.37 drift <0.1%; cnae 2.05→2.05 drift <0.5%). Split AR F: policy_block 4.30 (p=2.4e-4); cnae 2.03 (p=2.5e-4). Rejection region qualitatively stable at both margins — D3.3 pass. Stage 53 untouched (no refs to renamed column).
+**Report:** journal/sessions/2026-05-12_firm_support_implementation.md
+
+### 2026-05-13 — writer
+**Phase:** Exploration / Strategy
+**Target:** docs/strategy/firm_support_restrictions_ssiv.md (Phase 4 E4.3)
+**Score:** 97/100 (self-assessment)
+**Verdict:** Memo updated with split-volume robustness, pre-trend characterization, margin-specific (C2.1.5) Rotemberg diagnostics, RAIS-Negativa and AKM-two-way A-entries, D5-op operational note, and Adão (2016) reference. Recovers prior residual −1 deduction.
+**Report:** inline (this entry)
+
+### 2026-05-13 — Writer (Blueprint update, Phase 4 E4.2)
+**Phase:** Exploration / Documentation
+**Target:** docs/PROJECT_BLUEPRINT.md, docs/research_state.md, docs/decision_log.md
+**Score:** 94/100 (self-assessment)
+**Verdict:** Front-door state updated to reflect firm-support hybrid graduation. Added D29 (hybrid adopted; `policy_block` primary + `cnae_section` robustness) and D30 (volume control refined per user 2026-05-13). F1 promoted to CONFIRMED at graduated margins; F2 CONFIRMED at both. F3 PARTIAL with pre-trend characterization documented. F4 still BLOCKED at `policy_block x S3` per D28. Opened A-AKM-ssaggregate-SE-correction and A-Stage53-emp_share-weak (advisory, AR-robust). Marked D5-op private-vs-all-loans as IMPLEMENTED. Production Margin Status table moved `policy_block` to production primary and `cnae_section` to production robustness. Next action: Phase 4 E4.1 (methodology PDF) + E4.3 (memo) completion.
+**Report:** inline (this entry)
+
+### 2026-05-13 11:42 — writer
+**Phase:** Execution / Documentation (Phase 4 E4.1)
+**Target:** docs/methodology/ar_test_specification.tex
+**Score:** 92/100 (self-assessment)
+**Verdict:** Updated four loci of the methodology spec: (i) endogenous-variable definition narrowed to RAIS formal-sector composition with D24/D25 citations; (ii) new "Skeleton construction" paragraph formalizing the contemporaneous unbalanced skeleton with A0.1 7.64% and A0.5 1.83% bounds and A0.2/A0.3 zero-employee + drop counts; (iii) new "Frozen pre-election window" paragraph + BHJ §4.4 slack control (slack_frozen_mt); (iv) Volume control augmented with D5-op recipient-class decomposition (productive-firm 71.6%, public 28.3%, FI 0.10%) and split-volume description; (v) new Robustness section with R1 denominator variants, R2 margin choice (policy_block F=4.37, cnae F=2.05, drop-top-1 F=3.37, slack ΔF=0.023), R3 joint-vs-split (p≈2e-4 both, FI coef −0.018), R4 pre-trend characterization (mayor p=0.80, pres p<0.005, drop-section FS F=53.84); (vi) new Limitations section L1–L5 covering RAIS bound, other public credit, presidential pre-trend, AKM 2019 cluster SEs, and emp-share first-stage F in [0.03, 3.38]. Citations BHJ 2022, GPSS 2020, ASS 2019, AKM 2019 already in thebibliography (natbib). Recompile PASS via latexmk (XeLaTeX): 21 pages, no errors (warnings: cosmetic underfull hboxes only).
+**Report:** journal/sessions/2026-05-12_firm_support_implementation.md

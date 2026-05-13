@@ -1,0 +1,2 @@
+test,outcome,z_set,n_obs,n_munis,k_instruments,joint_F,joint_p,rejects_5pc,alpha_cleared
+B1.7.1_alpha_drop_PresEP,delta_log_gdp,all_offices_minus_PresE_PresP,55614,5570,55,1.62799608240901,0.00225686913608063,TRUE,FALSE

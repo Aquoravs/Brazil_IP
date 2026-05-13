@@ -1,0 +1,15 @@
+metric,value
+total_disbursement_2002_2017,5.831e+13
+share_public_entity,0.2826
+share_financial_institution,0.0010
+share_productive_firm,0.7164
+share_other,0.0000
+fi_double_count_share_2010_pct,14.57
+fi_double_count_escalate,FALSE
+pa_file_cells_2002_2017,2703
+pa_file_volume_2002_2017,8.435e+10
+main_pe_cells_2002_2017,2963
+main_pe_volume_2002_2017,1.648e+13
+pa_main_overlap_cells,2544
+pa_main_overlap_volume_main,2.573e+12
+pa_main_overlap_volume_pa,1.217e+10

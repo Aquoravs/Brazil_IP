@@ -1,0 +1,2 @@
+denominator,sector_var,n_rows,n_unique_muni_sec_year,n_muni_year,n_sectors,n_dropped_muni_years,s_min,s_median,s_mean,s_max,inv_J
+balanced,cnae_section,1045519,1045519,88835,21,180,0,0.0120481927710843,0.0849673702725632,1,0.0476190476190476

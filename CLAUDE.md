@@ -14,6 +14,7 @@
 - **Quality gates** — weighted aggregate score; nothing ships below 80/100; see `.claude/rules/quality.md`
 - **Worker-critic pairs** — every creator has a paired critic; critics never edit files
 - **Logging** — session logs, research journal, and entry format defined in `.claude/rules/logging.md`
+- **Writing style** — parsimonious language; plain English over coded shorthand; see `.claude/rules/writing-style.md`
 
 ---
 

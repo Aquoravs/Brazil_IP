@@ -1,0 +1,7 @@
+variant,threshold,count,total_muni_years,pct
+A_contemporaneous,zero,121,89136,0.135747621611919
+A_contemporaneous,le10,363,89136,0.407242864835757
+A_contemporaneous,le50,913,89136,1.0242775085263
+A_contemporaneous,le100,1798,89136,2.01714234428289
+B_frozen,zero,124,89136,0.139113265122958
+C_balanced,zero,211,89136,0.236716926943098

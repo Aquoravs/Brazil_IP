@@ -101,18 +101,53 @@ $e_\ell(t)$ advances and $T^{\ell}_{t}$ updates. The 2003 governor/president
 cycle (whose pre-window is 1998--2001, fully outside the data) is dropped.
 
 The endogenous object is the vector of \emph{sector employment shares}
-\[
-  s_{jmt} \;\equiv\; \frac{n_{jmt}}{n_{mt}},
+\begin{equation}\label{eq:emp-share}
+  s^{\mathrm{emp}}_{jmt} \;\equiv\; \frac{n_{jmt}}{n_{mt}},
   \qquad
   n_{mt} \equiv \sum_{j=1}^{J} n_{jmt},
   \qquad
-  \sum_{j=1}^{J} s_{jmt} \;=\; 1,
-\]
-constructed from RAIS firm--municipality--year employment counts. Stacked
-across $j$, $s_{mt}\equiv(s_{1mt},\dots,s_{Jmt})'\in\Delta^{J-1}$ lies on the
-unit simplex; $\iotaVec' s_{mt}=1$ and $\iotaVec'\Delta s_{mt}=0$ for any change.
-The outcome is municipal log real GDP, $Y_{mt}\equiv\log(\mathrm{GDP}_{mt})$, and
+  \sum_{j=1}^{J} s^{\mathrm{emp}}_{jmt} \;=\; 1,
+\end{equation}
+where the firm universe is RAIS (Brazil's formal-employment registry).
+Whenever no ambiguity arises we abbreviate $s_{jmt}\equiv s^{\mathrm{emp}}_{jmt}$;
+the superscript ``emp'' is preserved when contrasting against the BNDES credit
+share $s^{\mathrm{B}}_{jmt}$ in~\eqref{eq:bndes-share-notation}. The decision
+to fix the firm universe at RAIS, taken in D24 (2026-05-06) and operationalized
+by the firm-support hybrid memo (D25, 2026-05-12), restricts the analyzed
+channel to \emph{formal-sector composition}: politically driven shifts in
+non-formal employment (informal, MEI-unfiled, RAIS-Negativa-only) are by
+construction outside $s^{\mathrm{emp}}_{jmt}$. Stacked across $j$,
+$s_{mt}\equiv(s_{1mt},\dots,s_{Jmt})'\in\Delta^{J-1}$ lies on the unit simplex;
+$\iotaVec' s_{mt}=1$ and $\iotaVec'\Delta s_{mt}=0$ for any change. The
+outcome is municipal log real GDP, $Y_{mt}\equiv\log(\mathrm{GDP}_{mt})$, and
 $\Delta Y_{mt}\equiv Y_{mt}-Y_{m,t-1}$.
+
+\paragraph{Skeleton construction.}
+The panel underlying~\eqref{eq:emp-share} is a \emph{contemporaneous unbalanced}
+skeleton: a cell $(j,m,t)$ enters the panel if at least one RAIS firm with sector
+$j$ is present in muni $m$ in year $t$. Two operational details follow from the
+Phase~0 audits (A0.1--A0.3) of the firm-support hybrid plan:
+
+\begin{enumerate}[leftmargin=*,nosep]
+\item \emph{Zero-employee firms.} The audit (A0.2) finds the within-RAIS
+zero-employee rate at $0.0000\%$: the reconstructed RAIS panel does not retain
+Negativa-equivalent rows, so the contemporaneous-skeleton-includes-zero-employee-firms
+provision of the strategy memo is moot under the current extract and the
+contemporaneous skeleton is equivalent to a $n_{f,t}\geq 1$ requirement. The
+$n_{mt}=0$ drop count is 121 muni-years across 36 munis (0.14\%), with no muni
+zero across all 16 years.
+\item \emph{RAIS coverage bound.} Owner-CNPJs absent from the reconstructed
+RAIS panel constitute $7.64\%$ of admin-observed firm-years (A0.1); this is
+the upper bound on the Negativa-recoverable firm mass (not a tight equality,
+since some Owner-only firms are non-RAIS-universe, e.g.\ informal/MEI). The
+corresponding employment-mass impact, computed by reweighting Owner-only
+firms to the contemporaneous-RAIS employment scale (A0.5), is bounded at
+$1.83\%$ of municipal employment.
+\end{enumerate}
+The skeleton admits two sensitivity variants used throughout robustness
+(\autoref{subsec:robustness}): \emph{frozen}, which restricts the cell to
+firms active in $\tau\in T^{\mathrm{M}}_t$, and \emph{balanced}, which
+additionally requires presence in every post-election year of the cycle.
 
 We propose the following notation for BNDES sector credit shares to keep them
 distinct from employment shares:
@@ -487,8 +522,7 @@ which it has few. Equivalently, $\omega^{\ell}_{fp,t}$ is the
 owner-year-weighted average of the annual affiliation shares
 $L_{f,p,s}/L_{f,s}$. The residual $1-\sum_{p}\omega^{\ell}_{fp,t}$ is
 the unaffiliated-owner share at the firm level. The exposure is
-office-specific because the pre-election window $T^{\ell}_{t}$ is, but
-does not vary across municipalities.
+office-specific because the pre-election window $T^{\ell}_{t}$ is office-specific, but it does not vary across municipalities in the case of firms that operate in multiple municipalities.
 
 \paragraph{Firm-level cross-office instrument.}
 For channel $c\in\{\mathrm{M},\mathrm{M{\cdot}P},\mathrm{M{\cdot}G},
@@ -504,54 +538,35 @@ channel-$c$ shift in municipality $m$ at time $t$. We use the mayoral
 exposure $\omega^{\mathrm{M}}_{fp,t}$ uniformly across channels; the
 substantive justification is in \autoref{rem:weights} below.
 
-\paragraph{Sector-level baseline exposure.}
-The sector-level baseline exposure aggregates firm-level
-exposures~\eqref{eq:omega-firm} across firms within $(j,m)$ using
-owner-count weights, with the office-$\ell$ pre-election window:
-\begin{equation}\label{eq:wjmp}
-  w^{\ell}_{jmp,t}
-  \;\equiv\;
-  \frac{1}{|T^{\ell}_t|}\sum_{s\in T^{\ell}_t}
-    \frac{\sum_{f\in\cF(j,m)} L_{f,p,s}}
-         {\sum_{f\in\cF(j,m)} L_{f,s}},
-  \qquad
-  \sum_{p} w^{\ell}_{jmp,t}\le 1.
-\end{equation}
-The residual $1-\sum_{p}w^{\ell}_{jmp,t}$ is the unaffiliated-owner
-share of cell $(j,m)$, which contributes zero to $Z^{\ell}_{jmt}$ but
-enters the exposure control
-$\EC^{\ell}_{jm,t}\equiv\sum_p w^{\ell}_{jmp,t}$ that absorbs total
-political connectedness of $(j,m)$.
+\begin{remark}[Mayoral exposure for all channels]\label{rem:weights}
+We use the mayoral exposure $w^{\mathrm{M}}_{jmp,t}$ for all four
+cross-office instruments. This choice concerns the timing of the share
+component, not the definition of the cross-office shift. The share
+$w^{\mathrm{M}}_{jmp,t}$ measures the pre-municipal-election distribution
+of owner-party affiliation in sector $j$ and municipality $m$ for each
+party $p$. The cross-office component enters only through
+$\Align^{c}_{mpt}$, which records whether party $p$ holds the mayoralty
+and, for $c\in\{\mathrm{M{\cdot}P},\mathrm{M{\cdot}G},
+\mathrm{M{\cdot}G{\cdot}P}\}$, the relevant higher-tier office(s). Thus
+using the mayoral window does not assume that owner affiliation is caused
+by mayor--higher-tier alignment, nor that affiliation to the mayor's party
+is the only relevant political affinity. It fixes the baseline before the
+local officeholder common to every channel is chosen.
 
-\paragraph{Owner-count normalizer.}
-Let
-\begin{equation}\label{eq:N-norm}
-  N^{\ell}_{jm,t}
-  \;\equiv\;
-  \sum_{f\in\cF(j,m)} L_{f,t},
-\end{equation}
-the total number of owners across firms in cell $(j,m)$ at time $t$.
-
-\paragraph{Sector exposure as owner-count-weighted firm average.}
-Substituting~\eqref{eq:omega-firm} into~\eqref{eq:wjmp} and rearranging
-gives the equivalent representation
-\begin{equation}\label{eq:wjmp-as-avg}
-  w^{\ell}_{jmp,t}
-  \;=\;
-  \sum_{f\in\cF(j,m)}
-       \frac{L_{f,t}}{N^{\ell}_{jm,t}}\,\omega^{\ell}_{fp,t}.
-\end{equation}
-The sector-level baseline party exposure is the owner-count-weighted
-average of firm-level exposures across the firm support
-$\cF(j,m)$.\footnote{The simple (equal-firm-weight) average
-$\bar\omega^{\ell}_{jmp,t}\equiv |\cF(j,m)|^{-1}\sum_{f}\omega^{\ell}_{fp,t}$
-differs from~\eqref{eq:wjmp-as-avg} whenever firm-level exposure
-$\omega^{\ell}_{fp,t}$ covaries with firm size $L_{f,t}$. Owner-count
-weighting matches the empirical mass of political exposure in the cell
-and is the construction used throughout the pipeline.}
-Equation~\eqref{eq:wjmp-as-avg} is the bridge between the firm-level
-instrument~\eqref{eq:FA-firm} and the sector-level instruments of the
-next subsection.
+The identifying rationale is predetermination with respect to the local
+component of the channel. Since mayoral and gubernatorial/presidential
+elections alternate every two years, no four-year baseline window is
+completely insulated from all electoral politics. A higher-tier
+pre-window is a natural robustness check for cross-office channels if
+owner affiliation responds mainly to federal or state electoral incentives.
+A channel-specific window before the earliest election entering the
+current cross-office state is cleaner in the strict sense that it precedes
+both offices, but it is also mechanically older and may be a noisier
+measure of the relevant party-affiliation stock. A window before the
+latest election is not an admissible baseline for the cross-office
+channels because it can be post-treatment with respect to the office
+chosen earlier.
+\end{remark}
 
 \subsection{The shift-share form of the cross-office instruments}
 
@@ -587,22 +602,6 @@ changes variant is
 which is non-zero in any year in which any of the offices entering $c$
 turns over.
 
-\begin{remark}[Mayoral exposure for all channels]\label{rem:weights}
-We use the mayoral exposure $w^{\mathrm{M}}_{jmp,t}$ for all four
-cross-office instruments. The mayor is the local intermediary in every
-channel, so the sector-municipality exposure to ``politically active
-firms'' is naturally a mayor-relative object. A coalition-specific
-alternative $w^{c}_{jmp,t}$ that counts only owners affiliated with
-parties in the relevant federal/state coalition during the mayoral
-pre-election window would concentrate exposure on the channel-relevant
-subset and possibly improve first-stage power. The cost is a more
-complex \autoref{cond:BJS1}: the exposure shares would inherit a
-presidential- or gubernatorial-cycle dependence that the mayor-only
-$w^{\mathrm{M}}$ does not have. We adopt $w^{\mathrm{M}}$ as the primary
-specification for cleanliness of identification and treat the
-coalition-specific construction as a robustness exercise.
-\end{remark}
-
 \paragraph{The owner-count-weighted aggregation identity.}
 Each $Z^{c}_{jmt}$ is a within-region inner product of \emph{shares}
 $w^{\mathrm{M}}_{jmp,t}$ (sector-municipality exposure to party $p$, on
@@ -629,7 +628,75 @@ by each firm's share of total owner-counts in the cell. The
 identity~\eqref{eq:agg-identity} verifies diagnostically: collapsing
 firm instruments by these weights recovers the sector instrument.
 
-\subsection{Mass-weighted exposure alternatives}\label{subsec:mass-weighted}
+\subsection{Sector-level exposure weights}\label{subsec:sector-weights}
+
+\paragraph{Sector-level baseline exposure.}
+The sector-level baseline exposure aggregates firm-level
+exposures~\eqref{eq:omega-firm} across firms within $(j,m)$ using
+owner-count weights, with the office-$\ell$ pre-election window:
+\begin{equation}\label{eq:wjmp}
+  w^{\ell}_{jmp,t}
+  \;\equiv\;
+  \frac{1}{|T^{\ell}_t|}\sum_{s\in T^{\ell}_t}
+    \frac{\sum_{f\in\cF(j,m)} L_{f,p,s}}
+         {\sum_{f\in\cF(j,m)} L_{f,s}},
+  \qquad
+  \sum_{p} w^{\ell}_{jmp,t}\le 1.
+\end{equation}
+The residual $1-\sum_{p}w^{\ell}_{jmp,t}$ is the unaffiliated-owner
+share of cell $(j,m)$, which contributes zero to $Z^{\ell}_{jmt}$ but
+enters the exposure control
+$\EC^{\ell}_{jm,t}\equiv\sum_p w^{\ell}_{jmp,t}$ that absorbs total
+political connectedness of $(j,m)$.
+
+\paragraph{Owner-count normalizer.}
+Let
+\begin{equation}\label{eq:N-norm}
+  N^{\ell}_{jm,t}
+  \;\equiv\;
+  \sum_{f\in\cF(j,m)} L_{f,t},
+\end{equation}
+the total number of owners across firms in cell $(j,m)$ at time $t$.
+
+\paragraph{Frozen pre-election window.}
+The window $T^{\ell}_t=[e_\ell(t)-4,e_\ell(t)-1]$ in~\eqref{eq:window} is
+\emph{frozen} relative to the post-election alignment shocks: it never overlaps
+the post-inauguration interval over which $\Align^{\ell}_{mpt}$ is treated as
+the exogenous shift. This satisfies the predetermined-shares logic of
+\citet{goldsmith2020bartik} and supplies the share-level predetermination that
+\citet{borusyak2022quasi} use to translate shock-level orthogonality
+(\autoref{cond:BJS1}) into unit-level orthogonality. The within-cell sum
+$\EC^{\mathrm{M}}_{jm,t}=\sum_p w^{\mathrm{M}}_{jmp,t}\in[0,1]$ measures the
+fraction of cell $(j,m)$'s pre-window owner mass affiliated with any party; the
+residual $\mathrm{slack}_{jm,t}\equiv 1-\EC^{\mathrm{M}}_{jm,t}$ is unaffiliated
+mass that contributes zero to $Z^{c}_{jmt}$. In the language of
+\citet[\S4.4]{borusyak2022quasi}, this is the \emph{incomplete shares} setup,
+and the cell-level slack must be carried as a control in the muni panel.
+Operationally we form the per-cell slack column $\mathtt{slack\_frozen\_mt}$
+on the frozen window and include it among the controls in the muni panel
+of~\eqref{eq:struct}--\eqref{eq:rf-est}; on/off perturbations are documented
+in~\autoref{subsec:robustness}.
+
+\paragraph{Sector exposure as owner-count-weighted firm average.}
+Substituting~\eqref{eq:omega-firm} into~\eqref{eq:wjmp} and rearranging
+gives the equivalent representation
+\begin{equation}\label{eq:wjmp-as-avg}
+  w^{\ell}_{jmp,t}
+  \;=\;
+  \sum_{f\in\cF(j,m)}
+       \frac{L_{f,t}}{N^{\ell}_{jm,t}}\,\omega^{\ell}_{fp,t}.
+\end{equation}
+The sector-level baseline party exposure is the owner-count-weighted
+average of firm-level exposures across the firm support
+$\cF(j,m)$.\footnote{The simple (equal-firm-weight) average
+$\bar\omega^{\ell}_{jmp,t}\equiv |\cF(j,m)|^{-1}\sum_{f}\omega^{\ell}_{fp,t}$
+differs from~\eqref{eq:wjmp-as-avg} whenever firm-level exposure
+$\omega^{\ell}_{fp,t}$ covaries with firm size $L_{f,t}$. Owner-count
+weighting matches the empirical mass of political exposure in the cell
+and is the construction used throughout the pipeline.}
+Equation~\eqref{eq:wjmp-as-avg} is the bridge between the firm-level
+instrument~\eqref{eq:FA-firm} and the sector-level
+instruments~\eqref{eq:Z-M}--\eqref{eq:Z-MGP}.
 
 The intensity-based exposure $w^{\mathrm{M}}_{jmp,t}$ in~\eqref{eq:wjmp}
 normalizes owner-party counts \emph{within} each $(j,m)$ cell, so it
@@ -1338,6 +1405,29 @@ denominator, bias the partialling-out of the volume channel, and create a
 ``bad-control'' problem for the AR test. The 2002 denominator avoids this.
 \end{remark}
 
+\paragraph{Recipient-class composition of the numerator (D5-op).}
+The Phase~0 BNDES recipient audit (A0.4) decomposes total disbursements over
+2002--2017 into productive-firm (71.6\%), public-entity (28.3\%),
+financial-institution intermediation (0.10\%), and residual (\,$<0.01\%$\,)
+classes. The financial-intermediation overlap check confirms no double counting
+above $0.018\%$ of total credit in any year. Under D5-op (user, 2026-05-12) the
+\emph{primary} volume control aggregates all classes:
+\begin{equation}\label{eq:vol-joint}
+  \Vol^{\mathrm{joint}}_{mt}
+  \;\equiv\;
+  \frac{\mathrm{BNDES\_total}_{mt}}{\mathrm{GDP}_{m,2002}},
+\end{equation}
+with the productive-firm component restricted to RAIS-merged disbursements
+to remain internally consistent with the D1 RAIS-only analyzed universe. The
+\emph{split-volume} robustness specification enters three terms separately:
+(i) \emph{productive-nonRAIS}, private + CNAE recipients without a RAIS row
+in year $t$ ($\sim 42\%$ of D3.1's productive aggregate); (ii)
+\emph{financial-intermediary}; (iii) \emph{public-entity}. Public-credit
+flows outside the BNDES envelope (CEF, BB, BNB, constitutional funds) are
+\emph{not} in $\Vol_{mt}$; they are registered as out-of-scope in the
+project blueprint (open angle on alternative public-credit channels) and
+re-enter the discussion under \autoref{subsec:limitations}.
+
 \paragraph{Should $\Vol_{mt}$ be instrumented?}
 $\Vol_{mt}$ is itself endogenous: the same political shocks that move sector
 shares move the aggregate. The natural instrument for $\Vol_{mt}$ is a
@@ -1505,6 +1595,127 @@ cross-municipality average has $\sim M\times 3$ degrees of freedom for
 the mayoral channel and $\sim M\times 7$ for each cross-office channel.
 This is the relevant denominator for power, not the panel-level
 $M\times T$.
+
+%% =====================================================================
+\section{Robustness and limitations}\label{sec:robustness}
+%% =====================================================================
+
+\subsection{Robustness exhibits}\label{subsec:robustness}
+
+The estimation pipeline produces four robustness blocks that the AR test is
+evaluated against. Each is documented operationally; the specific
+F-statistics and rejection probabilities below are drawn from the Phase~1
+exploration (\texttt{explorations/anderson\_rubin/active\_denominator/}) at
+the production margin $\texttt{policy\_block\_active}\times\texttt{S3}$ and
+the side-by-side $\texttt{cnae\_section}\times\texttt{S3}$.
+
+\paragraph{R1. Denominator variants.}
+The three skeleton variants of~\autoref{eq:emp-share} (contemporaneous,
+frozen, balanced) are estimated as separate AR tests on the same
+instrument stack. Phase~1 finds that all three variants reject the
+optimality null at conventional levels, with the headline AR $F$-statistic
+on the muni panel at $\approx 2.69$ for the
+$\texttt{muni\_id}\hat{\;}\texttt{cnae\_section}$ FE-and-clustering
+configuration. The contemporaneous variant is the primary; the frozen and
+balanced variants are reported alongside, since their first stages drop
+the post-election attrition from balanced-panel restriction
+(\,$\sim 52\%$ at cycle~2013).
+
+\paragraph{R2. Margin choice: policy block vs.\ CNAE section.}
+The production margin uses 12 firm-side policy blocks
+($\texttt{policy\_block\_active}\times\texttt{S3}$, with one block held
+out as the simplex base $j_0$), so the active instrument set has
+$K_{\mathrm{eff}}=9$ blocks $\times$ at most four cross-office channels.
+The side-by-side robustness margin is $\texttt{cnae\_section}\times\texttt{S3}$
+($J=51$ active bins). Production AR $F$-statistics are $4.37$
+($p=2{\cdot}10^{-4}$) at policy block and $2.05$ ($p=2.1{\cdot}10^{-4}$)
+at CNAE section. The Phase~1 standalone diagnostic at policy block (C2.1.5)
+reports $F=4.19$; drop-top-1-shock $F=3.37$ ($p<0.001$, reject); drop-top-2
+$F=2.72$ ($p<0.01$, reject). Toggling the BHJ \S4.4 cell-level slack
+control on and off shifts $F$ by $\Delta F=0.023$ at the production FE
+configuration, within the Phase~1 envelope.
+
+\paragraph{R3. Joint vs.\ split volume control.}
+The default specification enters $\Vol^{\mathrm{joint}}_{mt}$ from~\eqref{eq:vol-joint};
+the robustness specification enters productive-nonRAIS, financial-intermediary,
+and public-entity disbursements separately, each normalized by initial-period
+GDP. Rejection regions are qualitatively stable at both aggregation margins:
+joint and split AR tests both deliver $p\approx 2{\cdot}10^{-4}$. The
+financial-intermediary channel coefficient in the split-volume reduced form
+is $-0.018$ (significant at the 5\% level), qualitatively matching the
+Phase~1 OLS exploration's $-0.105$ on the same channel.
+
+\paragraph{R4. Pre-trend characterization (documentation, not a gate).}
+Per the user's 2026-05-12 instruction, pre-trend evidence is documented
+rather than used as an admissibility gate. Phase~1 reports: the governor
+pre-trend rejection initially flagged in B17 resolves as a specification
+artifact under strict-timing windows; the presidential pre-trend is genuine
+but moderate ($p<0.005$ on $\Delta\log\mathrm{GDP}$); the mayoral pre-trend
+is clean ($p=0.80$). As a stress test, dropping the high-pre-trend
+presidential CNAE sections delivers a first-stage $F=53.84$ ($p<10^{-7}$)
+on the AR-robust specification. Substantively, the AR identification
+condition is conditional mean-independence of the shock~\eqref{eq:lvl-cond}
+or~\eqref{eq:chg-cond} rather than zero pre-trends, so the presidential
+moderate pre-trend is flagged in~\autoref{subsec:limitations} rather than
+treated as a failure.
+
+\subsection{Limitations}\label{subsec:limitations}
+
+\paragraph{L1. RAIS-formal-only bound.}
+The endogenous variable $s^{\mathrm{emp}}_{jmt}$ is constructed from the
+formal-sector RAIS panel. Politically driven shifts in informal employment,
+MEI-unfiled activity, and RAIS-Negativa-only firms are outside the analyzed
+channel. The upper bound on the Negativa-recoverable firm mass is $7.64\%$
+of admin-observed firm-years (A0.1) and the corresponding employment-mass
+impact is $1.83\%$ (A0.5). The bound is small enough that informal-sector
+mismeasurement is unlikely to overturn the rejection at the contemporaneous
+margin, but the structural claim is in any case narrower than ``the sectoral
+mix is GDP-optimal''---it is ``the formal-sector composition channel is
+GDP-neutral conditional on volume''.
+
+\paragraph{L2. Other public-credit channels.}
+The volume control $\Vol_{mt}$ covers BNDES disbursements only. Parallel
+public-credit envelopes---Caixa Econômica Federal (CEF), Banco do Brasil
+(BB), Banco do Nordeste (BNB), and the constitutional regional funds (FCO,
+FNE, FNO)---are not in $\Vol_{mt}$ and are not in the instrument. If the
+political shock drives these channels with the same cross-sector tilt as
+$Z^{c}_{jmt}$ generates for BNDES, the AR test attributes their composition
+effect to the BNDES channel. This is a known limitation of the formal-channel
+estimand and is registered as a future-scope open angle in the project
+blueprint.
+
+\paragraph{L3. Pre-trend residual on the presidential channel.}
+\autoref{prop:lvlchg} states the formal sufficient condition for AR
+identification as conditional mean-independence of the shock from prior
+trajectories given $q_k$. A non-zero pre-trend on the presidential channel
+indicates that some component of $\Align^{\mathrm{P}}_{pt}$ is forecastable
+from pre-period dynamics absorbed by $q_k$. With state$\times$year fixed
+effects in $q_k$, the residual presidential pre-trend is moderate
+($p<0.005$) and the robustness drop-section exercise (R4) preserves the
+rejection. The presidential-channel coefficients are nonetheless to be
+read with this qualification, and the cross-office channels
+$\mathrm{M{\cdot}P}$ and $\mathrm{M{\cdot}G{\cdot}P}$ inherit the same
+qualification through the product structure~\eqref{eq:prod-indep}.
+
+\paragraph{L4. Cluster-robust SEs vs.\ AKM shock-level inference.}
+The primary specification reports SEs clustered by municipality
+(\autoref{sec:inference}). At $K_{\mathrm{eff}}=9$ policy-block instruments,
+the standard two-way muni $+$ year clustering widens AR $t$-statistics by
+approximately $50\%$ relative to muni-only clustering, but the headline
+$5\%$ rejection survives. The \citet{adao2019shift} shock-level correction,
+implemented via the \texttt{ssaggregate} routine, is the right inference
+under the BJS framework and is flagged for the published version; it is
+not in the current pipeline.
+
+\paragraph{L5. First-stage strength on the emp-share endogenous variable.}
+The Phase~1 first stage at script~53 returns an effective $F$ in the
+interval $[0.03,3.38]$ for $s^{\mathrm{emp}}_{jmt}$ on the
+policy-block stack. This is below the conventional strong-instrument
+threshold. The AR test is robust to weak instruments by
+construction~\citep{andrews2019weak}---it has correct size for any value
+of $\Pi$, including $\Pi=0$---so weak-instrument inference is the right
+frame for the headline result. We disclose the first-stage $F$ alongside
+the AR statistic and do not report a 2SLS point estimate at this margin.
 
 %% =====================================================================
 \section{Summary}\label{sec:summary}

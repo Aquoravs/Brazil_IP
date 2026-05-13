@@ -129,6 +129,26 @@ DEPVAR_INFO <- list(
   levels = list(depvar = "s_mjt", dep_label = "$s_{mjt}$")
 )
 
+# Build DEPVAR_INFO from panel attributes (share_col / dshare_col set by script 41).
+# Under --endogenous=emp_share: share_col=s_emp_mjt, dshare_col=delta_s_emp_mjt.
+# Under --endogenous=bndes_credit (legacy): share_col=s_mjt, dshare_col=delta_s_mjt.
+build_depvar_info <- function(share_col, dshare_col, endogenous) {
+  share_label <- if (identical(endogenous, "emp_share")) {
+    "$s^{\\text{emp}}_{mjt}$"
+  } else {
+    "$s^{\\text{credit}}_{mjt}$"
+  }
+  dshare_label <- if (identical(endogenous, "emp_share")) {
+    "$\\Delta s^{\\text{emp}}_{mjt}$"
+  } else {
+    "$\\Delta s^{\\text{credit}}_{mjt}$"
+  }
+  list(
+    changes = list(depvar = dshare_col, dep_label = dshare_label),
+    levels  = list(depvar = share_col,  dep_label = share_label)
+  )
+}
+
 normalize_dimension_name <- function(name) {
   gsub("-", "_", name)
 }
@@ -151,7 +171,8 @@ valid_option_flags <- function() {
     "--muni_interaction",
     "--test",
     "--dry-run",
-    "--sector-var"
+    "--sector-var",
+    "--endogenous"
   )
 }
 
@@ -471,7 +492,12 @@ run_six_combos <- function(cfg, dt, sector_col, year_ref) {
   list(mods = mods, failed_combos = unique(failed))
 }
 
-build_table_notes <- function(cfg, sector_col) {
+build_table_notes <- function(cfg, sector_col, endogenous = "emp_share") {
+  endo_label <- if (identical(endogenous, "emp_share")) {
+    "Endogenous variable: sector employment share $s^{\\text{emp}}_{mjt}$ (D24 primary)."
+  } else {
+    "Endogenous variable: BNDES credit share $s^{\\text{credit}}_{mjt}$ (mechanism check)."
+  }
   fe_label <- switch(
     cfg$fe,
     mxj_jxt = "Muni $\\times$ sector + sector $\\times$ year FE.",
@@ -502,6 +528,7 @@ build_table_notes <- function(cfg, sector_col) {
     NULL
   }
   notes <- c(
+    endo_label,
     fe_label,
     if (identical(cfg$alignment, "coalition")) "Coalition alignment." else "Party alignment.",
     if (identical(cfg$baseline, "cycle_specific")) "Cycle-specific baseline." else "2002-fixed baseline.",
@@ -648,7 +675,20 @@ USE_GROUPS <- identical(SECTOR_VAR, "sector_group")
 USE_POLICY_BLOCKS <- identical(SECTOR_VAR, "policy_block")
 SCOL <- SECTOR_VAR
 
-spec_args <- args[!grepl("^--sector-var=", args)]
+# --endogenous flag: governs labels and mechanism-check side regressions.
+# The wide-column prefixes in Panel A (s_mjt / delta_s_mjt long) follow the
+# panel's `share_col` / `dshare_col` attributes set by script 41.
+endo_flag <- grep("^--endogenous=", args, value = TRUE)
+ENDOGENOUS <- NA_character_  # NA means: trust the panel attribute
+if (length(endo_flag)) {
+  ENDOGENOUS <- tolower(trimws(sub("^--endogenous=", "", endo_flag[1])))
+  if (!ENDOGENOUS %in% c("emp_share", "bndes_credit")) {
+    stop("Invalid --endogenous value: '", ENDOGENOUS,
+         "'. Use 'emp_share' or 'bndes_credit'.")
+  }
+}
+
+spec_args <- args[!grepl("^--sector-var=|^--endogenous=", args)]
 parsed_args <- parse_cli_args(spec_args)
 config_dt <- resolve_requested_configs(parsed_args)
 
@@ -690,6 +730,33 @@ if (!file.exists(panel_path)) {
 }
 
 dt <- qs_read(panel_path)
+
+# Resolve endogenous variable from panel attributes; --endogenous CLI flag
+# (if provided) must agree with the panel attribute.
+panel_endo <- attr(dt, "endogenous")
+panel_share_col <- attr(dt, "share_col")
+panel_dshare_col <- attr(dt, "dshare_col")
+if (is.null(panel_endo) || is.null(panel_share_col) || is.null(panel_dshare_col)) {
+  # Legacy panels without attributes: fall back to bndes_credit defaults.
+  panel_endo <- "bndes_credit"
+  panel_share_col <- "s_mjt"
+  panel_dshare_col <- "delta_s_mjt"
+  cat("  Panel attributes missing; assuming legacy --endogenous=bndes_credit.\n")
+}
+if (!is.na(ENDOGENOUS) && !identical(ENDOGENOUS, panel_endo)) {
+  stop(
+    "CLI --endogenous=", ENDOGENOUS,
+    " disagrees with panel attribute (endogenous=", panel_endo, ").",
+    "\n  Rebuild Panel A with `Rscript run_politicsregs.R 41 -- --endogenous=", ENDOGENOUS,
+    "` (and matching --sector-var) before running stage 53."
+  )
+}
+ENDOGENOUS <- panel_endo
+DEPVAR_INFO <- build_depvar_info(panel_share_col, panel_dshare_col, ENDOGENOUS)
+cat("  Endogenous:", ENDOGENOUS,
+    "| share col:", panel_share_col,
+    "| dshare col:", panel_dshare_col, "\n")
+
 dt <- coerce_panel_types(dt, sector_col = SCOL)
 cat("  Loaded:", format(nrow(dt), big.mark = ","), "rows,", ncol(dt), "cols\n")
 
@@ -729,8 +796,8 @@ if (parsed_args$test) {
 validate_required_columns(config_dt, names(dt))
 
 sample_masks <- list(
-  changes = !is.na(dt$delta_s_mjt),
-  levels = !is.na(dt$s_mjt)
+  changes = !is.na(dt[[DEPVAR_INFO$changes$depvar]]),
+  levels  = !is.na(dt[[DEPVAR_INFO$levels$depvar]])
 )
 
 cat(sprintf("  Final sample frame: %s obs, %d munis, %d sectors, %d years\n\n",
@@ -832,7 +899,7 @@ for (i in seq_len(nrow(config_dt))) {
       mods = mods,
       filename = cfg_slug,
       dep_var = dep_info$dep_label,
-      notes = build_table_notes(cfg, sector_col = SCOL),
+      notes = build_table_notes(cfg, sector_col = SCOL, endogenous = ENDOGENOUS),
       exposure_control_gof = if (identical(cfg$exposure_control, "yes")) "Yes" else "No",
       exposure_control_fstat = control_fstats,
       add_f_stat = TRUE,
@@ -896,6 +963,92 @@ for (i in seq_len(nrow(config_dt))) {
 
   rm(mods, dt_cfg)
   gc(verbose = FALSE)
+}
+
+# --- Mechanism-check side regressions ----------------------------------------
+# When the primary endogenous is employment share, run a small companion battery
+# with BNDES credit share as the depvar so readers can compare composition
+# (employment) vs. mechanism (credit). Only the requested specs are re-run.
+mech_dir <- NA_character_
+if (identical(ENDOGENOUS, "emp_share") &&
+    all(c("s_credit_mjt", "delta_s_credit_mjt") %in% names(dt))) {
+  cat("\n--- Mechanism-check pass: BNDES credit share depvar ---\n")
+
+  mech_dir <- file.path(table_dir, "mech_credit")
+  dir.create(mech_dir, recursive = TRUE, showWarnings = FALSE)
+
+  mech_depvar_info <- build_depvar_info(
+    share_col = "s_credit_mjt",
+    dshare_col = "delta_s_credit_mjt",
+    endogenous = "bndes_credit"
+  )
+  mech_sample_masks <- list(
+    changes = !is.na(dt$delta_s_credit_mjt),
+    levels  = !is.na(dt$s_credit_mjt)
+  )
+
+  for (i in seq_len(nrow(config_dt))) {
+    cfg <- config_dt[i]
+    dep_info <- mech_depvar_info[[cfg$time_variation]]
+    cfg_slug <- paste0(cfg$canonical_slug, "__mech_credit")
+    sample_idx <- mech_sample_masks[[cfg$time_variation]]
+    if (is.null(sample_idx) || !any(sample_idx)) next
+    dt_cfg <- dt[sample_idx]
+    cfg_muni_sample <- if (!is.null(cfg$muni_sample)) cfg$muni_sample else "all"
+    if (identical(cfg_muni_sample, "top_q4")) {
+      dt_cfg <- dt_cfg[!is.na(top_q4_muni) & top_q4_muni == 1L]
+    } else if (identical(cfg_muni_sample, "bottom_3q")) {
+      dt_cfg <- dt_cfg[!is.na(top_q4_muni) & top_q4_muni == 0L]
+    }
+
+    # Temporarily swap depvar by aliasing in the run_six_combos helper.
+    # Easiest path: copy dt_cfg with the credit column renamed to the
+    # default depvar name expected by run_six_combos.
+    dt_alias <- copy(dt_cfg)
+    dt_alias[, (panel_dshare_col) := delta_s_credit_mjt]
+    dt_alias[, (panel_share_col)  := s_credit_mjt]
+
+    year_ref_cfg <- min(dt_alias$year, na.rm = TRUE)
+    cat(sprintf("[mech: %s] sample rows: %s\n",
+                cfg_slug, format(nrow(dt_alias), big.mark = ",")))
+    run_result <- tryCatch(
+      run_six_combos(cfg, dt_alias, sector_col = SCOL, year_ref = year_ref_cfg),
+      error = function(e) {
+        cat("  WARNING: mech-check run failed:", conditionMessage(e), "\n")
+        list(mods = list(), failed_combos = names(COMBOS))
+      }
+    )
+    mods <- run_result$mods
+    if (!length(mods)) {
+      rm(dt_alias, dt_cfg); gc(verbose = FALSE)
+      next
+    }
+    control_fstats <- if (identical(cfg$exposure_control, "yes")) {
+      vapply(mods, safe_wald, numeric(1), pattern = "exposure_control")
+    } else {
+      rep(NA_real_, length(mods))
+    }
+    tryCatch({
+      save_beamer_table(
+        mods = mods,
+        filename = cfg_slug,
+        dep_var = dep_info$dep_label,
+        notes = build_table_notes(cfg, sector_col = SCOL, endogenous = "bndes_credit"),
+        exposure_control_gof = if (identical(cfg$exposure_control, "yes")) "Yes" else "No",
+        exposure_control_fstat = control_fstats,
+        add_f_stat = TRUE,
+        fstat_keep = "^(dZ_|Z_)",
+        table_dir = mech_dir
+      )
+    }, error = function(e) {
+      cat("  WARNING: mech-check table save failed:", conditionMessage(e), "\n")
+    })
+    rm(mods, dt_alias, dt_cfg); gc(verbose = FALSE)
+  }
+  cat(sprintf("Mechanism-check tables saved to: %s\n", mech_dir))
+} else if (identical(ENDOGENOUS, "emp_share")) {
+  cat("\nNote: s_credit_mjt / delta_s_credit_mjt not present in Panel A; ",
+      "mechanism-check pass skipped.\n", sep = "")
 }
 
 # --- Save manifest and summary ----------------------------------------------

@@ -1,0 +1,5 @@
+scope,election_cycle,n_obs,n_munis,k_instruments,joint_F,joint_p,rejects_5pc,fe
+pooled,,50028,5565,19,1.31410315916574,0.161673611445948,FALSE,muni_id+year
+per_cycle,2006,16651,5557,18,1322.5086203107,0,TRUE,year
+per_cycle,2010,16687,5564,19,4.44672829936494,3.31439331077191e-10,TRUE,year
+per_cycle,2014,16690,5564,19,3.54200538939428,2.67217588332549e-07,TRUE,year

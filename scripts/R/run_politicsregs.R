@@ -89,6 +89,7 @@ pipeline_main <- list(
   "31" = "3_instruments/31_build_sector_exposure_weights.R",
   "32" = "3_instruments/32_build_alignment_shocks.R",
   "32b" = "3_instruments/32b_build_muni_employment_baselines.R",
+  "32c" = "3_instruments/32c_build_emp_share_panel.R",
   "33" = "3_instruments/33_select_baseline_weights.R",
   "34" = "3_instruments/34_build_shift_share_instruments.R",
   "35" = "3_instruments/35_build_credit_shares.R",

@@ -1,0 +1,14 @@
+metric,value
+total_rais_firm_years_2002_2017,40706050
+zero_employee_firm_years,0
+zero_employee_share_pct,0
+na_n_employees,0
+min_year,2002
+max_year,2017
+persistent_ge3_share_of_zero_pct,
+isolated_share_of_zero_pct,
+transient_adjacent_share_of_zero_pct,
+escalation_threshold_lt_1pct_hit,1
+min_n_employees_observed,1
+n_employees_eq_1_count,11545513
+n_employees_eq_1_share_pct,28.36

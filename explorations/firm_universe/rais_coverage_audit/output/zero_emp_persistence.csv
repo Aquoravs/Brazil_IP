@@ -1,0 +1,4 @@
+category,n_runs,n_firm_years,share_of_zero_firm_years
+isolated_zero (run_len=1),0,0,
+two_consecutive (run_len=2),0,0,
+persistent_zero (run_len>=3),0,0,

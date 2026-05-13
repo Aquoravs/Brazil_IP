@@ -1,0 +1,9 @@
+variant,outcome,fe_spec,slack_included,status,n_obs,n_munis,K,n_collinear,ar_F,ar_p,rejects_5pc
+contemporaneous,log_gdp,muni_year,FALSE,ok,89009,5570,9,0,4.19163639733565,1.95850082213835e-05,TRUE
+contemporaneous,log_gdp,muni_year,TRUE,ok,88856,5570,9,0,4.21418940160284,1.80119770797125e-05,TRUE
+contemporaneous,log_gdp,year_only,FALSE,ok,89009,5570,9,0,101.862285735277,1.52381034817275e-190,TRUE
+contemporaneous,log_gdp,year_only,TRUE,ok,88856,5570,9,0,104.925059465295,2.02079443819961e-196,TRUE
+contemporaneous,delta_log_gdp,muni_year,FALSE,ok,83438,5570,9,0,2.93846838570231,0.00172830196130341,TRUE
+contemporaneous,delta_log_gdp,muni_year,TRUE,ok,83288,5570,9,0,2.96501522165905,0.00157869065638302,TRUE
+contemporaneous,delta_log_gdp,year_only,FALSE,ok,83438,5570,9,0,3.09857992433426,0.000997480848846875,TRUE
+contemporaneous,delta_log_gdp,year_only,TRUE,ok,83288,5570,9,0,2.98791412437427,0.00145968049731288,TRUE

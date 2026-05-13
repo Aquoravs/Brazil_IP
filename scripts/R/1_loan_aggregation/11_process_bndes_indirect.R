@@ -49,11 +49,28 @@ bootstrap_file <- local({
 source(normalizePath(bootstrap_file, winslash = "/", mustWork = TRUE))
 bootstrap_politicsregs()
 
+# Recipient-class classifier (D5-op, Phase 3 D3.1) — depends on bootstrap above.
+classifier_path <- normalizePath(
+  file.path(dirname(bootstrap_file), "classify_bndes_recipient.R"),
+  winslash = "/", mustWork = TRUE
+)
+source(classifier_path)
+
+# CLI flag: keep the legacy PRIVADA-only filter when explicitly requested.
+# Default is FALSE per D5-op: lift the filter, tag with recipient_class, and
+# downstream-restrict to recipient_class == "productive-firm" for the firm-level
+# aggregate (preserving the existing pipeline schema and inputs to scripts 22,
+# 31, 33). The full-class loan-level dataset and a new muni x year x class
+# aggregate are emitted alongside for D5-op volume control.
+cli_args <- commandArgs(trailingOnly = TRUE)
+restrict_to_private <- "--restrict-to-private" %in% cli_args
+log_info(sprintf("restrict_to_private flag: %s", restrict_to_private))
+
 # =====================================================================
 # Directories
 # =====================================================================
 raw_auto_dir <- make_base_path("raw/bndes_indirect_auto")
-raw_nonauto_dir <- make_base_path("raw/bndes_indirect_nonauto")
+raw_nonauto_dir <- make_base_path("raw/bndes_direct_and_indirect_nonauto")
 output_dir <- OUTPUT_DIR
 
 log_info("BNDES base:", BNDES_BASE)
@@ -265,19 +282,41 @@ loans[, direct := 0L]
 loans[automatic == 0L & ascii_upper(form_support) == "DIRETA", direct := 1L]
 
 # =====================================================================
-# Filter: private nature + reimbursable
+# CNAE section (needed for recipient classification below)
 # =====================================================================
 
-n0 <- nrow(loans)
-loans <- loans[ascii_upper(nature) == "PRIVADA"]
-log_info(sprintf("Private filter: %d -> %d (dropped %d)", n0, nrow(loans), n0 - nrow(loans)))
+loans[, cnae_section := substr(trimws(subsector_cnae_cod), 1, 1)]
+loans[cnae_section == "", cnae_section := NA_character_]
 
+# =====================================================================
+# Tag recipient_class (D5-op, Phase 3 D3.1)
+# =====================================================================
+# Priority: public-entity > financial-institution > productive-firm > other.
+# Done BEFORE any filter so the auxiliary all-class aggregate captures the
+# full universe. The legacy `nature == "PRIVADA"` filter is replaced by a
+# recipient-class restriction below (default: productive-firm).
+
+n_pre_tag <- nrow(loans)
+classify_bndes_recipient(loans)
+log_info("Recipient-class tag distribution (pre-restriction):")
+print(loans[, .(n_rows = .N, value_dis = sum(value_dis, na.rm = TRUE)),
+            by = recipient_class][order(-value_dis)])
+
+# Sanity: no NA values in recipient_class (all rows land in one of 4 classes).
+stopifnot("recipient_class has NA values" = !any(is.na(loans$recipient_class)))
+
+# Snapshot pre-restriction totals (loan-level) for downstream sanity checks.
+totals_pre <- loans[, .(value_dis = sum(value_dis, na.rm = TRUE), n_loans = .N),
+                    by = recipient_class]
+
+# Filter: reimbursable (applies to all classes; mirrors legacy behaviour).
 n0 <- nrow(loans)
 loans <- loans[!(automatic == 0L & ascii_upper(modality) == "NAO REEMBOLSAVEL")]
 log_info(sprintf("Reimbursable filter: %d -> %d (dropped %d)", n0, nrow(loans), n0 - nrow(loans)))
 
 # =====================================================================
-# IPCA deflation (base year 2018)
+# IPCA deflation (base year 2018) — applied before recipient-class
+# restriction so the all-class auxiliary aggregate carries real values too.
 # =====================================================================
 
 ipca_path <- make_base_path("raw/ipca_202509SerieHist.xlsx")
@@ -327,11 +366,21 @@ if (file.exists(ipca_path)) {
 }
 
 # =====================================================================
-# CNAE section (first character of subsector_cnae_cod)
+# Snapshot full-class dataset, then restrict primary pipeline to
+# recipient_class == "productive-firm" (D5-op default).
 # =====================================================================
+loans_all_classes <- copy(loans)
 
-loans[, cnae_section := substr(trimws(subsector_cnae_cod), 1, 1)]
-loans[cnae_section == "", cnae_section := NA_character_]
+n0 <- nrow(loans)
+if (restrict_to_private) {
+  loans <- loans[ascii_upper(nature) == "PRIVADA"]
+  log_info(sprintf("Legacy PRIVADA filter: %d -> %d (dropped %d)",
+                   n0, nrow(loans), n0 - nrow(loans)))
+} else {
+  loans <- loans[recipient_class == "productive-firm"]
+  log_info(sprintf("Recipient-class filter (productive-firm): %d -> %d (dropped %d)",
+                   n0, nrow(loans), n0 - nrow(loans)))
+}
 
 # =====================================================================
 # Drop working columns, restrict to 2002-2017, reorder
@@ -358,6 +407,7 @@ desired_order <- intersect(
     "subsector_cnae_name", "cnae_section",
     "sector_bndes", "subsector_bndes", "size",
     "fin_inst", "fin_inst_cnpj", "automatic", "direct",
+    "recipient_class",
     "year", "month"),
   names(loans)
 )
@@ -398,6 +448,48 @@ log_info(sprintf(
 # =====================================================================
 # Save: aggregated
 # =====================================================================
+
+# =====================================================================
+# Auxiliary aggregate: muni x year x recipient_class (D5-op, Phase 3 D3.1)
+# =====================================================================
+# Built from the FULL-CLASS dataset (pre-recipient-class restriction) so
+# downstream consumers can construct split-volume columns
+# bndes_total_{productive,fi,public,other}_mt without re-reading the raw
+# files. Applies the same 2002-2017 window and muni-id sanitation as the
+# primary firm-level aggregate.
+loans_all_classes <- loans_all_classes[year >= 2002L & year <= 2017L]
+class_my <- loans_all_classes[
+  !is.na(year) & !is.na(muni_id_ibge6) & !muni_id_ibge6 %in% c(0L, 999999L),
+  .(
+    value_dis_total           = sum(value_dis, na.rm = TRUE),
+    value_dis_real_2018_total = if (all(is.na(value_dis_real_2018))) NA_real_
+                                  else sum(value_dis_real_2018, na.rm = TRUE),
+    n_loans                   = .N
+  ),
+  by = .(muni_id_ibge6, year, recipient_class)
+]
+setorderv(class_my, c("muni_id_ibge6", "year", "recipient_class"))
+
+class_my_path <- make_output_path("bndes_loans_by_recipient_class_my.qs2")
+qs_save(class_my, class_my_path)
+log_info(sprintf("Saved muni x year x recipient_class aggregate: %d rows -> %s",
+                 nrow(class_my), class_my_path))
+
+# Sanity report: class-level totals (nominal R$, full window).
+class_totals <- loans_all_classes[, .(
+  value_dis = sum(value_dis, na.rm = TRUE), n_loans = .N
+), by = recipient_class][order(-value_dis)]
+class_totals[, share := value_dis / sum(value_dis)]
+log_info("Recipient-class shares (post reimbursable filter, 2002-2017):")
+print(class_totals)
+
+# Cross-check: productive-firm volume in restricted aggregate ≈ all-class
+# productive-firm volume from class_my.
+prod_v_main <- if (nrow(loans) > 0) sum(loans$value_dis, na.rm = TRUE) else 0
+prod_v_aux  <- sum(class_my[recipient_class == "productive-firm", value_dis_total],
+                   na.rm = TRUE)
+log_info(sprintf("Cross-check productive-firm volume: main=%.4e  aux=%.4e  diff=%.4e",
+                 prod_v_main, prod_v_aux, prod_v_main - prod_v_aux))
 
 agg_path <- make_output_path("bndes_firm_year_muni_sector.qs2")
 qs_save(agg, agg_path)

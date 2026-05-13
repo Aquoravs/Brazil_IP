@@ -1,0 +1,5 @@
+test,office,z_set,n_obs,n_munis,k_instruments,joint_F,joint_p,rejects_5pc,fe
+B1.8.3_mayor_strict,mayor,mayor_full,55614,5570,19,0.726789435483253,0.794684440306348,FALSE,muni_id+year
+B1.8.3_gov_strict,gov,gov_full,50028,5565,19,1.31410315916574,0.161673611445948,FALSE,muni_id+year
+B1.8.3_pres_strict_full,pres,pres_full,50028,5565,19,2.11712853814583,0.00306617549878288,TRUE,muni_id+year
+B1.8.3_pres_strict_cleaned,pres,pres_minus_E_P,50028,5565,17,2.28413678949185,0.00189334786438235,TRUE,muni_id+year

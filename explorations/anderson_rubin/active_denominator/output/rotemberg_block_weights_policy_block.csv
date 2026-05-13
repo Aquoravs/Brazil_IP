@@ -1,0 +1,4 @@
+policy_block,block_weight,n_offices_in_block,rank_block_weight
+Infra,0.492172277238894,3,1
+Ind,0.430337273578092,3,2
+Agro,0.0774904491830148,3,3

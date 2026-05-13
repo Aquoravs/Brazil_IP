@@ -39,6 +39,19 @@
 #   --sector-var=sector_group  Use ~10 grouped sectors (default; from script 30)
 #   --sector-var=cnae_section  Use 21 CNAE sections
 #
+#   --volume-control=joint     Single comprehensive volume control:
+#                                 total_bndes_real / initial_gdp_m,0
+#                              (production baseline; default; D3.3)
+#   --volume-control=split     Robustness: four separate volume terms entered
+#                              jointly, each / initial_gdp_m,0:
+#                                 total_bndes_real_mt        (RAIS-merged productive)
+#                                 bndes_total_productive_nonRAIS_mt
+#                                 bndes_total_fi_mt           (financial intermediaries)
+#                                 bndes_total_public_mt       (public-entity)
+#                              Note (D3.3, 2026-05-13): bndes_total_other_mt is
+#                              identically 0 across all muni-years per script 11
+#                              audit, so it is skipped from the split.
+#
 # Dependencies: script 41 (muni_panel_for_regs.qs2)
 # ==============================================================================
 
@@ -128,8 +141,36 @@ if (length(svar_flag)) {
 USE_GROUPS <- (SECTOR_VAR == "sector_group")
 USE_POLICY_BLOCKS <- (SECTOR_VAR == "policy_block")
 
+# --endogenous flag: governs labels only (Panel B wide columns s_*/delta_s_*
+# already carry whichever endogenous depvar script 41 was built with).
+endo_flag <- grep("^--endogenous=", args, value = TRUE)
+ENDOGENOUS <- NA_character_
+if (length(endo_flag)) {
+  ENDOGENOUS <- tolower(trimws(sub("^--endogenous=", "", endo_flag[1])))
+  if (!ENDOGENOUS %in% c("emp_share", "bndes_credit")) {
+    stop("Invalid --endogenous value: '", ENDOGENOUS,
+         "'. Use 'emp_share' or 'bndes_credit'.")
+  }
+}
+
+# --volume-control flag: D3.3 (2026-05-13) — switch the volume-control entered
+# alongside the AR instruments. joint = single ratio total_bndes_real /
+# initial_gdp_m,0 (production baseline); split = four separate ratios entered
+# together (productive RAIS, productive nonRAIS, FI, public).
+vol_flag <- grep("^--volume-control=", args, value = TRUE)
+VOLUME_CONTROL <- "joint"
+if (length(vol_flag)) {
+  VOLUME_CONTROL <- tolower(trimws(sub("^--volume-control=", "", vol_flag[1])))
+  if (!VOLUME_CONTROL %in% c("joint", "split")) {
+    stop("Invalid --volume-control value: '", VOLUME_CONTROL,
+         "'. Use 'joint' or 'split'.")
+  }
+}
+
 cat("Alignment type:", ALIGN_TYPE, "\n")
 cat("Sector variable:", SECTOR_VAR, "\n")
+cat("Endogenous (CLI):", if (is.na(ENDOGENOUS)) "(from panel attr)" else ENDOGENOUS, "\n")
+cat("Volume control:", VOLUME_CONTROL, "\n")
 cat("Specifications:", paste(run_specs, collapse = ", "), "\n\n")
 
 # --- Configuration -----------------------------------------------------------
@@ -155,8 +196,20 @@ if (!file.exists(panel_b_path)) {
 }
 
 dt <- qs_read(panel_b_path)
+panel_endo <- attr(dt, "endogenous")
+if (is.null(panel_endo)) panel_endo <- "bndes_credit"  # legacy panels
+if (!is.na(ENDOGENOUS) && !identical(ENDOGENOUS, panel_endo)) {
+  stop(
+    "CLI --endogenous=", ENDOGENOUS,
+    " disagrees with panel attribute (endogenous=", panel_endo, ").",
+    "\n  Rebuild Panel B with `Rscript run_politicsregs.R 41 -- --endogenous=", ENDOGENOUS,
+    "` (and matching --sector-var) before running stage 54."
+  )
+}
+ENDOGENOUS <- panel_endo
 setDT(dt)
 cat("  Loaded:", format(nrow(dt), big.mark = ","), "rows,", ncol(dt), "cols\n")
+cat("  Endogenous (from panel attr):", ENDOGENOUS, "\n")
 
 # Check GDP availability
 if (!"log_gdp_pc" %in% names(dt) || all(is.na(dt$log_gdp_pc))) {
@@ -178,12 +231,79 @@ cat("  Final sample:", format(nrow(dt), big.mark = ","), "obs,",
 cat(sprintf("  log_gdp_pc: mean=%.4f, sd=%.4f\n",
             mean(dt$log_gdp_pc), sd(dt$log_gdp_pc)))
 
+# --- Step 1b: Build volume-control variables (D3.3, 2026-05-13) ---------------
+# Construct initial_gdp_m,0 as the muni's baseline-year (earliest, typically
+# 2002) deflated GDP, recovered from log_gdp = log(pib_real). Panel B drops
+# pib_real but retains log_gdp (script 41 panel_b_drop list comment). Same
+# normalizer is used for BOTH joint and split variants — apples-to-apples.
+cat("\nStep 1b: Building volume-control ratios...\n")
+if (!"log_gdp" %in% names(dt)) {
+  stop("log_gdp column not found on Panel B; required to construct initial_gdp ",
+       "for volume-control ratios. Inspect script 41 Panel B drop list.")
+}
+dt[, initial_gdp := {
+  ok <- is.finite(log_gdp)
+  if (!any(ok)) NA_real_ else exp(log_gdp[ok][which.min(year[ok])])
+}, by = muni_id]
+
+n_no_baseline <- dt[, sum(is.na(initial_gdp) | initial_gdp <= 0)]
+if (n_no_baseline > 0L) {
+  cat(sprintf("  WARNING: %d rows have NA / non-positive initial_gdp — will produce NA ratios (dropped by feols).\n",
+              n_no_baseline))
+}
+
+# Volume-control numerators. Both joint and split use total_bndes_real as the
+# RAIS-merged productive numerator (per D3.3 task spec).
+vol_num_cols <- list(
+  joint = c("total_bndes_real"),
+  split = c("total_bndes_real",
+            "bndes_total_productive_nonRAIS_mt",
+            "bndes_total_fi_mt",
+            "bndes_total_public_mt")
+)
+vol_ratio_names <- list(
+  joint = c("vol_total_ratio"),
+  split = c("vol_prod_RAIS_ratio",
+            "vol_prod_nonRAIS_ratio",
+            "vol_fi_ratio",
+            "vol_public_ratio")
+)
+
+# Construct the ratio columns required by the active --volume-control variant.
+vol_active_num    <- vol_num_cols[[VOLUME_CONTROL]]
+vol_active_ratios <- vol_ratio_names[[VOLUME_CONTROL]]
+for (k in seq_along(vol_active_num)) {
+  nc <- vol_active_num[[k]]
+  rc <- vol_active_ratios[[k]]
+  if (!nc %in% names(dt)) {
+    stop("Volume-control numerator column missing on Panel B: '", nc,
+         "'. Rebuild script 41 with split-volume columns (D3.2).")
+  }
+  dt[, (rc) := get(nc) / initial_gdp]
+}
+cat(sprintf("  Volume control = %s; ratio cols: %s\n",
+            VOLUME_CONTROL, paste(vol_active_ratios, collapse = ", ")))
+for (rc in vol_active_ratios) {
+  v <- dt[[rc]]; v <- v[is.finite(v)]
+  cat(sprintf("    %s: n=%d mean=%.6f sd=%.6f median=%.6f max=%.4f\n",
+              rc, length(v), mean(v), sd(v), median(v), max(v)))
+}
+
+# String fragment used to splice the volume control into RF/2SLS formulae.
+# Joint = single term; split = four terms (additive, entered jointly).
+VOL_TERMS_STR <- paste(vol_active_ratios, collapse = " + ")
+VOL_HAS_CONTROL <- length(vol_active_ratios) > 0L  # always TRUE post-construction
+FILE_VOL_SFX <- if (identical(VOLUME_CONTROL, "split")) "_split_volume" else ""
+
 # --- Step 2: Identify columns ------------------------------------------------
 
 cat("\nStep 2: Identifying instrument and endogenous columns...\n")
 
-# Sector suffix regex: single letter [A-U] for cnae_section, multi-char for sector_group
-SEC_RE <- if (USE_GROUPS) "[A-Za-z]+" else "[A-U]"
+# Sector suffix regex:
+#   cnae_section : single letter A--U
+#   sector_group : multi-character alphanumeric (groups can include digits)
+#   policy_block : multi-character alphabetic word (Agro, Ind, Infra, Serv)
+SEC_RE <- if (USE_GROUPS) "[A-Za-z0-9]+" else if (USE_POLICY_BLOCKS) "[A-Za-z]+" else "[A-U]"
 
 # Muni-level instruments (aggregate, changes)
 z_muni_cycle <- grep("^dZ_.*_cycle_specific$", names(dt), value = TRUE)
@@ -251,14 +371,21 @@ etable_iv_defaults <- list(
     "log_gdp_pc" = "$\\ln(\\text{GDP}_{pc})$",
     "log_transfers_pc" = "$\\ln(\\text{Transfers}_{pc})$",
     "bndes_pc"   = "$\\text{BNDES}_{pc}$",
-    "delta_hhi"  = "$\\Delta\\text{HHI}$"
+    "delta_hhi"  = "$\\Delta\\text{HHI}$",
+    # Volume-control ratios (D3.3, 2026-05-13)
+    "vol_total_ratio"        = "$V_{mt}/\\text{GDP}_{m,0}$",
+    "vol_prod_RAIS_ratio"    = "$V^{\\text{prod,RAIS}}_{mt}/\\text{GDP}_{m,0}$",
+    "vol_prod_nonRAIS_ratio" = "$V^{\\text{prod,nonRAIS}}_{mt}/\\text{GDP}_{m,0}$",
+    "vol_fi_ratio"           = "$V^{\\text{FI}}_{mt}/\\text{GDP}_{m,0}$",
+    "vol_public_ratio"       = "$V^{\\text{pub}}_{mt}/\\text{GDP}_{m,0}$"
   )
   # Sector-specific delta_s and Z columns
   # Use actual sector codes found in the data (works for both cnae_section and sector_group)
   all_sec_codes <- if (length(sec_letters_all) > 0) sec_letters_all else LETTERS[1:21]
+  endo_super <- if (identical(ENDOGENOUS, "emp_share")) "\\text{emp}" else "\\text{credit}"
   for (sl in all_sec_codes) {
-    d[paste0("delta_s_", sl)]  <- paste0("$\\Delta s_", sl, "$")
-    d[paste0("s_", sl)]        <- paste0("$s_", sl, "$")
+    d[paste0("delta_s_", sl)]  <- paste0("$\\Delta s^{", endo_super, "}_{", sl, "}$")
+    d[paste0("s_", sl)]        <- paste0("$s^{", endo_super, "}_{", sl, "}$")
     for (tier in c("mayor", "gov", "pres")) {
       tlab <- switch(tier, mayor = "M", gov = "G", pres = "P")
       for (base in c("cycle_specific", "2002_fixed")) {
@@ -292,7 +419,19 @@ etable_tex_extras <- list(
     "Municipality FE" = "^muni_id$",
     "Year FE"         = "^year$"
   ),
-  notes = "Clustered (municipality) standard errors in parentheses. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$."
+  notes = paste0(
+    "Endogenous: sector ",
+    if (identical(ENDOGENOUS, "emp_share")) "employment share $s^{\\text{emp}}_{mjt}$ (D24 primary)"
+    else "BNDES credit share $s^{\\text{credit}}_{mjt}$ (mechanism / legacy)",
+    ". Volume control: ",
+    if (identical(VOLUME_CONTROL, "joint"))
+      "single comprehensive ratio $V_{mt}/\\text{GDP}_{m,0}$ (D3.3 joint baseline)."
+    else
+      paste0("four separate ratios entered jointly (D3.3 split-volume robustness): ",
+             "$V^{\\text{prod,RAIS}}$, $V^{\\text{prod,nonRAIS}}$, $V^{\\text{FI}}$, ",
+             "$V^{\\text{pub}}$, each / $\\text{GDP}_{m,0}$."),
+    " Clustered (municipality) standard errors in parentheses. $^{***}p<0.01$, $^{**}p<0.05$, $^{*}p<0.10$."
+  )
 )
 
 print_table <- function(mods, header, iv = FALSE) {
@@ -458,11 +597,12 @@ for (atype in align_types) {
           data = dt, vcov = ~muni_id)
       }
 
-      # (c) M+G + bndes_pc control (robustness: scale control)
-      if (length(z_sec_mg) > length(z_sec_m) && "bndes_pc" %in% names(dt)) {
-        mods_rf[["M+G+bndes_pc"]] <- feols(
+      # (c) M+G + volume control (D3.3): joint single ratio OR split four ratios
+      if (length(z_sec_mg) > length(z_sec_m) && VOL_HAS_CONTROL) {
+        vc_label <- if (identical(VOLUME_CONTROL, "split")) "M+G+vol_split" else "M+G+vol_joint"
+        mods_rf[[vc_label]] <- feols(
           as.formula(paste0("log_gdp_pc ~ ", paste(z_sec_mg, collapse = " + "),
-                            " + bndes_pc | muni_id + year")),
+                            " + ", VOL_TERMS_STR, " | muni_id + year")),
           data = dt, vcov = ~muni_id)
       }
 
@@ -471,10 +611,11 @@ for (atype in align_types) {
       cat("  (Full coefficient table saved to file; showing joint Wald tests only)\n")
       print_wald(mods_rf, pattern = "^dZ_", header = "Optimality test")
 
-      save_table(mods_rf, paste0("ss_reduced_form_t4", asfx),
-        sprintf("Reduced Form: log(GDP_pc) on sector-specific Z (muni×year, %s)", atype))
-      save_wald_summary(mods_rf, paste0("ss_reduced_form_t4_wald", asfx),
-        sprintf("Reduced Form Wald Tests (%s)", atype))
+      save_table(mods_rf, paste0("ss_reduced_form_t4", asfx, FILE_VOL_SFX),
+        sprintf("Reduced Form: log(GDP_pc) on sector-specific Z (muni×year, %s, vol=%s)",
+                atype, VOLUME_CONTROL))
+      save_wald_summary(mods_rf, paste0("ss_reduced_form_t4_wald", asfx, FILE_VOL_SFX),
+        sprintf("Reduced Form Wald Tests (%s, vol=%s)", atype, VOLUME_CONTROL))
       rm(mods_rf); gc(verbose = FALSE)
     } else {
       cat("  No cycle-specific sector instruments found — skipping Table 4\n")
@@ -516,22 +657,24 @@ for (atype in align_types) {
           }, error = function(e) cat("  WARNING: Scalar 2SLS (M+G) failed:", conditionMessage(e), "\n"))
         }
 
-        # (c) Overidentified + bndes_pc control (robustness)
-        if (length(z_mg) == 2 && "bndes_pc" %in% names(dt)) {
+        # (c) Overidentified + volume control (D3.3)
+        if (length(z_mg) == 2 && VOL_HAS_CONTROL) {
           z_str_mg <- paste(z_mg, collapse = " + ")
+          vc_label <- if (identical(VOLUME_CONTROL, "split")) "IV:M+G+vol_split" else "IV:M+G+vol_joint"
           tryCatch({
-            mods_scalar[["IV:M+G+bndes_pc"]] <- feols(
-              as.formula(paste0("log_gdp_pc ~ bndes_pc | muni_id + year | delta_hhi ~ ", z_str_mg)),
+            mods_scalar[[vc_label]] <- feols(
+              as.formula(paste0("log_gdp_pc ~ ", VOL_TERMS_STR,
+                                " | muni_id + year | delta_hhi ~ ", z_str_mg)),
               data = dt_hhi, vcov = ~muni_id)
-          }, error = function(e) cat("  WARNING: Scalar 2SLS (M+G+bndes_pc) failed:", conditionMessage(e), "\n"))
+          }, error = function(e) cat("  WARNING: Scalar 2SLS (M+G+vol) failed:", conditionMessage(e), "\n"))
         }
       }
 
       if (length(mods_scalar) > 0) {
         print_table(mods_scalar,
           sprintf("Table 5: Scalar 2SLS — log(GDP_pc) ~ delta_hhi [muni×year, %s]", atype), iv = TRUE)
-        save_table(mods_scalar, paste0("ss_scalar_2sls_t5", asfx),
-          sprintf("Scalar 2SLS (muni×year, %s)", atype), iv = TRUE)
+        save_table(mods_scalar, paste0("ss_scalar_2sls_t5", asfx, FILE_VOL_SFX),
+          sprintf("Scalar 2SLS (muni×year, %s, vol=%s)", atype, VOLUME_CONTROL), iv = TRUE)
       } else {
         cat("  No scalar 2SLS models could be estimated\n")
       }
@@ -598,16 +741,17 @@ for (atype in align_types) {
         }
       }
 
-      # 6c: M+G + bndes_pc control (robustness)
-      if (length(z_sec_mg) >= length(delta_s_cols) && "bndes_pc" %in% names(dt)) {
+      # 6c: M+G + volume control (D3.3)
+      if (length(z_sec_mg) >= length(delta_s_cols) && VOL_HAS_CONTROL) {
         iv_str_mg <- paste(z_sec_mg, collapse = " + ")
+        vc_label <- if (identical(VOLUME_CONTROL, "split")) "Vec:M+G+vol_split" else "Vec:M+G+vol_joint"
         tryCatch({
-          mods_vec[["Vec:M+G+bndes_pc"]] <- feols(
-            as.formula(paste0("log_gdp_pc ~ bndes_pc | muni_id + year | ",
+          mods_vec[[vc_label]] <- feols(
+            as.formula(paste0("log_gdp_pc ~ ", VOL_TERMS_STR, " | muni_id + year | ",
                               endo_str, " ~ ", iv_str_mg)),
             data = dt, vcov = ~muni_id)
         }, error = function(e) {
-          cat("  WARNING: Vector 2SLS (M+G+bndes_pc) failed:", conditionMessage(e), "\n")
+          cat("  WARNING: Vector 2SLS (M+G+vol) failed:", conditionMessage(e), "\n")
         })
       }
 
@@ -645,8 +789,9 @@ for (atype in align_types) {
           }
         }
 
-        save_table(mods_vec, paste0("ss_vector_2sls_t6", asfx),
-          sprintf("Vector 2SLS: log(GDP_pc) ~ delta_s_j (muni×year, %s)", atype), iv = TRUE)
+        save_table(mods_vec, paste0("ss_vector_2sls_t6", asfx, FILE_VOL_SFX),
+          sprintf("Vector 2SLS: log(GDP_pc) ~ delta_s_j (muni×year, %s, vol=%s)",
+                  atype, VOLUME_CONTROL), iv = TRUE)
       } else {
         cat("  No vector 2SLS models could be estimated\n")
       }
@@ -680,8 +825,8 @@ for (atype in align_types) {
 
         cat("  (Full coefficient table saved to file; showing joint Wald test only)\n")
         print_wald(mods_rob_a, "^dZ_", "Optimality test (2002-fixed)")
-        save_table(mods_rob_a, paste0("ss_robustness_t7a_fixed_rf", asfx),
-          sprintf("Reduced Form (2002-fixed, sector-specific Z, %s)", atype))
+        save_table(mods_rob_a, paste0("ss_robustness_t7a_fixed_rf", asfx, FILE_VOL_SFX),
+          sprintf("Reduced Form (2002-fixed, sector-specific Z, %s, vol=%s)", atype, VOLUME_CONTROL))
         rob_wald_mods[["2002-fixed baseline"]] <- mods_rob_a[[1]]
         rm(mods_rob_a); gc(verbose = FALSE)
       }
@@ -707,8 +852,8 @@ for (atype in align_types) {
 
         cat("  (Full coefficient table saved to file; showing joint Wald test only)\n")
         print_wald(mods_rob_b, "^dZ_", "Optimality test (trimmed)")
-        save_table(mods_rob_b, paste0("ss_robustness_t7b_trimmed_rf", asfx),
-          sprintf("Reduced Form (trimmed, sector-specific Z, %s)", atype))
+        save_table(mods_rob_b, paste0("ss_robustness_t7b_trimmed_rf", asfx, FILE_VOL_SFX),
+          sprintf("Reduced Form (trimmed, sector-specific Z, %s, vol=%s)", atype, VOLUME_CONTROL))
         rob_wald_mods[["Trimmed 1--99\\%"]] <- mods_rob_b[[1]]
         rm(mods_rob_b)
       }
@@ -733,8 +878,8 @@ for (atype in align_types) {
 
         cat("  (Full coefficient table saved to file; showing joint Wald tests only)\n")
         print_wald(mods_rob_c, "^dZ_", "Optimality test (alt clustering)")
-        save_table(mods_rob_c, paste0("ss_robustness_t7c_clustering", asfx),
-          sprintf("Reduced Form (alternative clustering, sector-specific Z, %s)", atype))
+        save_table(mods_rob_c, paste0("ss_robustness_t7c_clustering", asfx, FILE_VOL_SFX),
+          sprintf("Reduced Form (alternative clustering, sector-specific Z, %s, vol=%s)", atype, VOLUME_CONTROL))
         rob_wald_mods[["Cluster: muni+year"]] <- mods_rob_c[["cluster:muni+year"]]
         rm(mods_rob_c); gc(verbose = FALSE)
       }
@@ -754,22 +899,23 @@ for (atype in align_types) {
         cat("  WARNING: OLS failed:", conditionMessage(e), "\n")
       })
 
-      if ("bndes_pc" %in% names(dt)) {
+      if (VOL_HAS_CONTROL) {
+        vc_label <- if (identical(VOLUME_CONTROL, "split")) "OLS+vol_split" else "OLS+vol_joint"
         tryCatch({
-          mods_ols[["OLS+bndes_pc"]] <- feols(
+          mods_ols[[vc_label]] <- feols(
             as.formula(paste0("log_gdp_pc ~ ", paste(delta_s_cols, collapse = " + "),
-                              " + bndes_pc | muni_id + year")),
+                              " + ", VOL_TERMS_STR, " | muni_id + year")),
             data = dt, vcov = ~muni_id)
         }, error = function(e) {
-          cat("  WARNING: OLS+bndes_pc failed:", conditionMessage(e), "\n")
+          cat("  WARNING: OLS+vol failed:", conditionMessage(e), "\n")
         })
       }
 
       if (length(mods_ols) > 0) {
         print_table(mods_ols,
           sprintf("Table 7d: OLS Benchmark (uninstrumented) [%s]", atype))
-        save_table(mods_ols, paste0("ss_robustness_t7d_ols", asfx),
-          sprintf("OLS Benchmark (uninstrumented, %s)", atype))
+        save_table(mods_ols, paste0("ss_robustness_t7d_ols", asfx, FILE_VOL_SFX),
+          sprintf("OLS Benchmark (uninstrumented, %s, vol=%s)", atype, VOLUME_CONTROL))
       }
       rm(mods_ols); gc(verbose = FALSE)
     }
@@ -793,8 +939,8 @@ for (atype in align_types) {
 
           cat("  (Full coefficient table saved to file; showing joint Wald test only)\n")
           print_wald(mods_placebo, "^dZ_", "Exclusion restriction test")
-          save_table(mods_placebo, paste0("ss_robustness_t7e_placebo", asfx),
-            sprintf("Transfer Placebo (sector-specific Z, %s)", atype))
+          save_table(mods_placebo, paste0("ss_robustness_t7e_placebo", asfx, FILE_VOL_SFX),
+            sprintf("Transfer Placebo (sector-specific Z, %s, vol=%s)", atype, VOLUME_CONTROL))
           rm(mods_placebo)
         }
       } else {
@@ -807,8 +953,8 @@ for (atype in align_types) {
 
     # Save combined robustness Wald summary table
     if (length(rob_wald_mods) > 0) {
-      save_wald_summary(rob_wald_mods, paste0("ss_robustness_wald_summary", asfx),
-        sprintf("Robustness Wald Tests (%s)", atype))
+      save_wald_summary(rob_wald_mods, paste0("ss_robustness_wald_summary", asfx, FILE_VOL_SFX),
+        sprintf("Robustness Wald Tests (%s, vol=%s)", atype, VOLUME_CONTROL))
     }
     rm(rob_wald_mods); gc(verbose = FALSE)
   }

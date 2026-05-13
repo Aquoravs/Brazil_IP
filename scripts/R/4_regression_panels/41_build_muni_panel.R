@@ -76,7 +76,26 @@ if (length(svar_flag)) {
 USE_GROUPS <- (SECTOR_VAR == "sector_group")
 USE_POLICY_BLOCKS <- (SECTOR_VAR == "policy_block")
 SCOL <- SECTOR_VAR
-cat("Sector variable:", SECTOR_VAR, "\n\n")
+cat("Sector variable:", SECTOR_VAR, "\n")
+
+# --- Endogenous variable source (Phase 2 C2.2-partial; 2026-05-13) -----------
+# emp_share   : panel_a skeleton from emp_share_panel_<margin>.qs2 (script 32c).
+#               s_emp_mjt / delta_s_emp_mjt drive j0 selection, wide pivots,
+#               and HHI. Credit shares are merged as mechanism-check side
+#               variables (s_credit_mjt / delta_s_credit_mjt). The BHJ §4.4
+#               slack column (slack_frozen_mt) propagates to Panel B.
+# bndes_credit: legacy path. panel_a = credit, j0 by mean(s_mjt), wide pivots
+#               on s_mjt / delta_s_mjt. No slack column required.
+endo_flag <- grep("^--endogenous=", args, value = TRUE)
+ENDOGENOUS <- "emp_share"
+if (length(endo_flag)) {
+  ENDOGENOUS <- tolower(trimws(sub("^--endogenous=", "", endo_flag[1])))
+  if (!ENDOGENOUS %in% c("emp_share", "bndes_credit")) {
+    stop("Invalid --endogenous value: '", ENDOGENOUS,
+         "'. Use 'emp_share' or 'bndes_credit'.")
+  }
+}
+cat("Endogenous source:", ENDOGENOUS, "\n\n")
 
 # --- Configuration -----------------------------------------------------------
 
@@ -504,8 +523,86 @@ if (length(z_cols) > 0) {
   cat("  Levels instrument columns:", paste(z_cols, collapse = ", "), "\n")
 }
 
-# Start from credit shares: (muni_id, cnae_section, year, s_mjt, delta_s_mjt, ...)
-panel_a <- copy(credit)
+# --- Skeleton selection (C2.2-partial, 2026-05-13) --------------------------
+# When ENDOGENOUS == "emp_share": panel_a's skeleton comes from
+# emp_share_panel_<SECTOR_VAR>.qs2 (script 32c). Credit shares are merged in
+# afterwards as mechanism-check side variables. The BHJ §4.4 slack control
+# travels with the skeleton.
+# When ENDOGENOUS == "bndes_credit": existing behavior unchanged.
+
+if (ENDOGENOUS == "emp_share") {
+  emp_share_path <- make_output_path(
+    sprintf("emp_share_panel_%s.qs2", SECTOR_VAR)
+  )
+  if (!file.exists(emp_share_path)) {
+    stop("emp_share_panel not found: ", emp_share_path,
+         "\n  Run script 32c with --sector-var=", SECTOR_VAR, " first.")
+  }
+  emp_share <- qs_read(emp_share_path)
+  setDT(emp_share)
+  cat(sprintf("  Loaded emp_share_panel [%s]: %d rows\n",
+              SECTOR_VAR, nrow(emp_share)))
+
+  # Schema check.
+  emp_share_req <- c("muni_id", SCOL, "year", "n_jmt", "n_mt",
+                     "s_emp_mjt", "delta_s_emp_mjt", "slack_frozen_mt")
+  missing_es <- setdiff(emp_share_req, names(emp_share))
+  if (length(missing_es)) {
+    stop("emp_share_panel missing columns: ",
+         paste(missing_es, collapse = ", "))
+  }
+
+  # Skeleton: (muni_id, sector_var, year, s_emp_mjt, delta_s_emp_mjt,
+  #           slack_frozen_mt, n_jmt, n_mt).
+  panel_a <- emp_share[, c("muni_id", SCOL, "year",
+                           "n_jmt", "n_mt",
+                           "s_emp_mjt", "delta_s_emp_mjt",
+                           "slack_frozen_mt"), with = FALSE]
+  rm(emp_share); invisible(gc())
+
+  # Merge credit shares as mechanism-check side variables.
+  credit_side <- credit[, c("muni_id", SCOL, "year",
+                            intersect(c("s_mjt", "delta_s_mjt"), names(credit))),
+                        with = FALSE]
+  setnames(credit_side,
+           old = intersect(c("s_mjt", "delta_s_mjt"), names(credit_side)),
+           new = paste0(intersect(c("s_mjt", "delta_s_mjt"), names(credit_side)),
+                        "_credit"))
+  # Final names: s_mjt -> s_mjt_credit, delta_s_mjt -> delta_s_mjt_credit
+  # Rename for clarity per spec: s_credit_mjt / delta_s_credit_mjt
+  if ("s_mjt_credit" %in% names(credit_side)) {
+    setnames(credit_side, "s_mjt_credit", "s_credit_mjt")
+  }
+  if ("delta_s_mjt_credit" %in% names(credit_side)) {
+    setnames(credit_side, "delta_s_mjt_credit", "delta_s_credit_mjt")
+  }
+
+  panel_a <- merge(panel_a, credit_side,
+                   by = c("muni_id", SCOL, "year"), all.x = TRUE)
+  rm(credit_side, credit); invisible(gc())
+
+  # Slack column binding condition (strategist review §A, BHJ §4.4):
+  # slack_frozen_mt MUST be non-NA for every (muni_id, year) in panel_a.
+  stopifnot(
+    "slack_frozen_mt has NAs after emp_share skeleton load" =
+      !any(is.na(panel_a$slack_frozen_mt))
+  )
+
+  # Naming aliases for downstream code: when ENDOGENOUS == "emp_share",
+  # use s_emp_mjt / delta_s_emp_mjt in j0 selection, wide pivots, HHI.
+  SHARE_COL  <- "s_emp_mjt"
+  DSHARE_COL <- "delta_s_emp_mjt"
+  cat(sprintf("  Panel A skeleton: emp_share (rows=%d). Share col: %s\n",
+              nrow(panel_a), SHARE_COL))
+} else {
+  # Legacy bndes_credit path: skeleton from credit shares.
+  panel_a <- copy(credit)
+  SHARE_COL  <- "s_mjt"
+  DSHARE_COL <- "delta_s_mjt"
+  rm(credit); invisible(gc())
+  cat(sprintf("  Panel A skeleton: bndes_credit (rows=%d). Share col: %s\n",
+              nrow(panel_a), SHARE_COL))
+}
 
 # Merge sector-level instruments — split by baseline_type and suffix
 for (bt in unique(instr_sec$baseline_type)) {
@@ -541,7 +638,7 @@ if (length(z_cols) > 0) {
   }
 }
 
-rm(credit, instr_sec); invisible(gc())
+rm(instr_sec); invisible(gc())
 
 # Merge levels instruments (if available)
 levels_sec_path <- sub("instruments_sector", "instruments_levels_sector", instr_sec_path)
@@ -662,9 +759,13 @@ cat("  Panel B (base):", nrow(panel_b), "rows,",
 
 cat("\nStep 5b: Building wide-format sector columns for vector 2SLS and AR...\n")
 
-# Determine j0 (dropped sector): largest average share
-sec_shares <- panel_a[!is.na(s_mjt), .(mean_share = mean(s_mjt)), by = SCOL]
-setorder(sec_shares, -mean_share)
+# Determine j0 (dropped sector): largest average share.
+# Under --endogenous=emp_share, share column is s_emp_mjt; under bndes_credit
+# it is s_mjt. Deterministic alphabetical tiebreak on SECTOR_VAR.
+sec_shares <- panel_a[!is.na(get(SHARE_COL)),
+                      .(mean_share = mean(get(SHARE_COL))),
+                      by = SCOL]
+setorderv(sec_shares, c("mean_share", SCOL), order = c(-1L, 1L))
 j0 <- sec_shares[[SCOL]][1]
 cat(sprintf("  Dropped sector (j0): %s (mean share = %.4f)\n",
             j0, sec_shares$mean_share[1]))
@@ -706,12 +807,26 @@ make_sector_wide <- function(dt, value_col, sectors, out_prefix, fill = NULL) {
   wide
 }
 
-# Pivot delta_s_mjt to wide (excluding j0)
+# Pivot delta share to wide (excluding j0)
 # Do not zero-fill: undefined deltas (e.g. first year) must stay NA.
-delta_s_wide <- make_sector_wide(panel_a, "delta_s_mjt", sec_iv, "delta_s")
+# Column-name prefix kept as "delta_s" / "s" regardless of endogenous source,
+# so downstream regex patterns in scripts 53/54 remain stable.
+delta_s_wide <- make_sector_wide(panel_a, DSHARE_COL, sec_iv, "delta_s")
 
-# Pivot s_mjt to wide (for levels specification)
-s_wide <- make_sector_wide(panel_a, "s_mjt", sec_iv, "s", fill = 0)
+# Pivot share level to wide (for levels specification)
+s_wide <- make_sector_wide(panel_a, SHARE_COL, sec_iv, "s", fill = 0)
+
+# AR namespace (all-J) wide pivots — additionally emit ar_delta_s_*, ar_s_*
+# only when ENDOGENOUS == "emp_share", since the AR pivot on the realised
+# share vector is the load-bearing endogenous side. Under bndes_credit the
+# AR namespace for shares is not used downstream.
+if (ENDOGENOUS == "emp_share") {
+  ar_delta_s_wide <- make_sector_wide(panel_a, DSHARE_COL, sec_ar, "ar_delta_s")
+  ar_s_wide       <- make_sector_wide(panel_a, SHARE_COL,  sec_ar, "ar_s", fill = 0)
+} else {
+  ar_delta_s_wide <- NULL
+  ar_s_wide       <- NULL
+}
 
 # Pivot sector-level instruments to wide.
 # Existing names remain J-1 for structural share/2SLS specs.
@@ -744,8 +859,49 @@ for (cc in ctrl_sec_cols) {
 # Merge all wide columns into Panel B
 panel_b <- merge(panel_b, delta_s_wide, by = c("muni_id", "year"), all.x = TRUE)
 panel_b <- merge(panel_b, s_wide, by = c("muni_id", "year"), all.x = TRUE)
+if (!is.null(ar_delta_s_wide)) {
+  panel_b <- merge(panel_b, ar_delta_s_wide,
+                   by = c("muni_id", "year"), all.x = TRUE)
+}
+if (!is.null(ar_s_wide)) {
+  panel_b <- merge(panel_b, ar_s_wide,
+                   by = c("muni_id", "year"), all.x = TRUE)
+}
 for (zw in z_sec_wide_list) {
   panel_b <- merge(panel_b, zw, by = c("muni_id", "year"), all.x = TRUE)
+}
+
+# Slack propagation (BHJ §4.4): carry slack_frozen_mt onto panel_b as a
+# muni-year quantity. Only present when ENDOGENOUS == "emp_share".
+if (ENDOGENOUS == "emp_share") {
+  slack_my <- unique(panel_a[, .(muni_id, year, slack_frozen_mt)])
+  stopifnot(
+    "slack_frozen_mt not unique at (muni_id, year)" =
+      uniqueN(slack_my[, .(muni_id, year)]) == nrow(slack_my)
+  )
+  panel_b <- merge(panel_b, slack_my, by = c("muni_id", "year"), all.x = TRUE)
+  stopifnot(
+    "panel_b not unique at (muni_id, year) after slack merge" =
+      uniqueN(panel_b[, .(muni_id, year)]) == nrow(panel_b)
+  )
+  # Slack must be defined for every muni-year in Panel B (downstream
+  # specification gate). Drop muni-years not in emp_share_panel skeleton, or
+  # NA-fill = 1 if it's a pure muni_yr row absent from emp_share_panel.
+  # Hybrid memo binding condition: prefer dropping NAs to keep BHJ §4.4 valid.
+  na_slack <- sum(is.na(panel_b$slack_frozen_mt))
+  if (na_slack > 0L) {
+    cat(sprintf("  Dropping %d muni-year rows with NA slack_frozen_mt (not in emp_share skeleton)\n",
+                na_slack))
+    panel_b <- panel_b[!is.na(slack_frozen_mt)]
+  }
+  stopifnot(
+    "slack_frozen_mt still has NAs in panel_b" =
+      !any(is.na(panel_b$slack_frozen_mt))
+  )
+  cat(sprintf("  Slack propagated: range [%.4f, %.4f], mean=%.4f\n",
+              min(panel_b$slack_frozen_mt),
+              max(panel_b$slack_frozen_mt),
+              mean(panel_b$slack_frozen_mt)))
 }
 
 # --- Step 5b': Build muni-total exposure controls (row-sum across sectors) ----
@@ -776,8 +932,10 @@ for (fc in fill_cols) {
 }
 
 # Compute HHI for scalar 2SLS
-# HHI_mt = sum_j s_mjt^2
-hhi <- panel_a[!is.na(s_mjt), .(hhi = sum(s_mjt^2, na.rm = TRUE)), by = .(muni_id, year)]
+# HHI_mt = sum_j s_mjt^2 (or sum_j s_emp_mjt^2 under --endogenous=emp_share)
+hhi <- panel_a[!is.na(get(SHARE_COL)),
+               .(hhi = sum(get(SHARE_COL)^2, na.rm = TRUE)),
+               by = .(muni_id, year)]
 panel_b <- merge(panel_b, hhi, by = c("muni_id", "year"), all.x = TRUE)
 # delta_hhi
 setorder(panel_b, muni_id, year)
@@ -878,6 +1036,233 @@ if (!is.null(transfers) && nrow(transfers) > 0) {
 cat("  Panel B final:", nrow(panel_b), "rows,",
     uniqueN(panel_b$muni_id), "municipalities\n")
 
+# --- Step 5d: Split-volume BNDES columns by recipient class -----------------
+# C2.2-supplement (2026-05-13): add level columns to panel_b giving the
+# muni-year sum of `value_dis_real_2018_total` broken out by recipient class
+# (productive-firm / financial-institution / public-entity / other), plus a
+# residual column for productive-firm loans NOT in the RAIS-merged panel.
+#
+# ============================================================================
+# USER ADJUDICATION 2026-05-13 — four-way volume split (locked):
+#   Primary volume control (default):
+#     total_bndes_real                    RAIS-merged productive (D1 universe)
+#   Robustness split-volume components:
+#     bndes_total_productive_nonRAIS_mt   productive-firm loans NOT in RAIS
+#                                         = bndes_total_productive_all_mt
+#                                           - total_bndes_real
+#     bndes_total_fi_mt                   financial-intermediary loans
+#     bndes_total_public_mt               public-entity loans
+#     bndes_total_other_mt                residual (= 0 per D3.1)
+#   Identity:
+#     bndes_total_productive_all_mt =
+#         total_bndes_real + bndes_total_productive_nonRAIS_mt
+#
+# Note: bndes_total_productive_all_mt is the BROADER productive aggregate from
+# D3.1 (all private/CNAE firms), NOT the RAIS-merged subset. The RAIS-merged
+# subset is total_bndes_real (script-22 reconstruction). The residual
+# bndes_total_productive_nonRAIS_mt captures the productive-firm loans that
+# fall outside the RAIS-merged analyzed universe.
+# ============================================================================
+#
+# Source: data/processed/bndes_loans_by_recipient_class_my.qs2 (D3.1 output,
+# 56,103 rows, keyed on muni_id_ibge6 × year × recipient_class). The
+# muni_id_ibge6 column is the 6-digit IBGE code, which is the SAME variable
+# panel_b uses as `muni_id` (script 41 truncates 7-digit IBGE to 6 digits at
+# every load point — see lines 327, 457, 1005). The bridge is therefore an
+# identity rename; we still assert uniqueness of the mapping.
+#
+# Backward compatibility: if the recipient-class aggregate does not exist
+# (e.g., user pulled a snapshot from before D3.1), emit a warning and skip.
+
+recipient_class_path <- make_output_path("bndes_loans_by_recipient_class_my.qs2")
+RECIPIENT_CLASSES <- c("productive-firm", "financial-institution",
+                       "public-entity", "other")
+RECIPIENT_CLASS_SUFFIX <- c(
+  "productive-firm"        = "productive_all",
+  "financial-institution"  = "fi",
+  "public-entity"          = "public",
+  "other"                  = "other"
+)
+
+if (file.exists(recipient_class_path)) {
+  cat("\nStep 5d: Merging split-volume BNDES columns by recipient class...\n")
+  cat("  Loading:", basename(recipient_class_path), "\n")
+
+  rc <- qs_read(recipient_class_path)
+  setDT(rc)
+  cat(sprintf("  Recipient-class aggregate: %d rows\n", nrow(rc)))
+
+  # Muni-id bridge: muni_id_ibge6 (6-digit IBGE) → muni_id (panel_b also 6-digit).
+  # Build an explicit crosswalk just for the assertion: it must be one-to-one.
+  rc[, muni_id := as.integer(muni_id_ibge6)]
+  crosswalk <- unique(rc[, .(muni_id_ibge6, muni_id)])
+  stopifnot(
+    "muni_id_ibge6 not unique in crosswalk" =
+      uniqueN(crosswalk[, muni_id_ibge6]) == nrow(crosswalk),
+    "muni_id not unique in crosswalk" =
+      uniqueN(crosswalk[, muni_id]) == nrow(crosswalk)
+  )
+
+  # Report unmatched munis (recipient-class munis not in panel_b universe).
+  rc_munis <- unique(rc$muni_id)
+  pb_munis <- unique(panel_b$muni_id)
+  n_unmatched <- length(setdiff(rc_munis, pb_munis))
+  cat(sprintf("  Crosswalk: %d unique muni_id_ibge6, %d unmatched in panel_b\n",
+              length(rc_munis), n_unmatched))
+  if (n_unmatched > 0L) {
+    cat(sprintf("    First unmatched: %s\n",
+                paste(head(setdiff(rc_munis, pb_munis), 5),
+                      collapse = ", ")))
+  }
+
+  # Coerce recipient_class to known set and produce the wide column names.
+  unknown_classes <- setdiff(unique(rc$recipient_class), RECIPIENT_CLASSES)
+  if (length(unknown_classes)) {
+    warning("Unknown recipient_class values in aggregate: ",
+            paste(unknown_classes, collapse = ", "),
+            " (will be ignored)")
+    rc <- rc[recipient_class %in% RECIPIENT_CLASSES]
+  }
+
+  # Wide pivot: (muni_id × year) → one column per recipient_class.
+  rc_wide <- dcast(
+    rc,
+    muni_id + year ~ recipient_class,
+    value.var = "value_dis_real_2018_total",
+    fun.aggregate = sum,
+    fill = 0
+  )
+
+  # Ensure all four classes are present as columns (zero-fill if a class never
+  # appeared in the aggregate — e.g., D3.1 reported "other" share is 0%).
+  for (rcls in RECIPIENT_CLASSES) {
+    if (!rcls %in% names(rc_wide)) {
+      rc_wide[, (rcls) := 0]
+    }
+  }
+
+  # Rename to bndes_total_<suffix>_mt.
+  new_col_names <- paste0("bndes_total_", RECIPIENT_CLASS_SUFFIX, "_mt")
+  setnames(rc_wide,
+           old = RECIPIENT_CLASSES,
+           new = new_col_names)
+  rc_wide <- rc_wide[, c("muni_id", "year", new_col_names), with = FALSE]
+
+  # Left-join into panel_b on (muni_id, year). Muni-years with no BNDES
+  # activity (or absent from the recipient-class file) get NA, then zero-fill.
+  panel_b <- merge(panel_b, rc_wide,
+                   by = c("muni_id", "year"), all.x = TRUE)
+  for (nc in new_col_names) {
+    panel_b[is.na(get(nc)), (nc) := 0]
+  }
+
+  stopifnot(
+    "panel_b not unique at (muni_id, year) after recipient-class merge" =
+      uniqueN(panel_b[, .(muni_id, year)]) == nrow(panel_b)
+  )
+
+  # ----------------------------------------------------------------------
+  # Build residual productive-nonRAIS column (user adjudication 2026-05-13).
+  # ----------------------------------------------------------------------
+  # bndes_total_productive_nonRAIS_mt = bndes_total_productive_all_mt
+  #                                     - total_bndes_real
+  # This is the productive-firm loan volume sitting OUTSIDE the RAIS-merged
+  # analyzed universe (script-22 reconstruction).
+  if (!"total_bndes_real" %in% names(panel_b)) {
+    stop("total_bndes_real missing — cannot build bndes_total_productive_nonRAIS_mt.")
+  }
+  panel_b[, bndes_total_productive_nonRAIS_mt :=
+            bndes_total_productive_all_mt - total_bndes_real]
+
+  # Sign sanity: residual must be non-negative within floating-point
+  # tolerance. A substantially negative value would imply total_bndes_real
+  # contains loans absent from the D3.1 broader productive aggregate, which
+  # would indicate a deeper definitional inconsistency upstream.
+  min_residual <- min(panel_b$bndes_total_productive_nonRAIS_mt, na.rm = TRUE)
+  n_negative   <- sum(panel_b$bndes_total_productive_nonRAIS_mt < -1e-3,
+                      na.rm = TRUE)
+  cat(sprintf("  Sign sanity (productive_nonRAIS): min = %.6f R$, n(<-1e-3) = %d\n",
+              min_residual, n_negative))
+  stopifnot(
+    "bndes_total_productive_nonRAIS_mt has substantial negative values (>-1e-3)" =
+      all(panel_b$bndes_total_productive_nonRAIS_mt >= -1e-3)
+  )
+
+  # Identity check: productive_all == total_bndes_real + productive_nonRAIS
+  # (by construction; residual should be near machine epsilon).
+  identity_resid <- max(abs(
+    panel_b$bndes_total_productive_all_mt -
+      panel_b$total_bndes_real -
+      panel_b$bndes_total_productive_nonRAIS_mt
+  ), na.rm = TRUE)
+  cat(sprintf("  Identity check: max |productive_all - total_bndes_real - productive_nonRAIS| = %.3e\n",
+              identity_resid))
+  stopifnot(
+    "Productive-volume identity violated (>1e-6 R$)" =
+      identity_resid < 1e-6
+  )
+
+  # Aggregate / per-muni-year diagnostics for the new residual column.
+  agg_nonRAIS <- sum(panel_b$bndes_total_productive_nonRAIS_mt)
+  med_nonRAIS <- median(panel_b$bndes_total_productive_nonRAIS_mt)
+  max_nonRAIS <- max(panel_b$bndes_total_productive_nonRAIS_mt)
+  cat(sprintf("  productive_nonRAIS aggregate = %.3e R$ (expect ~1.66e13 = 16.6 T R$)\n",
+              agg_nonRAIS))
+  cat(sprintf("  productive_nonRAIS per muni-year: median = %.2f R$, max = %.2e R$\n",
+              med_nonRAIS, max_nonRAIS))
+  if (abs(agg_nonRAIS - 1.66e13) > 1e12) {
+    warning(sprintf(
+      "productive_nonRAIS aggregate (%.3e R$) deviates from expected 16.6 T R$ by more than 1 T R$ — flag for review.",
+      agg_nonRAIS))
+  }
+
+  # Legacy diagnostic: with productive_all renamed, this check no longer
+  # expects equality with total_bndes_real. Just report the GAP between
+  # productive_all and total_bndes_real (which equals productive_nonRAIS
+  # by identity above).
+  delta_prod <- panel_b$bndes_total_productive_all_mt - panel_b$total_bndes_real
+  cat(sprintf("  Gap (productive_all - total_bndes_real): max = %.3e R$, mean = %.3e R$\n",
+              max(delta_prod, na.rm = TRUE),
+              mean(delta_prod, na.rm = TRUE)))
+
+  # "Other" class should be zero per D3.1.
+  other_sum <- sum(panel_b$bndes_total_other_mt)
+  cat(sprintf("  Other-class total: %.2f R$ (D3.1 expects 0)\n", other_sum))
+  if (other_sum > 1e-3) {
+    warning(sprintf(
+      "bndes_total_other_mt is non-zero (%.2f R$) — contradicts D3.1 reported 0%% share",
+      other_sum))
+  }
+
+  # Per-year mean of each new column (diagnostic), including the residual.
+  yearly_cols <- c(new_col_names, "bndes_total_productive_nonRAIS_mt")
+  yearly_means <- panel_b[, lapply(.SD, mean, na.rm = TRUE),
+                          .SDcols = yearly_cols, by = year]
+  setorder(yearly_means, year)
+  cat("  Per-year mean (R$ per muni) of split-volume columns ",
+      "(incl. productive_nonRAIS):\n", sep = "")
+  print(yearly_means)
+
+  # Final column set present after Step 5d:
+  #   total_bndes_real                    (primary; from script 22 reconstruction)
+  #   bndes_total_productive_all_mt       (D3.1 broader productive aggregate)
+  #   bndes_total_productive_nonRAIS_mt   (residual = productive_all - total_bndes_real)
+  #   bndes_total_fi_mt                   (financial intermediary)
+  #   bndes_total_public_mt               (public entity)
+  #   bndes_total_other_mt                (residual; = 0 per D3.1)
+  cat("  Five-way volume column set installed in panel_b: ",
+      "total_bndes_real, bndes_total_productive_all_mt, ",
+      "bndes_total_productive_nonRAIS_mt, bndes_total_fi_mt, ",
+      "bndes_total_public_mt, bndes_total_other_mt\n", sep = "")
+
+  rm(rc, rc_wide, crosswalk); invisible(gc())
+} else {
+  cat("\nStep 5d: Recipient-class aggregate not found at\n    ",
+      recipient_class_path, "\n",
+      "  Skipping split-volume column supplement (backward-compat path).\n",
+      sep = "")
+}
+
 # ==============================================================================
 # STEP 6: Diagnostics and save
 # ==============================================================================
@@ -889,7 +1274,7 @@ cat("  Rows:", format(nrow(panel_a), big.mark = ","), "\n")
 cat("  Unique municipalities:", uniqueN(panel_a$muni_id), "\n")
 cat(sprintf("  Unique %s: %d\n", SCOL, uniqueN(panel_a[[SCOL]])))
 cat("  Years:", paste(range(panel_a$year), collapse = "-"), "\n")
-for (v in c("delta_s_mjt", "s_mjt", "log_gdp_pc")) {
+for (v in unique(c(DSHARE_COL, SHARE_COL, "delta_s_mjt", "s_mjt", "log_gdp_pc"))) {
   if (v %in% names(panel_a)) {
     vals <- panel_a[[v]][is.finite(panel_a[[v]])]
     if (length(vals)) cat(sprintf("  %s: mean=%.4f, sd=%.4f, n=%d\n",
@@ -926,8 +1311,10 @@ if (length(panel_a_drop)) {
 cat("  Dropping unused columns from Panel B...\n")
 # Note: s_* wide columns are retained for potential levels-specification second
 # stage; log_gdp and population are retained for AR robustness/balance checks.
+# total_bndes_real is RETAINED as the PRIMARY volume control (user adjudication
+# 2026-05-13, four-way split). Other split-volume columns are also retained.
 panel_b_drop <- intersect(
-  c("total_bndes_real", "total_employment", "n_firms", "n_bndes_firms",
+  c("total_employment", "n_firms", "n_bndes_firms",
     "log_bndes", "bndes_per_worker",
     "pib", "pib_real", "gdp_pc",
     "hhi", "log_bndes_pc",
@@ -961,6 +1348,10 @@ fwrite(summ_class_41, summary_classification_path)
 cat(sprintf("  Saved classification summary: %s\n", summary_classification_path))
 
 setorderv(panel_a, c("year", "muni_id", SCOL))
+attr(panel_a, "endogenous") <- ENDOGENOUS
+attr(panel_a, "share_col") <- SHARE_COL
+attr(panel_a, "dshare_col") <- DSHARE_COL
+attr(panel_a, "sector_var") <- SECTOR_VAR
 qs_save(panel_a, output_sector_path)
 cat(sprintf("  Saved Panel A: %s (%.2f MB)\n",
             output_sector_path, file.size(output_sector_path) / 1024^2))
@@ -970,6 +1361,9 @@ attr(panel_b, "sector_var") <- SECTOR_VAR
 attr(panel_b, "sectors_all") <- sec_all
 attr(panel_b, "sectors_iv") <- sec_iv
 attr(panel_b, "sectors_ar") <- sec_ar
+attr(panel_b, "endogenous") <- ENDOGENOUS
+attr(panel_b, "share_col") <- SHARE_COL
+attr(panel_b, "dshare_col") <- DSHARE_COL
 setorder(panel_b, year, muni_id)
 qs_save(panel_b, output_muni_path)
 cat(sprintf("  Saved Panel B: %s (%.2f MB)\n",
