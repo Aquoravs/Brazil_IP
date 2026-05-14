@@ -342,3 +342,19 @@ Spec deviation: C1_FE uses year FE only (not muni + year FE) because Z is time-i
 **Score:** 92/100 (self-assessment)
 **Verdict:** Updated four loci of the methodology spec: (i) endogenous-variable definition narrowed to RAIS formal-sector composition with D24/D25 citations; (ii) new "Skeleton construction" paragraph formalizing the contemporaneous unbalanced skeleton with A0.1 7.64% and A0.5 1.83% bounds and A0.2/A0.3 zero-employee + drop counts; (iii) new "Frozen pre-election window" paragraph + BHJ §4.4 slack control (slack_frozen_mt); (iv) Volume control augmented with D5-op recipient-class decomposition (productive-firm 71.6%, public 28.3%, FI 0.10%) and split-volume description; (v) new Robustness section with R1 denominator variants, R2 margin choice (policy_block F=4.37, cnae F=2.05, drop-top-1 F=3.37, slack ΔF=0.023), R3 joint-vs-split (p≈2e-4 both, FI coef −0.018), R4 pre-trend characterization (mayor p=0.80, pres p<0.005, drop-section FS F=53.84); (vi) new Limitations section L1–L5 covering RAIS bound, other public credit, presidential pre-trend, AKM 2019 cluster SEs, and emp-share first-stage F in [0.03, 3.38]. Citations BHJ 2022, GPSS 2020, ASS 2019, AKM 2019 already in thebibliography (natbib). Recompile PASS via latexmk (XeLaTeX): 21 pages, no errors (warnings: cosmetic underfull hboxes only).
 **Report:** journal/sessions/2026-05-12_firm_support_implementation.md
+
+### 2026-05-13 22:23 — orchestrator (AR-meeting 2026-05-14 deliverables)
+**Phase:** Exploration / AR-test diagnostic update
+**Target:** journal/meetings/2026-05-14/slides.tex + explorations/anderson_rubin/ar_meeting_2026_05_13/output/
+**Score:** worker stages all passed exploration-phase critic at >= 80
+  - Stage 0 (helpers): 92  | Stage A1 (Variant A weights): 90
+  - Stage A2 (Z + EC):  92  | Stage B (muni AR panel): 90
+  - Stage C (16 regs):  88  | Stage D (slides): 86
+  - Stage E verifier: PASS (32/32 F-stats in tex match CSV to 3 decimals)
+**Verdict:** End-to-end pipeline executed per APPROVED plan `journal/plans/2026-05-13_ar_test_updated_meeting.md`. Variant A muni-relative owner-share weights with channel-specific pre-earliest-election windows (Variant F timing). Two taxonomies × 4 channels × 4 control specs = 32 AR cells.
+**Key findings (advisory only):**
+  - policy_block (K=4, hold-out=Serv): rejects 5% in 2/16 cells, both on the M·G channel under `+EC` and `+Vol+EC` (F ≈ 3.99, p ≈ 0.0075). M, M·P, M·G·P all non-rejecting across specs.
+  - size_bin (K=3, hold-out=Grande): rejects 5% in 4/16 cells — (M·P, none) and (M·P, vol) at F=4.156 p=0.0157; (M·G, ec) and (M·G, vol+ec) at F≈4.07 p≈0.017. M and M·G·P never reject. Power constrained by K-1=2 instruments.
+  - Volume control alone moves F by <0.005 in every cell — the volume mechanism does not absorb the composition signal at these magnitudes.
+  - EC controls move F in both directions: large positive shift on M·G (both taxonomies), large negative shift on M·P size_bin.
+**Report:** journal/sessions/2026-05-13_ar_meeting_update.md
