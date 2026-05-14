@@ -335,5 +335,5 @@ All five open items closed by user responses on 2026-05-13. See L9–L12 in §2.
 | Stage E verifier | PASS (32/32 F-stats in tex match CSV to 3 decimals) |
 | Session log | `journal/sessions/2026-05-13_ar_meeting_update.md` |
 | Research journal | `journal/research_journal.md` (entry 2026-05-13 22:23 — orchestrator) |
-| Commit hash | (recorded by Stage F commit on `main`; see `git log` for hash of "feat(ar-test): updated AR results for 2026-05-14 meeting") |
+| Commit hash | `d2eaae6` (feat(ar-test): updated AR results for 2026-05-14 meeting) |
 

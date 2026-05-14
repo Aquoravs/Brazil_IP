@@ -102,3 +102,6 @@ Pending in this entry: single commit on `main` per plan §F; plan status flipped
 **Status:**
 - Done: Stages 0 → E; all critic scores >= 80.
 - Pending: commit + plan status update + research-journal append (this entry).
+
+**Commit hash:** `d2eaae6` — feat(ar-test): updated AR results for 2026-05-14 meeting.
+**Plan status:** flipped APPROVED → COMPLETED with hash appended in §10 of the plan.
