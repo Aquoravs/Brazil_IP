@@ -165,6 +165,11 @@ spec_labels <- c(none = "No controls", ec = "+ EC",
 channel_labels <- c(M = "Mayor", MP = "M $\\cdot$ P",
                     MG = "M $\\cdot$ G", MGP = "M $\\cdot$ G $\\cdot$ P")
 
+# Human-readable sector row labels — no raw sector codes in the deck.
+pb_labels   <- c(Agro = "Agriculture", Ind = "Industry",
+                 Infra = "Infrastructure", Serv = "Services")
+size_labels <- c(`1` = "Small", `2` = "Medium", `3` = "Big")
+
 build_fstat_tex <- function() {
   lines <- c(
     "\\begin{tabular}{@{}lcccc@{}}",
@@ -237,8 +242,8 @@ build_coef_panel <- function(channel) {
         row_est[i] <- "--"; row_se[i] <- ""
       }
     }
-    label <- if (identical(TAX, "policy_block")) sec
-             else paste0("Size ", sec)
+    label <- if (identical(TAX, "policy_block")) pb_labels[[as.character(sec)]]
+             else size_labels[[as.character(sec)]]
     lines <- c(lines,
                paste0(label, " & ", paste(row_est, collapse = " & "), " \\\\"),
                paste0("       & ", paste(row_se,  collapse = " & "), " \\\\"))
@@ -279,17 +284,10 @@ build_coef_panel <- function(channel) {
   }
   lines <- c(lines,
              paste0("EC (mean) & ", paste(row_est, collapse = " & "), " \\\\"))
-  # Footer rows
-  obs <- summary_dt[channel == channel[1L], n_obs[1L]]
-  munis <- summary_dt[channel == channel[1L], n_munis[1L]]
-  lines <- c(lines,
-             "\\midrule",
-             sprintf("Observations & \\multicolumn{4}{c}{%s} \\\\",
-                     format(obs, big.mark = ",")),
-             sprintf("Municipalities & \\multicolumn{4}{c}{%s} \\\\",
-                     format(munis, big.mark = ",")),
-             "\\bottomrule",
-             "\\end{tabular}")
+  # Close the table. Sample size (observations, municipalities) is identical
+  # across every channel/spec/taxonomy, so it is reported once on the
+  # Overview slide rather than repeated in each coefficient table.
+  lines <- c(lines, "\\bottomrule", "\\end{tabular}")
   lines
 }
 

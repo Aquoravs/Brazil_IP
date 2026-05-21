@@ -43,7 +43,7 @@ parse_kv <- function(flag, default) {
   sub(paste0("^", flag, "="), "", hit[[1L]])
 }
 TAX <- parse_kv("--tax", "policy_block")
-stopifnot(TAX %in% c("policy_block", "size_bin"))
+stopifnot(TAX %in% TAXONOMIES)
 message(sprintf("[INFO] %s | tax=%s", Sys.time(), TAX))
 
 # --- Load weights ----------------------------------------------------------
@@ -58,22 +58,32 @@ message(sprintf("[INFO] weights rows: %s", format(nrow(w), big.mark = ",")))
 al <- qs_read(file.path(DATA, "alignment_shocks.qs2")); setDT(al)
 al[, muni_id := as.integer(muni_id)]
 al[, year    := as.integer(year)]
-# Slim to needed columns only.
-align_cols <- c("align_mayor_coalition", "align_mayor_pres_coalition",
+# Pre-built coalition columns needed across the seven channels, plus the two
+# components for the GP product (governor x president).
+align_cols <- c("align_mayor_coalition", "align_gov_coalition",
+                "align_pres_coalition", "align_mayor_pres_coalition",
                 "align_mayor_gov_coalition", "align_triple_coalition")
 stopifnot(all(align_cols %in% names(al)))
 al <- al[, c("muni_id", "party", "year", align_cols), with = FALSE]
+# GP channel has no pre-built column: construct it as the product of the
+# governor and president coalition indicators at (muni, party, year).
+al[, align_gov_pres_coalition :=
+     align_gov_coalition * align_pres_coalition]
 message(sprintf("[INFO] alignment rows: %s", format(nrow(al), big.mark = ",")))
 
 # --- Per-channel: join weights × alignment, then sum over party ----------
 
-CHANNELS <- c("M", "MP", "MG", "MGP")
+# Seven channels (B1). The original four are a subset.
+CHANNELS <- all_channels()
 Z_list  <- vector("list", length(CHANNELS))
 EC_list <- vector("list", length(CHANNELS))
 
 for (i in seq_along(CHANNELS)) {
   c_lab <- CHANNELS[[i]]
   align_col <- channel_align_col(c_lab)
+  # GP returns NA from channel_align_col — it uses the product column built
+  # above (align_gov_pres_coalition).
+  if (is.na(align_col)) align_col <- "align_gov_pres_coalition"
   wc <- w[channel == c_lab,
           .(muni_id, year, sector, party, w_tilde)]
   if (!nrow(wc)) {

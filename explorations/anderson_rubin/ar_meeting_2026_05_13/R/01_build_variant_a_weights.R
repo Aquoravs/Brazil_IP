@@ -52,8 +52,13 @@ parse_kv <- function(flag, default) {
   sub(paste0("^", flag, "="), "", hit[[1L]])
 }
 TAX <- parse_kv("--tax", "policy_block")
-stopifnot(TAX %in% c("policy_block", "size_bin"))
+stopifnot(TAX %in% TAXONOMIES)
 message(sprintf("[INFO] %s | tax=%s", Sys.time(), TAX))
+
+# Taxonomy families: policy_block is cnae_section-level (sector attached once);
+# size_bin and policy_block_size_bin are firm x cycle-level (sector attached
+# inside the cycle/year loop). The crossed taxonomy reuses the size_bin path.
+TAX_CYCLE_LEVEL <- TAX %in% c("size_bin", "policy_block_size_bin")
 
 # --- Load primitives -------------------------------------------------------
 
@@ -94,17 +99,32 @@ if (identical(TAX, "policy_block")) {
   message(sprintf("[INFO] firm_panel after policy_block attach: %s rows",
                   format(nrow(fp), big.mark = ",")))
 } else {
-  # size_bin: firm-cycle-level. We attach size_bin AT THE CYCLE LEVEL inside
-  # the cycle loop below to keep cell membership cycle-correct.
+  # size_bin / policy_block_size_bin: firm-cycle-level. size_bin is attached
+  # AT THE CYCLE LEVEL inside the loop below to keep cell membership
+  # cycle-correct. For the crossed taxonomy we additionally hold the firm's
+  # cnae_section -> policy_block on fp (cnae_section is time-invariant) and
+  # cross it with the cycle-specific size_bin inside the loop.
   sb_full <- qs_read(file.path(DATA, "size_bin_mapping.qs2"))
   setDT(sb_full)
   sb_full[, firm_id := as.integer(firm_id)]
   sb_full[, election_cycle := as.integer(election_cycle)]
   sb_full[, size_bin := as.integer(size_bin)]
-  # Strip down to (firm_id, election_cycle, size_bin)
   sb_full <- sb_full[, .(firm_id, election_cycle, size_bin)]
   message(sprintf("[INFO] size_bin_mapping: %s firm-cycle rows",
                   format(nrow(sb_full), big.mark = ",")))
+  if (identical(TAX, "policy_block_size_bin")) {
+    # C1: crossed group = policy_block x size_bin. Attach policy_block to fp
+    # via cnae_section now; size_bin is attached per cycle in the loop.
+    pb <- qs_read(file.path(DATA, "policy_block_mapping.qs2"))
+    setDT(pb)
+    pb <- pb[policy_block != "XX"]
+    fp <- merge(fp, pb[, .(cnae_section, policy_block)],
+                by = "cnae_section", all.x = FALSE, all.y = FALSE)
+    fp[, cnae_section := NULL]
+    setkeyv(fp, c("firm_id", "muni_id", "year"))
+    message(sprintf("[INFO] firm_panel after policy_block attach (crossed): %s rows",
+                    format(nrow(fp), big.mark = ",")))
+  }
 }
 
 # --- Cycle assignment rule for size_bin -----------------------------------
@@ -143,23 +163,35 @@ if (identical(TAX, "policy_block")) {
                   format(nrow(agg_year), big.mark = ",")))
   setkeyv(agg_year, c("year", "muni_id"))
 } else {
-  message("[INFO] joining owner_aff to firm_panel (size_bin)...")
+  message(sprintf("[INFO] joining owner_aff to firm_panel (%s)...", TAX))
   # Slim joined first by year and add sector PER CYCLE.
   # Strategy: pre-join owner_aff and firm_panel on (firm, muni, year);
   # then within each cycle window we attach size_bin via cycle.
+  # For policy_block_size_bin we carry policy_block (time-invariant) on the
+  # join and cross it with the cycle-specific size_bin inside the loop.
   setkeyv(oa, c("firm_id", "muni_id", "year"))
-  fp_slim <- fp[, .(firm_id, muni_id, year)]
+  if (identical(TAX, "policy_block_size_bin")) {
+    fp_slim <- fp[, .(firm_id, muni_id, year, policy_block)]
+  } else {
+    fp_slim <- fp[, .(firm_id, muni_id, year)]
+  }
   setkeyv(fp_slim, c("firm_id", "muni_id", "year"))
   joined <- oa[fp_slim, nomatch = 0L,
                on = c("firm_id", "muni_id", "year"),
                allow.cartesian = TRUE]
-  joined <- joined[, .(firm_id, muni_id, year, party,
-                       aff_owners = as.numeric(aff_owners))]
-  message(sprintf("[INFO] joined rows: %s", format(nrow(joined), big.mark = ",")))
-  # Sum aff_owners by (firm_id, year, muni_id, party) — safe collapse if there
-  # are duplicate firm-year-muni rows in firm_panel due to multi-section.
-  joined <- joined[, .(aff_owners = sum(aff_owners, na.rm = TRUE)),
-                   by = .(firm_id, muni_id, year, party)]
+  if (identical(TAX, "policy_block_size_bin")) {
+    joined <- joined[, .(firm_id, muni_id, year, party, policy_block,
+                         aff_owners = as.numeric(aff_owners))]
+    joined <- joined[, .(aff_owners = sum(aff_owners, na.rm = TRUE)),
+                     by = .(firm_id, muni_id, year, party, policy_block)]
+  } else {
+    joined <- joined[, .(firm_id, muni_id, year, party,
+                         aff_owners = as.numeric(aff_owners))]
+    # Sum aff_owners by (firm_id, year, muni_id, party) — safe collapse if
+    # there are duplicate firm-year-muni rows from multi-section firms.
+    joined <- joined[, .(aff_owners = sum(aff_owners, na.rm = TRUE)),
+                     by = .(firm_id, muni_id, year, party)]
+  }
   message(sprintf("[INFO] firm-year-party aggregate: %s rows",
                   format(nrow(joined), big.mark = ",")))
   setkeyv(joined, c("firm_id", "year"))
@@ -168,7 +200,10 @@ if (identical(TAX, "policy_block")) {
 # --- Build the (channel, year_t) calendar --------------------------------
 
 YEARS <- 2002:2017
-CHANNELS <- c("M", "MP", "MG", "MGP")
+# Seven channels (B1): three mains, three pairs, one triple. The original
+# four (M, MP, MG, MGP) are a subset, so downstream four-channel consumers
+# still find their columns.
+CHANNELS <- all_channels()
 cal <- build_channel_calendar(years = YEARS, channels = CHANNELS)
 setDT(cal)
 message("\n[INFO] channel × year calendar (Variant F windows):")
@@ -191,10 +226,11 @@ build_weights_for_cell <- function(channel, t, T_lo, T_hi) {
     num <- sub[, .(L = sum(L, na.rm = TRUE)),
                by = .(muni_id, sector, party)]
   } else {
-    # size_bin path: attach size_bin via cycle(t), then aggregate.
+    # size_bin / policy_block_size_bin path: attach size_bin via cycle(t),
+    # then aggregate. For the crossed taxonomy the sector is the
+    # "<policy_block>_<size_bin>" pair carried on joined plus the cycle bin.
     cyc <- cycle_for_year(t)
-    sb_t <- sb_full[election_cycle == cyc,
-                    .(firm_id, sector = as.character(size_bin))]
+    sb_t <- sb_full[election_cycle == cyc, .(firm_id, size_bin)]
     setkeyv(sb_t, "firm_id")
     sub <- joined[year %in% yrs]
     sub <- merge(sub, sb_t, by = "firm_id",
@@ -203,6 +239,11 @@ build_weights_for_cell <- function(channel, t, T_lo, T_hi) {
                                        sector = character(),
                                        party = character(),
                                        w_tilde = numeric()))
+    if (identical(TAX, "policy_block_size_bin")) {
+      sub[, sector := paste0(policy_block, "_", size_bin)]
+    } else {
+      sub[, sector := as.character(size_bin)]
+    }
     num <- sub[, .(L = sum(aff_owners, na.rm = TRUE)),
                by = .(muni_id, sector, party)]
   }

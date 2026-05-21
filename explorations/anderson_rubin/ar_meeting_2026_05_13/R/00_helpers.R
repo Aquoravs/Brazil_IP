@@ -30,12 +30,22 @@ e_office <- function(t, office) {
 }
 
 # Channel-specific offices (mapping from channel label to vector of offices).
+# Seven channels: three mains (M, G, P), three pairs (MG, MP, GP), one triple
+# (MGP). The original four (M, MP, MG, MGP) are unchanged; G, P, GP are added.
 channel_offices <- list(
   M       = "mayor",
+  G       = "governor",
+  P       = "pres",
   MP      = c("mayor", "pres"),
   MG      = c("mayor", "governor"),
+  GP      = c("governor", "pres"),
   MGP     = c("mayor", "governor", "pres")
 )
+
+# The full seven-channel set, in main -> pair -> triple order. Helper scripts
+# that want all channels read this; the original four-channel scripts keep
+# their own hard-coded CHANNELS vector and are unaffected.
+all_channels <- function() c("M", "G", "P", "MG", "MP", "GP", "MGP")
 
 # Pre-earliest-election window for channel c at year t.
 #   Returns list(lo, hi) — both integers, inclusive — clipped to [2002, 2017].
@@ -75,6 +85,10 @@ build_channel_calendar <- function(years = 2002:2017,
 
 # --- Taxonomy loaders --------------------------------------------------------
 
+# Valid taxonomy values. policy_block_size_bin (4 blocks x 3 size bins = 12
+# crossed groups) is additive — the original two remain unchanged.
+TAXONOMIES <- c("policy_block", "size_bin", "policy_block_size_bin")
+
 load_taxonomy <- function(tax,
                           data_dir = file.path(Sys.getenv("BNDES_OUTPUT",
                                                           "data/processed"))) {
@@ -88,6 +102,14 @@ load_taxonomy <- function(tax,
     data.table::setDT(sb)
     return(sb)
   }
+  if (identical(tax, "policy_block_size_bin")) {
+    # Crossed taxonomy: assigned at firm x cycle level by the build scripts.
+    # Return both component mappings as a named list.
+    pb <- qs2::qs_read(file.path(data_dir, "policy_block_mapping.qs2"))
+    sb <- qs2::qs_read(file.path(data_dir, "size_bin_mapping.qs2"))
+    data.table::setDT(pb); data.table::setDT(sb)
+    return(list(policy_block = pb, size_bin = sb))
+  }
   stop("Unknown taxonomy: ", tax)
 }
 
@@ -95,6 +117,12 @@ load_taxonomy <- function(tax,
 taxonomy_levels <- function(tax) {
   if (identical(tax, "policy_block")) return(c("Agro", "Ind", "Infra", "Serv"))
   if (identical(tax, "size_bin"))     return(c("1", "2", "3"))
+  if (identical(tax, "policy_block_size_bin")) {
+    # 4 policy blocks x 3 size bins = 12 crossed groups, label "<block>_<bin>".
+    pb <- c("Agro", "Ind", "Infra", "Serv")
+    sb <- c("1", "2", "3")
+    return(as.vector(t(outer(pb, sb, paste, sep = "_"))))
+  }
   stop("Unknown taxonomy: ", tax)
 }
 
@@ -103,16 +131,46 @@ taxonomy_labels <- function(tax) {
     return(c(Agro = "Agriculture", Ind = "Industry",
              Infra = "Infrastructure", Serv = "Services"))
   if (identical(tax, "size_bin"))
-    return(c(`1` = "MPME", `2` = "Media", `3` = "Grande"))
+    return(c(`1` = "Small", `2` = "Medium", `3` = "Big"))
+  if (identical(tax, "policy_block_size_bin")) {
+    pb_lab <- c(Agro = "Agro", Ind = "Ind", Infra = "Infra", Serv = "Serv")
+    sb_lab <- c(`1` = "Small", `2` = "Medium", `3` = "Big")
+    lvls <- taxonomy_levels(tax)
+    parts <- strsplit(lvls, "_", fixed = TRUE)
+    out <- vapply(parts, function(p) paste0(pb_lab[[p[[1L]]]], " / ",
+                                            sb_lab[[p[[2L]]]]), character(1))
+    names(out) <- lvls
+    return(out)
+  }
   stop("Unknown taxonomy: ", tax)
 }
 
-# Channel display labels for slides.
+# Channel display labels for LaTeX tables and slides. Interaction channels use
+# the centered dot ($\cdot$) to match script 04's channel_labels and the slide
+# prose. Single-office channels stay plain text.
 channel_label <- function(channel) {
   switch(channel,
     M   = "Mayor",
+    G   = "Governor",
+    P   = "President",
+    MP  = "Mayor $\\cdot$ President",
+    MG  = "Mayor $\\cdot$ Governor",
+    GP  = "Governor $\\cdot$ President",
+    MGP = "Mayor $\\cdot$ Gov. $\\cdot$ President",
+    channel)
+}
+
+# Plain-text channel labels for CSV columns and console output, where a raw
+# LaTeX "$\cdot$" would be noise. Same channels as channel_label(), with " x "
+# in place of the centered dot.
+channel_label_plain <- function(channel) {
+  switch(channel,
+    M   = "Mayor",
+    G   = "Governor",
+    P   = "President",
     MP  = "Mayor x President",
     MG  = "Mayor x Governor",
+    GP  = "Governor x President",
     MGP = "Mayor x Gov. x President",
     channel)
 }
@@ -131,13 +189,99 @@ ec_col_name <- function(channel, sector) {
 
 # Maps channel label to alignment_shocks.qs2 column (coalition variants only,
 # per L5 of the plan).
+#
+# The four cross-mayor channels and the three single-office mains have a
+# pre-built coalition column. The GP pair (governor x president) has NO
+# pre-built column: it is constructed in 02_build_instruments_ec.R as the
+# product align_gov_coalition * align_pres_coalition at the (muni,party,year)
+# level. channel_align_col() therefore returns NA for GP — callers detect this
+# and build the product. The original four channels are unchanged.
 channel_align_col <- function(channel) {
   switch(channel,
     M   = "align_mayor_coalition",
+    G   = "align_gov_coalition",
+    P   = "align_pres_coalition",
     MP  = "align_mayor_pres_coalition",
     MG  = "align_mayor_gov_coalition",
+    GP  = NA_character_,   # built as gov_coalition * pres_coalition
     MGP = "align_triple_coalition",
     stop("Unknown channel: ", channel))
+}
+
+# Component coalition columns for channels built as a product (GP).
+channel_align_components <- function(channel) {
+  switch(channel,
+    GP = c("align_gov_coalition", "align_pres_coalition"),
+    stop("Channel has no product definition: ", channel))
+}
+
+# --- Phase B/C shared utilities ----------------------------------------------
+# Lifted from B2-B6 / C3 to remove copy-paste duplication. Every Phase B/C
+# script sources 00_helpers.R and uses these instead of redefining them.
+
+# Resolve the absolute path of the running script (Rscript only).
+get_this_script <- function() {
+  a <- commandArgs(trailingOnly = FALSE)
+  fa <- grep("^--file=", a, value = TRUE)
+  if (length(fa)) return(normalizePath(sub("^--file=", "", fa[[1L]]),
+                                       winslash = "/", mustWork = TRUE))
+  stop("Run via Rscript.")
+}
+
+# Parse a "--flag=value" command-line argument; returns `default` if absent.
+parse_kv <- function(flag, default, cli = commandArgs(trailingOnly = TRUE)) {
+  hit <- grep(paste0("^", flag, "="), cli, value = TRUE)
+  if (!length(hit)) return(default)
+  sub(paste0("^", flag, "="), "", hit[[1L]])
+}
+
+# Firm size-bin election cycles (odd years 2005-2017). Single source of truth;
+# previously hard-coded in 03_build_muni_ar_panel.R, B2, and C3.
+SIZE_CYCLES <- c(2005L, 2007L, 2009L, 2011L, 2013L, 2015L, 2017L)
+
+# --- Numeric / LaTeX formatting helpers --------------------------------------
+# fmt_n: fixed-decimal; fmt_g: significant-digits; fmt_p: p-value with a
+# "<0.001" floor; fmt_F: alias of fmt_n at 3 digits. Digits are arguments so a
+# caller that needs a different precision passes it explicitly rather than
+# redefining the function.
+
+fmt_n <- function(x, d = 3L) {
+  if (!is.finite(x)) return("--")
+  formatC(x, format = "f", digits = d)
+}
+
+fmt_g <- function(x, d = 3L) {
+  if (!is.finite(x)) return("--")
+  formatC(x, format = "g", digits = d)
+}
+
+fmt_p <- function(p, d = 3L) {
+  if (!is.finite(p)) return("--")
+  if (p < 0.001) return("$<$0.001")
+  formatC(p, format = "f", digits = d)
+}
+
+fmt_F <- function(x, d = 3L) fmt_n(x, d)
+
+# Joint Wald F-statistics over highly collinear stacked channels can be
+# numerically degenerate: when the cluster-robust VCV of the coefficient block
+# is near-singular, inverting it in the quadratic form yields a garbage F (e.g.
+# tens of millions). joint_F_rank_deficient() flags such cases so the joint cell
+# can be reported as rank-deficient rather than a bogus number. A non-finite F
+# or one exceeding JOINT_F_CEILING is treated as rank-deficient.
+JOINT_F_CEILING <- 1e4
+
+joint_F_rank_deficient <- function(F_stat) {
+  !is.finite(F_stat) || F_stat > JOINT_F_CEILING
+}
+
+# Significance stars from a p-value.
+stars <- function(p) {
+  if (!is.finite(p)) return("")
+  if (p < 0.01) return("$^{***}$")
+  if (p < 0.05) return("$^{**}$")
+  if (p < 0.10) return("$^{*}$")
+  ""
 }
 
 # --- Sanity test (run at sourcing) -------------------------------------------

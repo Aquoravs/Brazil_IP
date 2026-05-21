@@ -81,7 +81,7 @@ tax_levels_for_display <- function(tax) {
   if (identical(tax, "policy_block"))
     return("Agriculture, Industry, Infrastructure, Services")
   if (identical(tax, "size_bin"))
-    return("MPME, Media, Grande")
+    return("Small, Medium, Big")
   ""
 }
 
@@ -94,7 +94,7 @@ build_body_lines <- function(tax) {
     c(Serv = "Services", Ind = "Industry", Agro = "Agriculture",
       Infra = "Infrastructure")[ho]
   } else {
-    c(`1` = "MPME", `2` = "Media", `3` = "Grande")[as.character(ho)]
+    c(`1` = "Small", `2` = "Medium", `3` = "Big")[as.character(ho)]
   }
   c(
     sprintf("\\begin{frame}{%s --- Setup}", display),
@@ -102,14 +102,14 @@ build_body_lines <- function(tax) {
     sprintf("\\item \\textbf{Taxonomy:} %s. $K=%d$; hold-out sector: \\textbf{%s}.",
             display, K, holdout_label),
     sprintf("\\item \\textbf{Levels:} %s.", levels),
-    "\\item Weights: Variant A (muni-relative aligned-owner share), pre-earliest-election window.",
-    "\\item Volume control: $\\mathrm{vol}_{mt} = \\mathrm{total\\_bndes\\_real}_{mt} / \\mathrm{pib\\_real}_{m,2002}$.",
-    "\\item FE: municipality + year. SE: one-way cluster on \\texttt{muni\\_id}.",
+    "\\item Weights: muni-relative aligned-owner share, pre-earliest-election window.",
+    "\\item Volume control: $\\mathrm{vol}_{mt}$, total BNDES disbursements over 2002 municipal GDP.",
+    "\\item Fixed effects: municipality and year. Standard errors clustered by municipality.",
     "\\end{itemize}",
     "\\end{frame}",
     "",
     sprintf("\\begin{frame}{%s --- AR joint $F$}", display),
-    "{\\footnotesize Variant A weights, pre-earliest-election window.}",
+    "{\\footnotesize Muni-relative owner-share weights, pre-earliest-election window.}",
     "\\vskip 0.25em",
     "\\resizebox{\\textwidth}{!}{%",
     "\\setlength{\\tabcolsep}{4pt}%",
@@ -157,6 +157,13 @@ for (tax in c("policy_block", "size_bin")) {
 
 # --- Master deck ------------------------------------------------------------
 
+# Sample size for the Overview slide. The complete-case drop (log_gdp +
+# vol_ratio) leaves an identical panel across taxonomies and specs, so the
+# count is read once from the policy_block summary and shown only on Overview.
+.smry <- fread(file.path(OUT, "ar_summary_policy_block.csv"))
+n_obs_overview   <- format(.smry$n_obs[1L],   big.mark = ",")
+n_munis_overview <- format(.smry$n_munis[1L], big.mark = ",")
+
 deck <- c(
   "\\documentclass[aspectratio=169,11pt]{beamer}",
   "\\usetheme{default}",
@@ -189,11 +196,13 @@ deck <- c(
   "",
   "\\begin{frame}{Overview}",
   "\\begin{itemize}\\setlength{\\itemsep}{0.45em}",
-  "\\item \\textbf{Question.} Under the updated instrument convention (Variant A muni-relative owner-share, pre-earliest-election window), does the Anderson-Rubin test reject $H_0\\!:\\!\\beta=0$ on sector employment shares?",
-  "\\item \\textbf{Two taxonomies.} Policy block (Agriculture, Industry, Infrastructure, Services; $K=4$); firm-size (MPME, Media, Grande; $K=3$).",
+  "\\item \\textbf{Question.} Under the updated instrument convention (muni-relative owner-share, pre-earliest-election window), does the Anderson-Rubin test reject $H_0\\!:\\!\\beta=0$ on sector employment shares?",
+  "\\item \\textbf{Two taxonomies.} Policy block (Agriculture, Industry, Infrastructure, Services; $K=4$); firm-size (Small, Medium, Big; $K=3$).",
   "\\item \\textbf{Four control specs.} (1) No controls; (2) $+$ EC (per-cell exposure control); (3) $+$ Vol (volume control); (4) $+$ Vol $+$ EC.",
   "\\item \\textbf{Four channels.} Mayor; Mayor $\\cdot$ President; Mayor $\\cdot$ Governor; Mayor $\\cdot$ Gov.\\ $\\cdot$ President.",
-  "\\item All regressions use municipality and year FE; one-way cluster on \\texttt{muni\\_id}.",
+  sprintf("\\item \\textbf{Sample.} %s municipalities; %s municipality-years. Constant across both taxonomies and all four control specs.",
+          n_munis_overview, n_obs_overview),
+  "\\item All regressions use municipality and year fixed effects; standard errors clustered by municipality.",
   "\\end{itemize}",
   "\\end{frame}",
   "",
@@ -202,9 +211,9 @@ deck <- c(
   "",
   "\\begin{frame}{Bottom Line}",
   "\\begin{itemize}\\setlength{\\itemsep}{0.45em}",
-  "\\item Under Variant A weights with pre-earliest-election windows, the AR test \\textit{rejects} at 5\\% in two cells: (M $\\cdot$ G, $+$ EC) and (M $\\cdot$ G, $+$ Vol $+$ EC) for policy\\_block; (M $\\cdot$ P, no controls / $+$ Vol) and (M $\\cdot$ G, $+$ EC / $+$ Vol $+$ EC) for size\\_bin.",
+  "\\item Under muni-relative owner-share weights with pre-earliest-election windows, the AR test \\textit{rejects} at 5\\% in two cells: (M $\\cdot$ G, $+$ EC) and (M $\\cdot$ G, $+$ Vol $+$ EC) for BNDES sectors; (M $\\cdot$ P, no controls / $+$ Vol) and (M $\\cdot$ G, $+$ EC / $+$ Vol $+$ EC) for firm size.",
   "\\item The volume control (single coefficient) shifts $F$ negligibly; the EC controls (per-cell, $K-1$ columns) move $F$ in both directions.",
-  "\\item Size\\_bin power is constrained ($K-1=2$ instruments per channel).",
+  "\\item Firm-size power is constrained ($K-1=2$ instruments per channel).",
   "\\item Per-channel coefficients reported on the following slides for inspection.",
   "\\end{itemize}",
   "\\end{frame}",

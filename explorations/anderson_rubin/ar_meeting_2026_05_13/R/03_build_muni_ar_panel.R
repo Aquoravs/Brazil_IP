@@ -6,10 +6,14 @@
 # vol_ratio_mt = total_bndes_real_mt / pib_real_{m, 2002}
 #   pib_real_{m, 2002} is recovered as exp(log_gdp) at year 2002 per muni.
 #
-# Hold-out sector: drop the highest-mean-share sector to keep unit-norm.
-# Hold-out source: emp_share_panel_<emp_tax>.qs2 (contemporaneous variant).
+# Simplex / category omission (Decision 1, 2026-05-20):
+#   The endogenous shares s and the EC each sum to 1, so the EC drops one
+#   sector (hold-out absorbed by FE) — EC_wide keeps J-1 columns per channel.
+#   The instruments Z do NOT sum to 1, so ALL J sector columns are retained
+#   — Z_wide keeps J columns per channel. The AR Wald is the joint test on
+#   all J Z columns of the channel.
 #
-# CLI:  --tax={policy_block, size_bin}
+# CLI:  --tax={policy_block, size_bin, policy_block_size_bin}
 # Out:  output/muni_panel_ar_<tax>.qs2
 #       output/holdout_<tax>.csv (lists the dropped sector and its mean share)
 # ==============================================================================
@@ -41,7 +45,7 @@ parse_kv <- function(flag, default) {
   sub(paste0("^", flag, "="), "", hit[[1L]])
 }
 TAX <- parse_kv("--tax", "policy_block")
-stopifnot(TAX %in% c("policy_block", "size_bin"))
+stopifnot(TAX %in% TAXONOMIES)
 message(sprintf("[INFO] %s | tax=%s", Sys.time(), TAX))
 
 # --- Load Z and EC --------------------------------------------------------
@@ -64,6 +68,43 @@ if (identical(TAX, "policy_block")) {
   share_summary <- emp[!is.na(s_emp_mjt) & sector != "XX",
                        .(mean_share = mean(s_emp_mjt, na.rm = TRUE)),
                        by = sector]
+} else if (identical(TAX, "policy_block_size_bin")) {
+  # Crossed taxonomy: no precomputed share panel. Build crossed-sector
+  # employment shares from the firm panel (policy_block x cycle size_bin).
+  message("[INFO] computing policy_block_size_bin mean shares from firm_panel ...")
+  fp <- qs_read(file.path(DATA, "firm_panel_for_regs.qs2")); setDT(fp)
+  fp <- fp[, .(firm_id = as.integer(firm_id),
+               muni_id = as.integer(muni_id),
+               year    = as.integer(year),
+               cnae_section = as.character(cnae_section),
+               n_employees)]
+  fp <- fp[!is.na(cnae_section) & nzchar(cnae_section)]
+  pbm <- qs_read(file.path(DATA, "policy_block_mapping.qs2")); setDT(pbm)
+  pbm <- pbm[policy_block != "XX"]
+  fp <- merge(fp, pbm[, .(cnae_section, policy_block)],
+              by = "cnae_section", all.x = FALSE)
+  fp[, cnae_section := NULL]
+  sb <- qs_read(file.path(DATA, "size_bin_mapping.qs2")); setDT(sb)
+  # SIZE_CYCLES from 00_helpers.R.
+  fp[, election_cycle := pmax(SIZE_CYCLES[1L],
+                              vapply(year, function(y) {
+                                cs <- SIZE_CYCLES[SIZE_CYCLES <= y]
+                                if (length(cs) == 0L) SIZE_CYCLES[1L]
+                                else max(cs)
+                              }, integer(1)))]
+  sb[, `:=`(election_cycle = as.integer(election_cycle),
+            firm_id = as.integer(firm_id), size_bin = as.integer(size_bin))]
+  fp <- merge(fp, sb[, .(firm_id, election_cycle, size_bin)],
+              by = c("firm_id", "election_cycle"), all.x = FALSE)
+  fp[, sector := paste0(policy_block, "_", size_bin)]
+  njmt <- fp[!is.na(n_employees), .(n_jmt = sum(n_employees, na.rm = TRUE)),
+             by = .(muni_id, year, sector)]
+  nmt  <- njmt[, .(n_mt = sum(n_jmt, na.rm = TRUE)), by = .(muni_id, year)]
+  njmt <- merge(njmt, nmt, by = c("muni_id", "year"))
+  njmt[, s := n_jmt / n_mt]
+  share_summary <- njmt[!is.na(s), .(mean_share = mean(s, na.rm = TRUE)),
+                        by = sector]
+  rm(fp, sb, pbm, njmt, nmt); gc(verbose = FALSE)
 } else {
   # Compute size_bin mean shares from firm panel + size_bin mapping.
   message("[INFO] computing size_bin mean shares from firm_panel ...")
@@ -73,8 +114,8 @@ if (identical(TAX, "policy_block")) {
                year    = as.integer(year),
                n_employees)]
   sb <- qs_read(file.path(DATA, "size_bin_mapping.qs2")); setDT(sb)
-  # Match year -> cycle (max cycle <= year, fallback to 2005)
-  SIZE_CYCLES <- c(2005L, 2007L, 2009L, 2011L, 2013L, 2015L, 2017L)
+  # Match year -> cycle (max cycle <= year, fallback to 2005). SIZE_CYCLES
+  # from 00_helpers.R.
   fp[, election_cycle := pmax(SIZE_CYCLES[1L],
                               vapply(year, function(y) {
                                 cs <- SIZE_CYCLES[SIZE_CYCLES <= y]
@@ -104,11 +145,16 @@ fwrite(share_summary, file.path(OUT, sprintf("holdout_%s.csv", TAX)))
 message(sprintf("[INFO] hold-out sector for %s: %s (mean share = %.4f)",
                 TAX, holdout, share_summary$mean_share[1L]))
 
-sectors_keep <- sort(setdiff(unique(Z$sector), holdout))
-message(sprintf("[INFO] keep sectors (K-1=%d): %s",
-                length(sectors_keep), paste(sectors_keep, collapse = ", ")))
+# Decision 1: Z retains ALL J sectors; EC retains J-1 (drop the hold-out).
+sectors_all  <- sort(unique(Z$sector))
+sectors_keep <- sort(setdiff(sectors_all, holdout))
+message(sprintf("[INFO] Z keeps ALL J=%d sectors: %s",
+                length(sectors_all), paste(sectors_all, collapse = ", ")))
+message(sprintf("[INFO] EC keeps J-1=%d sectors (hold-out %s dropped): %s",
+                length(sectors_keep), holdout,
+                paste(sectors_keep, collapse = ", ")))
 
-Z  <- Z [sector %in% sectors_keep]
+# Z: keep all J sectors. EC: drop the hold-out sector only.
 EC <- EC[sector %in% sectors_keep]
 
 # --- Reshape to wide ------------------------------------------------------
@@ -168,7 +214,8 @@ message("[INFO] first cols: ",
 # --- Save -----------------------------------------------------------------
 
 attr(panel, "holdout_sector") <- holdout
-attr(panel, "sectors_keep")   <- sectors_keep
+attr(panel, "sectors_all")    <- sectors_all   # all J — Z columns
+attr(panel, "sectors_keep")   <- sectors_keep  # J-1 — EC columns
 attr(panel, "taxonomy")       <- TAX
 
 qs_save(panel, file.path(OUT, sprintf("muni_panel_ar_%s.qs2", TAX)))
