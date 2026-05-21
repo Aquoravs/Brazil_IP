@@ -10,12 +10,9 @@ $postscript_mode = $dvi_mode = 0;
 ensure_path('TEXINPUTS', './preambles//');
 ensure_path('BIBINPUTS', '..//');
 
-# Silence — stop on errors but don't pause
-$xelatex = 'xelatex -interaction=nonstopmode %O %S';
-
 # Keep the final PDF beside the source, with generated support files in build/.
 $out_dir = '.';
 $aux_dir = 'build';
 
-# latexmk moves SyncTeX to $out_dir when $aux_dir differs, so move it back.
-$success_cmd = q{powershell -NoProfile -Command "$r='%R'.Trim('"'); $aux='%Y'.Trim('"'); Move-Item -LiteralPath ($r + '.synctex.gz') -Destination (Join-Path $aux ($r + '.synctex.gz')) -Force -ErrorAction SilentlyContinue"};
+$xelatex = 'xelatex -interaction=nonstopmode -file-line-error -synctex=1 %O %S';
+$clean_ext = 'synctex.gz xdv';

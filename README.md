@@ -28,7 +28,7 @@ All project data. Raw inputs are never modified; processed outputs are reproduci
 | Directory / File | Contents |
 |-----------------|----------|
 | `bndes_indirect_auto/` | BNDES indirect loans (automatic operations), 2002-2025 |
-| `bndes_indirect_nonauto/` | BNDES indirect loans (non-automatic operations), 2002-2025 |
+| `bndes_direct_and_indirect_nonauto/` | BNDES non-automatic loans (direct and indirect operations), 2002-2025 |
 | `david_ra/` | Political affiliation data, including `in_power_upd_2002_2019.qs2` (year-party-municipality level) |
 | `mun_gdp/` | IBGE PIB Municipal .xls files (2002-2009 and 2010-2019), values in R$ 1,000 (nominal) |
 | `ipca_202509SerieHist.xlsx` | BCB IPCA historical series (read with `skip=6`, annual average index, base year 2018) |
