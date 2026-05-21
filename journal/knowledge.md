@@ -159,6 +159,7 @@ These were investigated but are now superseded by the AR-test agenda; kept for t
 | For… | See… |
 |---|---|
 | Current decisions and AR-test focus | [`docs/research_state.md`](../docs/research_state.md) |
+| Defenses of design choices (advisor / referee Q&A) | [`docs/design_defenses.md`](../docs/design_defenses.md) |
 | Advisor comment statuses (C1-C8) | [`journal/meetings/2026-04-17/tracker.md`](meetings/2026-04-17/tracker.md) |
 | Plan history (per-task) | [`journal/plans/`](plans/) |
 | Session logs (full detail per task) | [`journal/sessions/`](sessions/) |

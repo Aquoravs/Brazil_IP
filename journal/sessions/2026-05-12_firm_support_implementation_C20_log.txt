@@ -1,0 +1,300 @@
+Run started: 2026-05-13T09:44:14
+Aviso:
+NAs introducidos por coerción 
+Orchestrator: EXECUTE mode 
+Script root: C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/scripts/R 
+Audits mode: auto 
+Forward args to scripts: (none) 
+
+=== Running [MAIN] 41 -> 4_regression_panels/41_build_muni_panel.R ===
+Command: Rscript C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/scripts/R/4_regression_panels/41_build_muni_panel.R
+==============================================================================
+Building Municipality Panels for Regressions
+==============================================================================
+
+Sector variable: sector_group 
+
+Step 1: Aggregating firm-level data to municipality-year...
+  Loading from fst: rais_bndes_reconstructed.fst 
+  Loaded: 44,181,405 rows
+  Municipality-year panel: 89066 rows, 5572 municipalities
+
+Step 1b: Building muni employment quartile classification (2002–2017)...
+  Classified: 5572 municipalities
+  Q1: 1393 munis (25.0%)
+  Q2: 1393 munis (25.0%)
+  Q3: 1393 munis (25.0%)
+  Q4: 1393 munis (25.0%)
+
+Step 2: Loading GDP data...
+  Loading: PIB dos Municípios - base de dados 2002-2009.xls 
+    Using sheet: PIB_dos_Municípios 
+    Loaded: 44501 rows, 40 cols
+    Columns: Ano, Código da Grande Região, Nome da Grande Região, Código da Unidade da Federação, Sigla da Unidade da Federação, Nome da Unidade da Federação, Código do Município, Nome do Município, Região Metropolitana, Código da Mesorregião, Nome da Mesorregião, Código da Microrregião, Nome da Microrregião, Código da Região Geográfica Imediata, Nome da Região Geográfica Imediata, Município da Região Geográfica Imediata, Código da Região Geográfica Intermediária, Nome da Região Geográfica Intermediária, Município da Região Geográfica Intermediária, Código Concentração Urbana, Nome Concentração Urbana, Tipo Concentração Urbana, Código Arranjo Populacional, Nome Arranjo Populacional, Hierarquia Urbana, Hierarquia Urbana (principais categorias), Código da Região Rural, Nome da Região Rural, Região rural (segundo classificação do núcleo), Amazônia Legal, Semiárido, Cidade-Região de São Paulo, Valor adicionado bruto da Agropecuária, 
+a preços correntes
+(R$ 1.000), Valor adicionado bruto da Indústria,
+a preços correntes
+(R$ 1.000), Valor adicionado bruto dos Serviços,
+a preços correntes 
+- exceto Administração, defesa, educação e saúde públicas e seguridade social
+(R$ 1.000), Valor adicionado bruto da Administração, defesa, educação e saúde públicas e seguridade social, 
+a preços correntes
+(R$ 1.000), Valor adicionado bruto total, 
+a preços correntes
+(R$ 1.000), Impostos, líquidos de subsídios, sobre produtos, 
+a preços correntes
+(R$ 1.000), Produto Interno Bruto, 
+a preços correntes
+(R$ 1.000), Produto Interno Bruto per capita, 
+a preços correntes
+(R$ 1,00) 
+  Loading: PIB dos Municípios - base de dados 2010-2019.xls 
+    Using sheet: PIB_dos_Municípios 
+    Loaded: 55685 rows, 43 cols
+    Columns: Ano, Código da Grande Região, Nome da Grande Região, Código da Unidade da Federação, Sigla da Unidade da Federação, Nome da Unidade da Federação, Código do Município, Nome do Município, Região Metropolitana, Código da Mesorregião, Nome da Mesorregião, Código da Microrregião, Nome da Microrregião, Código da Região Geográfica Imediata, Nome da Região Geográfica Imediata, Município da Região Geográfica Imediata, Código da Região Geográfica Intermediária, Nome da Região Geográfica Intermediária, Município da Região Geográfica Intermediária, Código Concentração Urbana, Nome Concentração Urbana, Tipo Concentração Urbana, Código Arranjo Populacional, Nome Arranjo Populacional, Hierarquia Urbana, Hierarquia Urbana (principais categorias), Código da Região Rural, Nome da Região Rural, Região rural (segundo classificação do núcleo), Amazônia Legal, Semiárido, Cidade-Região de São Paulo, Valor adicionado bruto da Agropecuária, 
+a preços correntes
+(R$ 1.000), Valor adicionado bruto da Indústria,
+a preços correntes
+(R$ 1.000), Valor adicionado bruto dos Serviços,
+a preços correntes 
+- exceto Administração, defesa, educação e saúde públicas e seguridade social
+(R$ 1.000), Valor adicionado bruto da Administração, defesa, educação e saúde públicas e seguridade social, 
+a preços correntes
+(R$ 1.000), Valor adicionado bruto total, 
+a preços correntes
+(R$ 1.000), Impostos, líquidos de subsídios, sobre produtos, 
+a preços correntes
+(R$ 1.000), Produto Interno Bruto, 
+a preços correntes
+(R$ 1.000), Produto Interno Bruto per capita, 
+a preços correntes
+(R$ 1,00), Atividade com maior valor adicionado bruto, Atividade com segundo maior valor adicionado bruto, Atividade com terceiro maior valor adicionado bruto 
+  Using: muni=Código do Município, year=Ano, pib=Produto Interno Bruto, 
+a preços correntes
+(R$ 1.000)
+  GDP panel: 100185 muni-years, 5570 municipalities
+  GDP match: 89009 / 89066 (99.9%)
+
+Step 2b: Deflating GDP with IPCA...
+New names:
+• `` -> `...1`
+• `` -> `...2`
+• `` -> `...3`
+• `` -> `...4`
+• `` -> `...5`
+• `` -> `...6`
+• `` -> `...7`
+• `` -> `...8`
+  IPCA deflation applied (base 2018). Deflator range: 0.691 - 7.311
+Aviso:
+In eval(jsub, SDenv, parent.frame()) : NAs introducidos por coerción
+
+Step 3: Loading population data...
+  Loading cached population data
+  Population panel: 190564 muni-years
+  Population match: 89016 / 89066 (99.9%)
+  GDP per capita available: 89008 / 89066 (99.9%)
+
+Step 4: Building muni × sector × year panel (Panel A)...
+  Credit shares: 795456 rows
+  Sector instruments: 738216 rows
+  Changes instrument columns: dZ_mayor_party, dZ_mayor_coalition, dZ_gov_party, dZ_gov_coalition, dZ_pres_party, dZ_pres_coalition, dZ_emp_mayor_party, dZ_emp_mayor_coalition, dZ_emp_gov_party, dZ_emp_gov_coalition, dZ_emp_pres_party, dZ_emp_pres_coalition, dZ_firm_mayor_party, dZ_firm_mayor_coalition, dZ_firm_gov_party, dZ_firm_gov_coalition, dZ_firm_pres_party, dZ_firm_pres_coalition, dZ_binary_mayor_party, dZ_binary_mayor_coalition, dZ_binary_gov_party, dZ_binary_gov_coalition, dZ_binary_pres_party, dZ_binary_pres_coalition 
+  Levels instrument columns: Z_mayor_party, Z_mayor_coalition, Z_gov_party, Z_gov_coalition, Z_pres_party, Z_pres_coalition, Z_emp_mayor_party, Z_emp_mayor_coalition, Z_emp_gov_party, Z_emp_gov_coalition, Z_emp_pres_party, Z_emp_pres_coalition, Z_firm_mayor_party, Z_firm_mayor_coalition, Z_firm_gov_party, Z_firm_gov_coalition, Z_firm_pres_party, Z_firm_pres_coalition, Z_binary_mayor_party, Z_binary_mayor_coalition, Z_binary_gov_party, Z_binary_gov_coalition, Z_binary_pres_party, Z_binary_pres_coalition 
+  Merged sector changes instruments [2002_fixed]: 296725 matched
+  Merged sector changes instruments [cycle_specific]: 441491 matched
+  Merged unified levels instruments [2002_fixed]
+  Merged unified levels instruments [cycle_specific]
+  Loading sector exposure controls...
+  Merged sector exposure controls [2002_fixed]
+  Merged sector exposure controls [cycle_specific]
+  Panel A: 795456 rows, 5572 munis, 10 sectors, 16 years
+
+Step 5: Building muni × year panel (Panel B)...
+  Panel B (base): 89066 rows, 5572 municipalities
+
+Step 5b: Building wide-format sector columns for vector 2SLS and AR...
+  Dropped sector (j0): Tr (mean share = 0.1849)
+  Sector shares:
+    sector_group  mean_share
+          <char>       <num>
+ 1:           Tr 0.184925262
+ 2:           Tp 0.125859789
+ 3:           CL 0.083730184
+ 4:           CH 0.055755260
+ 5:           MS 0.038544868
+ 6:           Ag 0.036344009
+ 7:          UCo 0.032539889
+ 8:           CA 0.025674751
+ 9:           Mi 0.023201749
+10:          PSO 0.006150575
+
+  Building muni-total exposure controls (sum across sectors)...
+  Added 24 muni-total EC columns (sample: ec_total_2002_fixed, ec_total_mayor_2002_fixed, ec_total_gov_pres_2002_fixed, ec_total_emp_2002_fixed)
+  Panel B with wide columns: 89066 rows, 2149 cols
+  Structural wide sectors (J-1=9): delta_s_Tp, delta_s_CL, delta_s_CH, delta_s_MS, delta_s_Ag, ...
+  AR wide sectors (J=10): Tr, Tp, CL, CH, MS, Ag, UCo, CA, Mi, PSO
+  AR instrument columns: 960; AR exposure-control columns: 240
+
+Step 5c: Downloading transfer data (optional)...
+  Loading cached transfer data
+  Transfer match: 85759 / 89066 (96.3%)
+  Panel B final: 89066 rows, 5572 municipalities
+
+Step 6: Summary and save...
+
+  === Panel A (muni × sector × year) ===
+  Rows: 795,456 
+  Unique municipalities: 5572 
+  Unique sector_group: 10
+  Years: 2002-2017 
+  delta_s_mjt: mean=0.0016, sd=0.2180, n=745740
+  s_mjt: mean=0.0644, sd=0.2013, n=795456
+  log_gdp_pc: mean=9.6146, sd=0.7311, n=794467
+
+  === Panel B (muni × year) ===
+  Rows: 89066 
+  Unique municipalities: 5572 
+  Years: 2002-2017 
+  log_bndes: mean=8.4403, sd=7.3506, n=89066
+  total_employment: mean=7255.9331, sd=75982.3329, n=89066
+  log_gdp_pc: mean=9.5620, sd=0.7388, n=89008
+  log_gdp: mean=18.9796, sd=1.4330, n=89009
+
+  Dropping unused columns from Panel A...
+    Dropping: bndes_mjt, bndes_mt, total_employment, n_firms, log_gdp_pc, log_gdp, gdp_pc, pib, population, state_id 
+  Dropping unused columns from Panel B...
+    Dropping: total_bndes_real, total_employment, n_firms, n_bndes_firms, log_bndes, bndes_per_worker, pib, pib_real, gdp_pc, hhi, log_bndes_pc, transfers_federal, transfers_state, transfers_total 
+  Panel A: 125 cols remaining
+  Panel B: 2139 cols remaining
+
+Saving...
+  Saved classification: C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/data/processed/muni_employment_classification.qs2 (0.04 MB)
+  Saved classification summary: C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/data/processed/muni_employment_classification_summary.csv
+  Saved Panel A: C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/data/processed/muni_sector_panel_grouped.qs2 (53.11 MB)
+  Saved Panel B: C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/data/processed/muni_panel_for_regs_grouped.qs2 (60.40 MB)
+  Saved C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/data/processed/muni_panel_grouped_summary.csv
+
+Municipality panels complete.
+
+=== Running [AUDIT] audit_41_muni_panel -> diagnostics/audit_41_muni_panel.R ===
+Command: Rscript C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/scripts/R/diagnostics/audit_41_muni_panel.R
+==============================================================================
+Audit: Municipality Panels (Stage 41)
+==============================================================================
+
+Sector variable: sector_group 
+Strict mode: TRUE 
+
+Saved audit outputs to:
+   C:/Users/LENOVO/Desktop/David/Proyectos/Brazil_IP/data/processed/diagnostics/41_muni_panel_audit_sector_group 
+
+Audit complete.
+
+Orchestration complete.
+Error: inesperado ',' en "pt_rel,"
+Ejecución interrumpida
+Run ended: 2026-05-13T09:47:16
+Wall-clock seconds: 181
+Exit code: 1
+
+=== Second run: --sector-var=cnae_section ===
+Run started: 2026-05-13T09:47:51
+==============================================================================
+Building Municipality Panels for Regressions
+==============================================================================
+
+Sector variable: cnae_section 
+
+Step 1: Aggregating firm-level data to municipality-year...
+  Loading from fst: rais_bndes_reconstructed.fst 
+  Loaded: 44,181,405 rows
+  Municipality-year panel: 89066 rows, 5572 municipalities
+
+Step 1b: Building muni employment quartile classification (2002–2017)...
+  Classified: 5572 municipalities
+  Q1: 1393 munis (25.0%)
+  Q2: 1393 munis (25.0%)
+  Q3: 1393 munis (25.0%)
+  Q4: 1393 munis (25.0%)
+
+Step 2: Loading GDP data...
+  Loading: PIB dos Municípios - base de dados 2002-2009.xls 
+    Using sheet: PIB_dos_Municípios 
+    Loaded: 44501 rows, 40 cols
+    Columns: Ano, Código da Grande Região, Nome da Grande Região, Código da Unidade da Federação, Sigla da Unidade da Federação, Nome da Unidade da Federação, Código do Município, Nome do Município, Região Metropolitana, Código da Mesorregião, Nome da Mesorregião, Código da Microrregião, Nome da Microrregião, Código da Região Geográfica Imediata, Nome da Região Geográfica Imediata, Município da Região Geográfica Imediata, Código da Região Geográfica Intermediária, Nome da Região Geográfica Intermediária, Município da Região Geográfica Intermediária, Código Concentração Urbana, Nome Concentração Urbana, Tipo Concentração Urbana, Código Arranjo Populacional, Nome Arranjo Populacional, Hierarquia Urbana, Hierarquia Urbana (principais categorias), Código da Região Rural, Nome da Região Rural, Região rural (segundo classificação do núcleo), Amazônia Legal, Semiárido, Cidade-Região de São Paulo, Valor adicionado bruto da Agropecuária, 
+a preços correntes
+(R$ 1.000), Valor adicionado bruto da Indústria,
+a preços correntes
+(R$ 1.000), Valor adicionado bruto dos Serviços,
+a preços correntes 
+- exceto Administração, defesa, educação e saúde públicas e seguridade social
+(R$ 1.000), Valor adicionado bruto da Administração, defesa, educação e saúde públicas e seguridade social, 
+a preços correntes
+(R$ 1.000), Valor adicionado bruto total, 
+a preços correntes
+(R$ 1.000), Impostos, líquidos de subsídios, sobre produtos, 
+a preços correntes
+(R$ 1.000), Produto Interno Bruto, 
+a preços correntes
+(R$ 1.000), Produto Interno Bruto per capita, 
+a preços correntes
+(R$ 1,00) 
+  Loading: PIB dos Municípios - base de dados 2010-2019.xls 
+    Using sheet: PIB_dos_Municípios 
+    Loaded: 55685 rows, 43 cols
+    Columns: Ano, Código da Grande Região, Nome da Grande Região, Código da Unidade da Federação, Sigla da Unidade da Federação, Nome da Unidade da Federação, Código do Município, Nome do Município, Região Metropolitana, Código da Mesorregião, Nome da Mesorregião, Código da Microrregião, Nome da Microrregião, Código da Região Geográfica Imediata, Nome da Região Geográfica Imediata, Município da Região Geográfica Imediata, Código da Região Geográfica Intermediária, Nome da Região Geográfica Intermediária, Município da Região Geográfica Intermediária, Código Concentração Urbana, Nome Concentração Urbana, Tipo Concentração Urbana, Código Arranjo Populacional, Nome Arranjo Populacional, Hierarquia Urbana, Hierarquia Urbana (principais categorias), Código da Região Rural, Nome da Região Rural, Região rural (segundo classificação do núcleo), Amazônia Legal, Semiárido, Cidade-Região de São Paulo, Valor adicionado bruto da Agropecuária, 
+a preços correntes
+(R$ 1.000), Valor adicionado bruto da Indústria,
+a preços correntes
+(R$ 1.000), Valor adicionado bruto dos Serviços,
+a preços correntes 
+- exceto Administração, defesa, educação e saúde públicas e seguridade social
+(R$ 1.000), Valor adicionado bruto da Administração, defesa, educação e saúde públicas e seguridade social, 
+a preços correntes
+(R$ 1.000), Valor adicionado bruto total, 
+a preços correntes
+(R$ 1.000), Impostos, líquidos de subsídios, sobre produtos, 
+a preços correntes
+(R$ 1.000), Produto Interno Bruto, 
+a preços correntes
+(R$ 1.000), Produto Interno Bruto per capita, 
+a preços correntes
+(R$ 1,00), Atividade com maior valor adicionado bruto, Atividade com segundo maior valor adicionado bruto, Atividade com terceiro maior valor adicionado bruto 
+  Using: muni=Código do Município, year=Ano, pib=Produto Interno Bruto, 
+a preços correntes
+(R$ 1.000)
+  GDP panel: 100185 muni-years, 5570 municipalities
+  GDP match: 89009 / 89066 (99.9%)
+
+Step 2b: Deflating GDP with IPCA...
+New names:
+• `` -> `...1`
+• `` -> `...2`
+• `` -> `...3`
+• `` -> `...4`
+• `` -> `...5`
+• `` -> `...6`
+• `` -> `...7`
+• `` -> `...8`
+  IPCA deflation applied (base 2018). Deflator range: 0.691 - 7.311
+Aviso:
+In eval(jsub, SDenv, parent.frame()) : NAs introducidos por coerción
+
+Step 3: Loading population data...
+  Loading cached population data
+  Population panel: 190564 muni-years
+  Population match: 89016 / 89066 (99.9%)
+  GDP per capita available: 89008 / 89066 (99.9%)
+
+Step 4: Building muni × sector × year panel (Panel A)...
+  Credit shares: 1464016 rows
+  Sector instruments: 881627 rows
+  Changes instrument columns:  
+  Levels instrument columns: Z_mayor_party, Z_mayor_coalition, Z_gov_party, Z_gov_coalition, Z_pres_party, Z_pres_coalition 
+Error en setnames(sub, dz_cols, dz_bt): 
+  'old' tiene una longitud 0 pero 'new' tiene una longitud 1
+Calls: setnames -> stopf -> raise_condition -> signal
+Ejecución interrumpida
+Run ended: 2026-05-13T09:48:09
+Wall-clock seconds: 18
+Exit code: 1

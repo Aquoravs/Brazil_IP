@@ -358,3 +358,126 @@ Spec deviation: C1_FE uses year FE only (not muni + year FE) because Z is time-i
   - Volume control alone moves F by <0.005 in every cell — the volume mechanism does not absorb the composition signal at these magnitudes.
   - EC controls move F in both directions: large positive shift on M·G (both taxonomies), large negative shift on M·P size_bin.
 **Report:** journal/sessions/2026-05-13_ar_meeting_update.md
+
+### 2026-05-20 13:00 — coder (AR instrument-combinations exploration)
+**Phase:** Exploration / AR-test design review
+**Target:** explorations/anderson_rubin/instrument_combinations/findings.md
+**Score:** 86/100 (self-assessment, exploration phase)
+**Verdict:** Answered the 2026-05-14 advisor questions on instrument combinations. Summarized prior decisions (additive tier stack in ar_test_strategy.md 2026-04-28 -> cross-office channels D25 -> per-channel implementation). Built a Monte Carlo (N=4000, 2000 reps) comparing six instrument sets on AR-test size and power.
+**Key findings (illustrative simulation, not real-data evidence):**
+  - The AR test is a joint Wald on the reduced form; three regimes govern adding an instrument — valid+relevant raises power, valid+irrelevant lowers it, invalid causes false rejection of H0:beta=0.
+  - Power (beta=0.20): {M·G} alone 75.0% > cross-office×4 stack 72.4% > mayor-only 70.6% > {M,G,M·G} 68.7% > additive {M,G,P} 64.2% > kitchen sink 57.7%. {M·G} alone beats {M,G,M·G} — main effects dilute the interaction.
+  - Under a governor exclusion violation (beta=0), every G-containing set falsely rejects at ~100%; mayor M and M·P stay at ~5%. Cross-office crossing attenuates but does not remove higher-tier contamination; M is the only universally clean anchor.
+  - Recommendation: keep cross-office per-channel design; do not revive additive {M,G,P}; report cross-office instruments without their standalone main effects.
+**Report:** explorations/anderson_rubin/instrument_combinations/findings.md
+
+### 2026-05-20 13:40 — coder (AR instrument-combinations: agnostic follow-up)
+**Phase:** Exploration / AR-test design review
+**Target:** explorations/anderson_rubin/instrument_combinations/findings.md §8
+**Score:** 87/100 (self-assessment, exploration phase)
+**Verdict:** Responded to user pushback that the first simulation assumed the mechanism. Added the relevance-vs-validity distinction and an agnostic procedure. Built agnostic_office_relevance_sim.R.
+**Key findings (illustrative simulation):**
+  - The saturated first stage (composition on all 7 channels M,G,P,MG,MP,GP,MGP) recovers the true channel in every "world" (MxG-only, P-only, both) — coefficient on the true channel ~1.0, t up to 57; others ~0. This is the agnostic relevance tool; no exclusion restriction needed.
+  - AR power, truth = P-only: mayor-restricted set {M,MG,MP,MGP} gets only 23.3% vs 76.3% for the P channel alone. Imposing "instruments must contain the mayor" forfeits most power if the mayor is not the operative office.
+  - The mayor-anchor is a VALIDITY argument (locally idiosyncratic, few non-composition levers), not a relevance claim. Which office is relevant is open and must be tested.
+  - Recommended 3-stage procedure: build all 7 channels; saturated first stage (relevance, agnostic); per-channel placebo (validity); per-channel AR test on the relevant-and-valid set. Do not pre-exclude G/P before stage 1.
+**Report:** explorations/anderson_rubin/instrument_combinations/findings.md §8
+
+### 2026-05-20 14:30 — orchestrator (instrument-combinations: weight/EC resolution)
+**Phase:** Exploration / AR-test design review
+**Target:** docs/decision_log.md D32; journal/plans/2026-05-20_ec-adequacy-and-instrument-combinations.md
+**Score:** N/A (decision + plan)
+**Verdict:** Resolved the weight-construction question. Evaluated reverting to a within-cell affiliated-normalized weight (complete shares at the sector level, eliminating the EC); rejected after an external second opinion — it discards sector mass and reintroduces thin-cell instability (the Variant B-prime mechanism). D32: keep the muni-relative weight + per-channel EC as primary; the EC is the BHJ-prescribed, non-biasing incomplete-shares control; recentering the alignment shocks is the planned EC-free robustness. Wrote a 3-phase plan (DRAFT): Phase A EC adequacy audit, Phase B instrument-combinations agenda (build G/P/GP channels, saturated first stage, {M,G,MG} vs {MG}), Phase C recentering robustness.
+**Report:** journal/plans/2026-05-20_ec-adequacy-and-instrument-combinations.md
+
+### 2026-05-20 20:05 — coder (Phase A: EC adequacy audit)
+**Phase:** Exploration / AR-test design review
+**Target:** explorations/anderson_rubin/instrument_combinations/findings.md §10
+**Score:** 88/100 (self-assessment, exploration phase; threshold 80)
+**Verdict:** Audited the exposure control (EC) entering the AR test against the plan's six checks (A1–A6). EC confirmed as the BHJ-correct, predetermined incomplete-shares control for the muni-relative weight, correctly built and entered; AR conclusion robust to EC functional form. D32 stands and is reinforced.
+**Key findings:**
+  - A1: EC = Σ_p of the same muni-relative weight as the instrument Z; recomputed EC matches the saved EC to 7e-16.
+  - A2: the exploration AR pipeline carries the sum-of-shares EC and NO `slack` column; Σ_j EC = 1 for all 264,168 muni-year-channel cells. The `slack ≡ 1−EC` object belongs to the within-cell intensity weight, a different construction; under the Variant-A muni-relative weight the incomplete-shares control is the per-sector sum-of-shares EC, which the pipeline carries. No leftover slack column to resolve.
+  - A3: one EC per retained sector; hold-out `Serv` consistent for Z and EC; Σ_j EC = 1 makes the EC simplicial — constant absorbed by hold-out + FE.
+  - A4: exposure window strictly pre-year-t (T_Fc_hi − t ∈ [−4,−1]); no contemporaneous leakage.
+  - A5: 32 AR regressions (4 channels × 4 EC forms × 2 volume specs). The AR rejection verdict is stable across linear/quad/binned EC for every channel; MG rejects under all three EC forms (F ∈ [3.63,3.99], p ∈ [0.0075,0.0123]); M/MP/MGP never reject. EC functional-form dependence is not a concern — no Phase C escalation.
+  - A6: median effective number of shocks ≈ 8 per muni-year-channel; 27–28% of cells thin (≤5 affiliated owners) but thin-identified muni-years carry only ~1.8% of municipal GDP. The muni-relative denominator is thick — collapse is not a threat. Confirms the D32 rationale against the within-cell weight.
+**Documentation flag:** `docs/methodology/ar_test_specification.tex` §2.3 and production scripts `32c_build_emp_share_panel.R` / `41_build_muni_panel.R` still describe / carry the intensity-weight `slack_frozen_mt`; aligning the primary-spec narrative and production code with the D32 Variant-A primary is routed to E4.1 (out of Phase A scope; production code frozen pending review).
+**Report:** explorations/anderson_rubin/instrument_combinations/findings.md §10
+
+### 2026-05-20 20:30 — coder (created design-defenses knowledge doc)
+**Phase:** Exploration / AR-test design review
+**Target:** docs/design_defenses.md
+**Score:** N/A (knowledge document)
+**Verdict:** Created `docs/design_defenses.md` — a Q&A bank of anticipated questions on the project's assumptions and design choices, each with a rigorous answer and evidence pointers, for advisor meetings and referee reports. Distinct from the decision log (what was decided) and the blueprint (argument map): this file records why a choice survives challenge. First entry Q1: the AR-test instruments and EC are piecewise-constant in 2-year blocks (4-year for pure M) while the outcome varies yearly — not a bias problem; effective variation is muni-by-block; muni-clustered SEs (already used) make inference correct. Registered in the blueprint Start Here table and the knowledge.md cross-references.
+**Report:** docs/design_defenses.md
+
+### 2026-05-20 22:15 — Coder
+**Phase:** Execution (exploration) — AR-test Phases B and C
+**Target:** explorations/anderson_rubin/ar_meeting_2026_05_13/R/{B2,B3,B4,B5,B6,C3}_*.R + 03 edit
+**Score:** N/A (awaiting coder-critic)
+**Verdict:** Implemented Phases B (B1-B6) and C of the 2026-05-20 plan. Edited 03 so Z retains all J sector columns and EC retains J-1 (Decision 1). Built six new scripts + master runner; ran end-to-end for both margins. B2 composition first stage at policy_block: only President clears the 5% gate (F=7.75); at 12-group no channel clears -> fallback {M,MP,MG,MGP}. B3 volume first stage: Governor and Mayor-Governor relevant for volume at both margins. B4 routing: policy_block comp={P} vol={G,MG}; 12-group comp={M,MP,MG,MGP} vol={G}. B5: stacked {M,G,MG} sharper than {MG}-only at both margins. B6 three-volume AR: only Mayor-Governor rejects at policy_block (F=3.19, p=0.012, stable across all three volume treatments); 12-group compset rejects without/with Vol control (F=1.47, p=0.020) but not under Full IV. C3: 12-group thin cells 64.8% of cells but carry only 9.3% of GDP, n_eff median 12.5.
+**Report:** explorations/anderson_rubin/ar_meeting_2026_05_13/output/ (28 files)
+
+### 2026-05-20 22:38 — Coder
+**Phase:** Execution (exploration) — AR-test Phases B and C
+**Target:** explorations/anderson_rubin/ar_meeting_2026_05_13/R/{00_helpers,03,B2,B3,B4,B5,B6,C3}.R
+**Score:** N/A (robustness/hygiene fixes addressing coder-critic 82/100 must-fix list)
+**Verdict:** Addressed all four must-fix items. (1) Added nrow>0 preconditions to B2/B3/B5/B6 panels (and B2 analysis tables, B6 comp_set) and wrapped every feols() in tryCatch mirroring 04's pattern — failed fits report and skip rather than crash. (2) Deleted the dead ar_ci_width() stub in B5, replaced with a one-line note that scalar-index AR CI width is not computed. (3) Added stopifnot(!any(route$rel_comp)) inside B4's fallback block to assert the fallback invariant. (4) De-duplicated get_this_script/parse_kv/fmt_*/stars and the SIZE_CYCLES constant into 00_helpers.R; the six B/C scripts and 03 now source the helper instead of redefining. Reconciled fmt_* digit defaults (fmt_n d=3) and passed explicit digits at the bare call sites in B2/B4 to preserve .tex output. Should-fix done: C3 now reports zero-HHI cells dropped via message() (dropped 0, 453,040 retained). Re-ran full pipeline via run_phase_bc.R --skip-build: all scripts ran clean; all 16 CSV outputs (ar_routing, ar_three_volume, ar_first_stage, ar_b5_comparison, C3_coverage) byte-identical to the pre-edit baseline; .tex outputs also unchanged. No numeric regression.
+**Report:** explorations/anderson_rubin/ar_meeting_2026_05_13/output/ (CSVs verified unchanged)
+
+### 2026-05-20 22:45 — coder
+**Phase:** Execution
+**Target:** explorations/anderson_rubin/ar_meeting_2026_05_13/R/B2_composition_first_stage.R, B3, 00_helpers.R
+**Score:** N/A
+**Verdict:** Guarded the joint Wald F against rank-deficiency (joint_F_rank_deficient(), ceiling 1e4 in 00_helpers.R); degenerate policy_block composition joint (F=4.86e7) now reports "Rank-deficient (collinear channels)" in the .tex and NA in the CSV; sane joints (comp pbsb F=2.97, vol F=1.75/1.80) and all per-channel rows + routing CSVs unchanged.
+**Report:** inline
+
+### 2026-05-20 22:50 — coder-critic
+**Phase:** Execution (exploration) — AR-test Phases B and C review
+**Target:** explorations/anderson_rubin/ar_meeting_2026_05_13/R/{03,B2,B3,B4,B5,B6,C3,run_phase_bc}.R
+**Score:** 82/100 (PASS, exploration gate 80; PR gate 90 not met)
+**Verdict:** PASS. All 9 correctness requirements verified. Decision 1 (Z keeps J, EC keeps J-1) correctly implemented in 03. AR Wald keys isolate channel Z columns and exclude EC and volume. INV-13/14/15/16/19 all pass. The reported F=0.919 identical-F claim verified NOT a masked bug — vol_ratio IS in the volctrl regression (coef 5.4e-06, t~0.07), F-stats differ in the 4th decimal. Deductions: missing feols/empty-set preconditions in B-scripts (-5); B5 dead ar_ci_width() stub (-3); B4 fallback relies on an unasserted invariant (-3); utility-function duplication across 6 scripts (-2); decorative console tags (-3); SIZE_CYCLES magic constant repeated 3x (-1); C3 uncounted zero-HHI drop (-1). All four must-fix items addressed by the coder in the 22:38 follow-up; outputs verified byte-identical.
+**Report:** inline (coder-critic transcript)
+
+### 2026-05-20 23:05 — storyteller
+**Phase:** Presentation — 2026-05-21 advisor meeting deck
+**Target:** journal/meetings/2026-05-21/slides.tex
+**Score:** N/A (awaiting storyteller-critic)
+**Verdict:** Built an 18-frame Beamer deck for the 2026-05-21 advisor meeting, inheriting the 2026-05-14 preamble/theme. Narrative arc: advisor questions -> approach (7 channels, 2 saturated first stages, routing rule) -> per-margin routing results -> {M·G} vs {M,G,M·G} comparison -> three-volume AR test -> coverage caveat -> bottom line. Two margins only (policy_block, policy_block × S3); standalone size_bin and cnae_section dropped. Every table slide carries the mandatory note (instruments-only Wald; EC always included; star thresholds). Compiles clean under XeLaTeX, 18 pages, no undefined references.
+**Report:** journal/meetings/2026-05-21/build/slides.pdf
+
+### 2026-05-20 23:30 — storyteller-critic
+**Phase:** Presentation (advisor meeting deck)
+**Target:** journal/meetings/2026-05-21/slides.tex
+**Score:** 90/100 (advisory)
+**Verdict:** 18-frame AR-test advisor deck. Compiles clean, 18 frames, no "??". Plan D3 mandatory note check PASSES on all table slides — instruments-only Wald statement and EC-included statement present and not truncated. Numbers match source tables/ .tex files exactly (INV-21). Notation consistent with the $\cdot$ convention (INV-20). Narrative arc fits the methods/descriptive advisor type. Minor deductions: compset slides omitted the in-frame composition-set instrument list (-5; fixed post-review — fallback set {M,M·P,M·G,M·G·P} added to slide 15 subtitle); routing-table notes inconsistent on star thresholds (-2); star-threshold boilerplate on starless slides (-3). No must-fix blockers.
+**Report:** inline (storyteller-critic transcript)
+
+### 2026-05-21 11:30 — Coder (simplified mode)
+**Phase:** Execution (exploration)
+**Target:** B2b/B3b multi-channel first stages + 2026-05-21 slides
+**Score:** N/A (simplified exploration loop)
+**Verdict:** Multi-channel first stages built; composition relevance concentrates in Mayor channels (policy block) and stacked President (12 groups); volume control on/off inert. Awaiting user instrument-set decision before Phase 2.
+**Report:** journal/sessions/2026-05-21_multi-channel-first-stages.md
+
+### 2026-05-21 14:00 — Coder (simplified mode)
+**Phase:** Execution (exploration)
+**Target:** B2b/B3b joint-F columns + 2026-05-21 slides
+**Score:** N/A (simplified exploration loop)
+**Verdict:** Joint Wald F added to multi-channel first stages with an orthogonality-bound reliability flag. {M,P} at policy block is the only set with a reliable, significant joint first stage; all other multi-channel joint tests are collinearity-contaminated. Awaiting user set decision for Phase 2.
+**Report:** journal/sessions/2026-05-21_multi-channel-first-stages.md
+
+### 2026-05-21 14:50 — Coder (simplified mode)
+**Phase:** Execution (exploration) — Phase 1A
+**Target:** B7_collinearity_diagnosis.R; collinearity-diagnosis tables + slides; run_phase_bc.R --phase selector
+**Score:** N/A (simplified exploration loop; verification checklist passed)
+**Verdict:** Phase 1A collinearity diagnosis complete. The wide-form instrument block is well-conditioned at both margins (condition number kappa <= 4.5, worst VIF <= 3.4, full rank) — the stacked-long collinearity does not carry over to the first stage the AR test embeds. All four interaction alignment columns (M.G, M.P, M.G.P, G.P) are exact products of their single-office parents (1A.1 audit, exact on all 1,288,211 rows); the four parent-plus-interaction stacks are proposed inadmissible a priori, not from measured collinearity. Verticalizacao is not the collinearity source (1A.4: verticalizado cycles show lower, not higher, residual cross-channel correlation). D38 logged. Halting at mandatory checkpoint #1 — user prunes the instrument set before Phase 1B.
+**Report:** journal/sessions/2026-05-21_multi-channel-first-stages.md
+
+### 2026-05-21 17:46 — Coder (simplified mode)
+**Phase:** Execution (exploration) — Phase 1B
+**Target:** B8_wide_first_stage.R; B4_channel_routing.R; run_phase_bc.R --phase=1b
+**Score:** N/A (simplified exploration loop; verification checklist passed)
+**Verdict:** Phase 1B wide-form first stage complete and halted at checkpoint #2. B8 evaluated all 18 stacks at both margins with the AR-matching muni-year IV system, EC controls, muni/year FE, vol_ratio verdict fit, and muni clustering. B4 now consumes the B8 wide-form verdict rather than B2/B3 stacked-form CSVs; all seven singleton channels route to composition at both margins, with no Phase 1B volume set.
+**Report:** journal/sessions/2026-05-21_multi-channel-first-stages.md
