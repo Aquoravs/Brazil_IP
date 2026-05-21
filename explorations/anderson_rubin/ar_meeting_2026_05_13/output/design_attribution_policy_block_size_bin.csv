@@ -1,0 +1,7 @@
+pair,pair_label,corr_full,corr_verticalizado,corr_post,taxonomy,vert_minus_post
+G-P,Governor vs President,0.00961712877226378,0.0107339783947567,0.012714160493271,policy_block_size_bin,-0.00198018209851427
+MG-MP,Mayor x Governor vs Mayor x President,0.0265988479069601,0.0132317100363655,0.0362974365648884,policy_block_size_bin,-0.0230657265285229
+MP-MGP,Mayor x President vs Mayor x Gov. x President,0.0704140847397972,0.0602166033060989,0.0714377192170586,policy_block_size_bin,-0.0112211159109596
+MG-MGP,Mayor x Governor vs Mayor x Gov. x President,0.0604539558544058,0.02507494794359,0.0813153432213395,policy_block_size_bin,-0.0562403952777494
+M-MG,Mayor vs Mayor x Governor,0.0569744201515934,0.0443559913053034,0.0679711158480768,policy_block_size_bin,-0.0236151245427734
+M-MP,Mayor vs Mayor x President,0.042865375020578,0.0157269540418235,0.063010320161291,policy_block_size_bin,-0.0472833661194675

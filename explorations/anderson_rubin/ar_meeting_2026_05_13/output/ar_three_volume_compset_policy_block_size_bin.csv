@@ -1,0 +1,4 @@
+instrument_set,spec,ar_F,ar_p,df1,df2,K_Z,n_obs,vol_coef,vol_se,reject_5pc,taxonomy
+"compset {M,MG,MP,MGP}",novol,1.46477344972785,0.0196108008579461,48,83065,48,88694,,,TRUE,policy_block_size_bin
+"compset {M,MG,MP,MGP}",volctrl,1.46492314757279,0.0195836785616832,48,83064,48,88694,9.84980906093639e-06,7.46450077623491e-05,TRUE,policy_block_size_bin
+"compset {M,MG,MP,MGP}",volIV,1.19953170613897,0.162109309472891,48,83064,48,88694,0.0353104218163216,0.0174076398508665,FALSE,policy_block_size_bin

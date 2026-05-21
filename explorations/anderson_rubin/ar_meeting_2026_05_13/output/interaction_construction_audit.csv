@@ -1,0 +1,5 @@
+channel,interaction_col,parents,n_rows,n_equal,share_equal,exact_product,source
+MG,align_mayor_gov_coalition,align_mayor_coalition * align_gov_coalition,1288211,1288211,1,TRUE,32_build_alignment_shocks.R
+MP,align_mayor_pres_coalition,align_mayor_coalition * align_pres_coalition,1288211,1288211,1,TRUE,32_build_alignment_shocks.R
+MGP,align_triple_coalition,align_mayor_coalition * align_gov_coalition * align_pres_coalition,1288211,1288211,1,TRUE,32_build_alignment_shocks.R
+GP,align_gov_pres_coalition,align_gov_coalition * align_pres_coalition,1288211,1288211,1,TRUE,02_build_instruments_ec.R (product by construction)

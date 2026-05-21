@@ -1,0 +1,16 @@
+taxonomy,combo_id,pair,set_lab,channel,channel_label,F_partial,p_partial,joint_F,joint_p,joint_reliable,relevant_5pc,n_obs,panel
+policy_block_size_bin,1,MG,"\{M, G\}",M,Mayor,3.58730331748481,0.0582261190531766,2.52265990010878,0.0802520194000954,TRUE,FALSE,88694,Mayor and Governor
+policy_block_size_bin,1,MG,"\{M, G\}",G,Governor,3.23794146547492,0.0719546136766987,2.52265990010878,0.0802520194000954,TRUE,FALSE,88694,Mayor and Governor
+policy_block_size_bin,2,MG,"\{M, G, M$\cdot$G\}",M,Mayor,0.215007235233862,0.642871989207752,2.23436615781737,0.0819961968403677,TRUE,FALSE,88694,Mayor and Governor
+policy_block_size_bin,2,MG,"\{M, G, M$\cdot$G\}",G,Governor,6.12471689564487,0.0133324424671924,2.23436615781737,0.0819961968403677,TRUE,TRUE,88694,Mayor and Governor
+policy_block_size_bin,2,MG,"\{M, G, M$\cdot$G\}",MG,Mayor x Governor,6.22484594941748,0.0125989112478547,2.23436615781737,0.0819961968403677,TRUE,TRUE,88694,Mayor and Governor
+policy_block_size_bin,3,MP,"\{M, P\}",M,Mayor,3.25890691110236,0.0710400810282967,1.67186546079753,0.187902542924543,TRUE,FALSE,88694,Mayor and President
+policy_block_size_bin,3,MP,"\{M, P\}",P,President,0.645862004784888,0.421598315358373,1.67186546079753,0.187902542924543,TRUE,FALSE,88694,Mayor and President
+policy_block_size_bin,4,MP,"\{M, P, M$\cdot$P\}",M,Mayor,3.65855386722059,0.0557854622874037,1.22548044092307,0.298596085680305,TRUE,FALSE,88694,Mayor and President
+policy_block_size_bin,4,MP,"\{M, P, M$\cdot$P\}",P,President,1.18831855571564,0.275672145774581,1.22548044092307,0.298596085680305,TRUE,FALSE,88694,Mayor and President
+policy_block_size_bin,4,MP,"\{M, P, M$\cdot$P\}",MP,Mayor x President,0.976173050490127,0.323148323766636,1.22548044092307,0.298596085680305,TRUE,FALSE,88694,Mayor and President
+policy_block_size_bin,5,GP,"\{G, P\}",G,Governor,3.11623404660478,0.0775194111213585,2.15607833067987,0.115784750114478,TRUE,FALSE,88694,Governor and President
+policy_block_size_bin,5,GP,"\{G, P\}",P,President,1.31065636225088,0.252279147735116,2.15607833067987,0.115784750114478,TRUE,FALSE,88694,Governor and President
+policy_block_size_bin,6,GP,"\{G, P, G$\cdot$P\}",G,Governor,3.36578795212977,0.0665673058179988,1.44995468428277,0.226087704656507,TRUE,FALSE,88694,Governor and President
+policy_block_size_bin,6,GP,"\{G, P, G$\cdot$P\}",P,President,0.0745858029450046,0.784773938974444,1.44995468428277,0.226087704656507,TRUE,FALSE,88694,Governor and President
+policy_block_size_bin,6,GP,"\{G, P, G$\cdot$P\}",GP,Governor x President,1.11652708447218,0.290670563873016,1.44995468428277,0.226087704656507,TRUE,FALSE,88694,Governor and President

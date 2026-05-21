@@ -1,0 +1,15 @@
+metric,value,taxonomy
+n_eff_median,12.5348837209302,policy_block_size_bin
+n_eff_mean,16.2984766351976,policy_block_size_bin
+n_eff_p10,2.57142857142857,policy_block_size_bin
+n_eff_min,1,policy_block_size_bin
+cell_L_median,3,policy_block_size_bin
+cell_L_mean,11.0039815211487,policy_block_size_bin
+cell_L_p10,1,policy_block_size_bin
+cell_L_p90,22,policy_block_size_bin
+pct_cells_thin,64.7735854889785,policy_block_size_bin
+pct_muniyear_thin,66.8211181799238,policy_block_size_bin
+pct_gdp_in_thin,9.33202001711416,policy_block_size_bin
+n_cells,452842,policy_block_size_bin
+n_muniyears,81579,policy_block_size_bin
+thin_threshold,5,policy_block_size_bin

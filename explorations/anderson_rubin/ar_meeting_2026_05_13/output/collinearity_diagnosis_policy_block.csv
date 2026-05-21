@@ -1,0 +1,19 @@
+stack_id,stack_group,stack_label,tex_label,channels,n_instruments,block_rank,rank_deficiency,condition_number,lambda_min,lambda_max,worst_vif,mean_abs_corr,max_abs_corr,verdict,taxonomy
+M,Singletons,Mayor,\{M\},M,4,4,0,1.28497877112674,0.805346843014781,1.32976490294244,1.05663404135096,0.0981942671099104,0.192875687306399,admissible,policy_block
+G,Singletons,Governor,\{G\},G,4,4,0,1.23373419788302,0.83530570506119,1.27141887300211,1.03929885772435,0.0845887128312365,0.158216047962596,admissible,policy_block
+P,Singletons,President,\{P\},P,4,4,0,1.0384555595201,0.969058188091238,1.04502261012891,1.00127918814545,0.0155551505008052,0.0276377793294114,admissible,policy_block
+MG,Singletons,Mayor x Governor,\{M$\cdot$G\},MG,4,4,0,1.31311200250164,0.801330185628329,1.38170409492755,1.06772534582861,0.11768182057288,0.187781468417846,admissible,policy_block
+MP,Singletons,Mayor x President,\{M$\cdot$P\},MP,4,4,0,1.2661766463335,0.812063922195155,1.30190355964713,1.05294089247357,0.0900164658971363,0.171162324607073,admissible,policy_block
+GP,Singletons,Governor x President,\{G$\cdot$P\},GP,4,4,0,1.18082671550226,0.866979227447835,1.20887398743793,1.02493178981172,0.0639492697556857,0.131700540563084,admissible,policy_block
+MGP,Singletons,Mayor x Gov. x President,\{M$\cdot$G$\cdot$P\},MGP,4,4,0,1.3510069298985,0.756777919800911,1.38128598638794,1.08746792424126,0.114172068266453,0.216664747392026,admissible,policy_block
+M_MP,Mayor stacks,Mayor + Mayor x President,"\{M, M$\cdot$P\}","M,MP",8,8,0,1.90635644209438,0.485399664147363,1.76403697629244,1.32185661768829,0.100583620427031,0.446275640418217,admissible,policy_block
+M_MG,Mayor stacks,Mayor + Mayor x Governor,"\{M, M$\cdot$G\}","M,MG",8,8,0,2.02641527213405,0.474526497842719,1.94857608641413,1.32667702639955,0.12845593462119,0.453172522372791,admissible,policy_block
+M_MGP,Mayor stacks,Mayor + Mayor x Gov. x President,"\{M, M$\cdot$G$\cdot$P\}","M,MGP",8,8,0,1.62354720616985,0.608326114132515,1.60349016868797,1.16022824625177,0.0804008454783708,0.245808855214194,admissible,policy_block
+mayor_full,Mayor stacks,Mayor + Mayor x President + Mayor x Governor + Mayor x Gov. x President,"\{M, M$\cdot$P, M$\cdot$G, M$\cdot$G$\cdot$P\}","M,MP,MG,MGP",16,16,0,3.79803465520467,0.195535443344805,2.82061191846961,2.53398275760402,0.115676857595904,0.667810298061447,admissible,policy_block
+M_G,Parent pairs,Mayor + Governor,"\{M, G\}","M,G",8,8,0,1.30973856183902,0.786556551237009,1.34927098528546,1.06054112163725,0.0444005213851076,0.193575558200088,admissible,policy_block
+M_P,Parent pairs,Mayor + President,"\{M, P\}","M,P",8,8,0,1.30469614153115,0.78948019258492,1.34387846433667,1.06516109923901,0.0321294850670393,0.193575558200088,admissible,policy_block
+G_P,Parent pairs,Governor + President,"\{G, P\}","G,P",8,8,0,1.27975186671701,0.797449942993136,1.30603547858577,1.04864309629043,0.0346892469425357,0.158216047962596,admissible,policy_block
+M_P_MP,Parent + interaction,Mayor + President + Mayor x President,"\{M, P, M$\cdot$P\}","M,P,MP",12,12,0,2.4123046958619,0.330875983704738,1.92543813866433,1.7438189149491,0.0779231862738594,0.52700584147915,inadmissible,policy_block
+M_G_MG,Parent + interaction,Mayor + Governor + Mayor x Governor,"\{M, G, M$\cdot$G\}","M,G,MG",12,12,0,2.70482544262738,0.307295008578163,2.2481950738086,1.85100185557356,0.103142478663891,0.503443853040018,inadmissible,policy_block
+G_P_GP,Parent + interaction,Governor + President + Governor x President,"\{G, P, G$\cdot$P\}","G,P,GP",12,12,0,2.59581817398579,0.274250679086869,1.84797566978633,2.04193243047986,0.0808023190988182,0.563863887905172,inadmissible,policy_block
+M_G_P_MGP,Parent + interaction,Mayor + Governor + President + Mayor x Gov. x President,"\{M, G, P, M$\cdot$G$\cdot$P\}","M,G,P,MGP",16,16,0,1.90697384964795,0.490847126017783,1.784989754484,1.32400281432453,0.047370883870443,0.305110646715238,inadmissible,policy_block

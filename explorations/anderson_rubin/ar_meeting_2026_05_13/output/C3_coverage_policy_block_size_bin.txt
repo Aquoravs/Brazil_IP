@@ -1,0 +1,18 @@
+C3 thin-cell coverage audit -- policy_block_size_bin margin
+Generated: 2026-05-20 22:55:31.730387
+
+Effective number of shocks (inverse-HHI of muni-relative weights):
+  median = 12.53   mean = 16.30   p10 = 2.57   min = 1.00
+
+Cell affiliated-owner counts L_{jm,t} (annual, thin <= 5):
+  median = 3.0   mean = 11.0   p10 = 1.0   p90 = 22.0
+  thin cells = 64.8% of 452,842 cells
+
+GDP mass in thin-identified muni-years:
+  thin muni-years = 66.8% of 81,579 muni-years
+  thin muni-years carry 9.33% of municipal GDP
+
+Reading: the muni-relative denominator keeps per-channel weights thick;
+denominator collapse is not a threat at this finer 12-group margin.
+Thin cells concentrate in small municipalities carrying little GDP mass,
+so the GDP-relevant AR estimand is not driven by them.

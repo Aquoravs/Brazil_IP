@@ -1,0 +1,3 @@
+set,channels,ar_F,ar_p,df1,df2,K_Z,n_obs,reject_5pc,ar_ci_lo,ar_ci_hi,ar_ci_width,ci_note
+MG only,MG,1.90538638243534,0.0289129730385079,12,83111,12,88694,TRUE,,,,scalar-index AR CI not feasible from muni wide panel
+"M, G, MG stacked","M,G,MG",2.61302285940655,4.41981774761176e-07,36,83065,36,88694,TRUE,,,,scalar-index AR CI not feasible from muni wide panel

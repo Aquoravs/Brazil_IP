@@ -1,0 +1,19 @@
+stack_id,stack_label,channels,n_instruments,condition_number,worst_vif,rank_deficient,exact_product_apriori,diagnostic_only,candidate_ar_instrument,verdict,proposed_admissible,reason,taxonomy
+M,Mayor,M,4,1.28497877112674,1.05663404135096,FALSE,FALSE,FALSE,TRUE,admissible,TRUE,"Condition number, VIF, and rank all within thresholds",policy_block
+G,Governor,G,4,1.23373419788302,1.03929885772435,FALSE,FALSE,TRUE,FALSE,admissible,TRUE,"Condition number, VIF, and rank all within thresholds",policy_block
+P,President,P,4,1.0384555595201,1.00127918814545,FALSE,FALSE,TRUE,FALSE,admissible,TRUE,"Condition number, VIF, and rank all within thresholds",policy_block
+MG,Mayor x Governor,MG,4,1.31311200250164,1.06772534582861,FALSE,FALSE,FALSE,TRUE,admissible,TRUE,"Condition number, VIF, and rank all within thresholds",policy_block
+MP,Mayor x President,MP,4,1.2661766463335,1.05294089247357,FALSE,FALSE,FALSE,TRUE,admissible,TRUE,"Condition number, VIF, and rank all within thresholds",policy_block
+GP,Governor x President,GP,4,1.18082671550226,1.02493178981172,FALSE,FALSE,TRUE,FALSE,admissible,TRUE,"Condition number, VIF, and rank all within thresholds",policy_block
+MGP,Mayor x Gov. x President,MGP,4,1.3510069298985,1.08746792424126,FALSE,FALSE,FALSE,TRUE,admissible,TRUE,"Condition number, VIF, and rank all within thresholds",policy_block
+M_MP,Mayor + Mayor x President,"M,MP",8,1.90635644209438,1.32185661768829,FALSE,FALSE,FALSE,TRUE,admissible,TRUE,"Condition number, VIF, and rank all within thresholds",policy_block
+M_MG,Mayor + Mayor x Governor,"M,MG",8,2.02641527213405,1.32667702639955,FALSE,FALSE,FALSE,TRUE,admissible,TRUE,"Condition number, VIF, and rank all within thresholds",policy_block
+M_MGP,Mayor + Mayor x Gov. x President,"M,MGP",8,1.62354720616985,1.16022824625177,FALSE,FALSE,FALSE,TRUE,admissible,TRUE,"Condition number, VIF, and rank all within thresholds",policy_block
+mayor_full,Mayor + Mayor x President + Mayor x Governor + Mayor x Gov. x President,"M,MP,MG,MGP",16,3.79803465520467,2.53398275760402,FALSE,FALSE,FALSE,TRUE,admissible,TRUE,"Condition number, VIF, and rank all within thresholds",policy_block
+M_G,Mayor + Governor,"M,G",8,1.30973856183902,1.06054112163725,FALSE,FALSE,FALSE,TRUE,admissible,TRUE,"Condition number, VIF, and rank all within thresholds",policy_block
+M_P,Mayor + President,"M,P",8,1.30469614153115,1.06516109923901,FALSE,FALSE,FALSE,TRUE,admissible,TRUE,"Condition number, VIF, and rank all within thresholds",policy_block
+G_P,Governor + President,"G,P",8,1.27975186671701,1.04864309629043,FALSE,FALSE,TRUE,FALSE,admissible,TRUE,"Condition number, VIF, and rank all within thresholds",policy_block
+M_P_MP,Mayor + President + Mayor x President,"M,P,MP",12,2.4123046958619,1.7438189149491,FALSE,TRUE,FALSE,TRUE,inadmissible,FALSE,Exact product: interaction alignment equals the product of its parents,policy_block
+M_G_MG,Mayor + Governor + Mayor x Governor,"M,G,MG",12,2.70482544262738,1.85100185557356,FALSE,TRUE,FALSE,TRUE,inadmissible,FALSE,Exact product: interaction alignment equals the product of its parents,policy_block
+G_P_GP,Governor + President + Governor x President,"G,P,GP",12,2.59581817398579,2.04193243047986,FALSE,TRUE,TRUE,FALSE,inadmissible,FALSE,Exact product: interaction alignment equals the product of its parents,policy_block
+M_G_P_MGP,Mayor + Governor + President + Mayor x Gov. x President,"M,G,P,MGP",16,1.90697384964795,1.32400281432453,FALSE,TRUE,FALSE,TRUE,inadmissible,FALSE,Exact product: interaction alignment equals the product of its parents,policy_block
