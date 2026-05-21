@@ -2,9 +2,9 @@
 
 **Type:** strategy memo (open methodological question + diagnostic plan + data and pipeline requirements).
 
-**Status:** OPEN — pending decision after a focused read of BHJ (2022, 2025) and a small empirical comparison. Variant A (mayoral exposure $w^{\mathrm{M}}$ for all channels) is the interim choice and is the operative specification of `docs/methodology/ar_test_specification.tex`.
+**Status:** DECIDED (2026-05-13) — no coalition gating in the primary specification; use the pre-earliest-election window for cross-office channels. The mayoral-window exposure is retained as a mechanism-aligned robustness.
 
-**Question.** When the alignment shift $\Align^{c}_{mpt}$ is office-specific (channel $c\in\{M\}$) or cross-office-specific ($c\in\{M\!\cdot\!P, M\!\cdot\!G, M\!\cdot\!G\!\cdot\!P\}$), should the pre-period exposure weight $w$ also be office- or channel-specific (gating on which parties were politically active in the relevant office during the pre-period window), or should a single mayoral exposure $w^{\mathrm{M}}$ be used uniformly across channels?
+**Question.** When the alignment shift $\Align^{c}_{mpt}$ is office-specific (channel $c\in\{M\}$) or cross-office-specific ($c\in\{M\!\cdot\!P, M\!\cdot\!G, M\!\cdot\!G\!\cdot\!P\}$), which pre-period should define the exposure weight $w$, and should the share be gated by coalition membership?
 
 **Cross-references:**
 - `docs/methodology/ar_test_specification.tex` — eqs. `eq:Z-M`–`eq:Z-MGP` (the four sector-channel instruments) and Remark `rem:weights` (the convention this memo evaluates).
@@ -36,38 +36,38 @@
 
 ## 1. The decision
 
-The four cross-office shift-share instruments (Eqs. `eq:Z-M`–`eq:Z-MGP` of `ar_test_specification.tex`) all currently use the mayoral-window pre-period exposure $w^{M}_{jmp,t}$ as the share weight:
+The four cross-office shift-share instruments (Eqs. `eq:Z-M`–`eq:Z-MGP` of `ar_test_specification.tex`) now use the channel-specific pre-earliest-election exposure $w^{F,c}_{jmp,t}$ as the primary share weight:
 
-$$Z^{c}_{jmt} \equiv \sum_{p} w^{M}_{jmp,t}\,\mathrm{Align}^{c}_{mpt},\qquad c\in\{M,\,M\!\cdot\!P,\,M\!\cdot\!G,\,M\!\cdot\!G\!\cdot\!P\}.$$
+$$Z^{c}_{jmt} \equiv \sum_{p} w^{F,c}_{jmp,t}\,\mathrm{Align}^{c}_{mpt},\qquad c\in\{M,\,M\!\cdot\!P,\,M\!\cdot\!G,\,M\!\cdot\!G\!\cdot\!P\}.$$
 
-The open question: **is $w^{M}$ the right exposure weight for the cross-office channels, or should each channel use a coalition-specific exposure $w^{c}$?**
+The decided answer: **use no coalition gating, and anchor cross-office exposure before the earliest election among the offices in the channel.** The mayoral-window exposure $w^M$ remains a robustness specification because it is mechanism-aligned with the local intermediary, but it is no longer primary.
 
-A coalition-specific exposure would count, in each $(j,m)$ cell, only owners affiliated with parties that were *politically active in the relevant coalition during the pre-period window*. For the mayor-president channel, $w^{M\cdot P}_{jmp,t}$ would weight owners of party $p$ by the average over $T^{M}_{t}$ of their relevance to the federal coalition at the time.
+A coalition-specific exposure, not used in the primary specification, would count in each $(j,m)$ cell only owners affiliated with parties that were *politically active in the relevant coalition during the pre-period window*. For the mayor-president channel, a gated robustness weight such as $w^{B,M\cdot P}_{jmp,t}$ would weight owners of party $p$ by the average over $T^{M}_{t}$ of their relevance to the federal coalition at the time.
 
 **Two orthogonal axes.** The decision problem has two independent dimensions:
 
 1. **Coalition-gating axis** — whether the exposure share is computed across all owners (Variant A) or restricted to coalition-active owners (Variants B–D). Affects *who counts* in the share.
 2. **Pre-window timing axis** — which office's electoral cycle anchors the pre-period $T^{\cdot}_t$ (Variants A vs E vs F). Affects *when the baseline is measured*.
 
-**Decision (2026-05-10).** Variant A on both axes is the **primary** specification: pre-mayor window $T^{M}_t$, no coalition gating. The window axis carries the robustness suite — Variant E (higher-tier pre-window) and Variant F (pre-last-election, channel-agnostic). The gating axis is deferred — Variants B/C remain academic robustness, pending closer reading of BHJ (2025) §3; Variant B′ (coalition-restricted denominator) is rejected because the share collapses in cells with few or no coalition-affiliated owners.
+**Decision (2026-05-13).** Variant F on the timing axis and no gating on the coalition axis is the **primary** specification: pre-earliest-election window $T^{F,c}_t$, no coalition gating. Variant A (mayoral pre-window for all channels) is the main mechanism-aligned robustness. Variant E (higher-tier pre-window) is a second timing robustness. The gating axis is deferred to robustness only; it is not part of the primary specification. Variant B′ (coalition-restricted denominator) is rejected because the share collapses in cells with few or no coalition-affiliated owners. The previously written "pre-last/pre-latest election" wording was wrong: a latest-election window can be post-treatment with respect to the office chosen earlier in a cross-office channel.
 
 ## 2. Why this matters
 
-**Substantive reading.** The exposure share is the cross-sectional weight that converts a national/regional political shock into a sector-municipality intensity. If credit allocation actually responds to the *coalition-relevant* political capital of firms (not the universe of party-affiliated firms), $w^{M}$ averages signal with noise: it pools owners affiliated with parties that are coalition-relevant and parties that are not. A coalition-specific weight concentrates the exposure on the politically active subset.
+**Substantive reading.** The exposure share is the cross-sectional weight that converts a national/regional political shock into a sector-municipality intensity. In the primary specification it measures baseline owner-party affinity, not whether those owners belong to a governing or electoral coalition. The cross-office content enters through $\mathrm{Align}^{c}_{mpt}$: whether party $p$, or its electoral coalition, holds the mayoral and higher-tier offices defining channel $c$.
 
-**Statistical reading.** First-stage power should be higher with $w^{c}$ than with $w^{M}$ if the mechanism is cross-office: the relevant signal is in the coalition-affiliated fraction, and weighting by the broader $w^{M}$ adds variance from politically inactive owners.
+**Statistical reading.** The timing decision trades predetermination against measurement freshness. Variant F is most defensible because the share is measured before every election that defines the current cross-office state. Variant A can have more power if mayoral-cycle political affinity is persistent and more current, but it is less clean for cross-office channels because part of the baseline may be after the higher-tier election.
 
-**Cost.** The exposure share itself becomes time-varying with the federal/state political cycle. Under the share-exogeneity path of GPSS (2020), this introduces a new endogeneity concern (the share now reflects political dynamics, not just structural exposure). Under the shift-exogeneity path of BHJ (2022), this complicates BJS-1 because the exposure now carries cycle-dependent information that must be controlled for.
+**Cost.** The primary pre-earliest window is mechanically older for about half the panel because Brazilian mayoral and gubernatorial/presidential elections alternate every two years. Coalition-gated shares remain a robustness question only: they could concentrate signal on politically active parties, but they also make the share depend on coalition membership and raise new BJS-1 conditioning concerns.
 
 ## 3. Candidate weight constructions
 
-**Two orthogonal axes of variation.** The exposure weight can vary along (i) the **coalition-gating axis** — whether owners affiliated with non-coalition parties contribute to the share — and (ii) the **pre-window timing axis** — which office's election defines $T^{\cdot}_t$. Variants A–D (§3.1) vary the gating at fixed window $T^{M}_t$; Variants E–F (§3.2) vary the window at no gating. The two axes are orthogonal — any (gating, window) combination is admissible, though we only build the diagonal (A as primary; E, F as window robustness; B, C as deferred gating robustness).
+**Two orthogonal axes of variation.** The exposure weight can vary along (i) the **coalition-gating axis** — whether owners affiliated with non-coalition parties contribute to the share — and (ii) the **pre-window timing axis** — which office's election defines $T^{\cdot}_t$. Variants A, E, and F vary the window with no gating; B and C vary gating and are deferred robustness only.
 
 ### 3.1 Coalition-gating axis (window fixed at $T^{M}_t$)
 
 Define the firm support of cell $(j,m)$ as $\mathcal{F}(j,m)$ and pre-period window $T^{M}_{t} = [e_{M}(t)-4,\ e_{M}(t)-1]\cap[2002,2017]$ (mayoral window from `eq:window`).
 
-### Variant A — Mayoral exposure (current)
+### Variant A — Mayoral exposure (main robustness)
 $$
 w^{M}_{jmp,t} = \frac{1}{|T^{M}_{t}|}\sum_{s\in T^{M}_{t}}
   \frac{\sum_{f\in\mathcal{F}(j,m)} L_{f,p,s}}{\sum_{f\in\mathcal{F}(j,m)} L_{f,s}}
@@ -135,27 +135,43 @@ Identical to Variant A in construction, but the pre-period is anchored to the mo
 
 **Cons:** temporally misaligned with the local political moment. $T^{G/P}_t$ falls in the middle of the previous mayor's term, so the baseline is already partially endogenous to local politics from the prior cycle. For the pure-mayor channel, the window mismatch is mechanical — it should drag the AR statistic toward zero if the local cycle is the operative one.
 
-### Variant F — Pre-last-election window (channel-agnostic)
+### Variant F — Pre-earliest-election window (channel-specific primary)
 $$
-w^{F}_{jmp,t} = \frac{1}{|T^{L}_{t}|}\sum_{s\in T^{L}_{t}}
+w^{F,c}_{jmp,t} = \frac{1}{|T^{F,c}_{t}|}\sum_{s\in T^{F,c}_{t}}
   \frac{\sum_{f\in\mathcal{F}(j,m)} L_{f,p,s}}{\sum_{f\in\mathcal{F}(j,m)} L_{f,s}}
 $$
-where $e_{L}(t) \equiv \max\{e_{M}(t),\ e_{G/P}(t)\}$ — the year of the most recent election of *either* type, with "most recent" including year $t$ itself. The window $T^{L}_t = [\,e_L(t)-4,\ e_L(t)-1\,]$ is therefore the four years immediately preceding the latest political event, regardless of office.
+For a channel $c$, let $\mathcal{O}(c)$ be the set of offices entering the
+channel: $\mathcal{O}(M)=\{M\}$, $\mathcal{O}(M\!\cdot\!P)=\{M,P\}$,
+$\mathcal{O}(M\!\cdot\!G)=\{M,G\}$, and
+$\mathcal{O}(M\!\cdot\!G\!\cdot\!P)=\{M,G,P\}$. Define
+$e_{F,c}(t)\equiv \min_{\ell\in\mathcal{O}(c)} e_\ell(t)$ and
+$T^{F,c}_{t}=[\,e_{F,c}(t)-4,\ e_{F,c}(t)-1\,]\cap[2002,2017]$.
+The window is therefore before the earliest election that enters the current
+cross-office state. For the pure-mayor channel this collapses to Variant A;
+for cross-office channels it is stricter than both the mayoral and higher-tier
+windows because it precedes every office in the channel.
 
 **Worked examples** (Brazilian electoral calendar — mayoral: 2000/04/08/12/16; gov/pres: 2002/06/10/14):
 
-| $t$ | $e_M(t)$ | $e_{G/P}(t)$ | $e_L(t)$ | $T^{L}_t$ |
+| $t$ | $e_M(t)$ | $e_{G/P}(t)$ | $e_{F,c}(t)$ for cross-office channels | $T^{F,c}_t$ |
 |---|---|---|---|---|
-| 2008 (mayoral) | 2008 | 2006 | 2008 | $[2004, 2007]$ |
-| 2010 (gov/pres) | 2008 | 2010 | 2010 | $[2006, 2009]$ |
-| 2011 | 2008 | 2010 | 2010 | $[2006, 2009]$ |
-| 2012 (mayoral) | 2012 | 2010 | 2012 | $[2008, 2011]$ |
-| 2014 (gov/pres) | 2012 | 2014 | 2014 | $[2010, 2013]$ |
-| 2017 | 2016 | 2014 | 2016 | $[2012, 2015]$ |
+| 2008 (mayoral) | 2008 | 2006 | 2006 | $[2002, 2005]$ |
+| 2010 (gov/pres) | 2008 | 2010 | 2008 | $[2004, 2007]$ |
+| 2011 | 2008 | 2010 | 2008 | $[2004, 2007]$ |
+| 2012 (mayoral) | 2012 | 2010 | 2010 | $[2006, 2009]$ |
+| 2014 (gov/pres) | 2012 | 2014 | 2012 | $[2008, 2011]$ |
+| 2017 | 2016 | 2014 | 2014 | $[2010, 2013]$ |
 
-**Pros:** the baseline is always measured just before whichever electoral event most recently reset the political landscape — so the "pre-shock" interpretation is preserved no matter which channel is being instrumented.
+**Pros:** the baseline precedes every officeholder entering the cross-office
+shift, so it is the cleanest option against contamination from either the
+mayoral or higher-tier election.
 
-**Cons:** the pre-window jumps office type year-to-year, which complicates BJS-1 conditioning (shock-level controls must accommodate both types of reset) and the AKM cluster definition. The window is no longer aligned with the mayoral-cycle structure of the AR test's identifying variation in odd years (e.g., 2011, 2015) — in those years $T^{L}_t$ is anchored to gov/pres while the shift $\mathrm{Align}^{M}_{mpt}$ is still pinned to the mayoral cycle.
+**Cons:** the baseline is mechanically older for half of the panel because
+Brazilian mayoral and gubernatorial/presidential elections alternate every two
+years. That buys stricter predetermination at the cost of a staler, noisier
+measure of the party-affiliation stock. It also makes the exposure
+channel-specific, whereas Variant A keeps one mayoral-window exposure object
+for all channels.
 
 ## 4. What the literature says (initial reading, to be refined)
 
@@ -168,7 +184,7 @@ where $e_{L}(t) \equiv \max\{e_{M}(t),\ e_{G/P}(t)\}$ — the year of the most r
 ### BHJ (2025, JEP) — practical guide
 - Multiple shock sets combined via overidentified shock-level IV.
 - For shifts that are correlated across periods of the same shock dimension (e.g., national waves in $\mathrm{Align}^{P}$), the recommended fix is shock-level inference with clusters defined on the shock dimension.
-- The guide recommends *checking whether the SSIV estimate is robust to alternative share constructions*. This directly motivates running both Variant A and Variant B/C and comparing.
+- The guide recommends *checking whether the SSIV estimate is robust to alternative share constructions*. This directly motivates reporting the mayoral-window and higher-tier-window timing variants, and later any coalition-gated variants, against the Variant F primary.
 - The `ssaggregate` package transforms the panel to the shock level; the exposure choice is an input.
 
 ### GPSS (2020, AER) — share-exogeneity path
@@ -182,35 +198,35 @@ where $e_{L}(t) \equiv \max\{e_{M}(t),\ e_{G/P}(t)\}$ — the year of the most r
 
 ## 5. Empirical analysis required
 
-**Goal:** decide between Variants A, B, C, D for each channel $c$ based on (i) substantive fit, (ii) statistical power, (iii) BJS condition diagnostics.
+**Goal:** implement the decided primary exposure (Variant F, no gating) and report robustness diagnostics for the mayoral-window, higher-tier-window, and later gating variants.
 
 ### Tasks
 
-1. **Build the active exposure variants** for the leading candidate margin if it is committed after D28 (`policy_block_active × S3`, $J=12$). Window-axis variants (A, E, F) have no new data dependencies and are built first; gating-axis variants (B, C) require coalition rosters and are deferred:
-   - Variant A *(primary)*: existing $w^{M}_{jmp,t}$ from script `3_instruments/31_*` outputs.
-   - Variant E *(window robustness)*: same as A, with $T^{G/P}_t$ replacing $T^{M}_t$. New script — joins the existing owner-party-firm panel against gov/pres-election years. **No new data input.**
-   - Variant F *(window robustness)*: same as A, with $T^{L}_t = [e_L(t)-4,\ e_L(t)-1]$ where $e_L(t) = \max(e_M(t),\ e_{G/P}(t))$. Tabulate $e_L(t)$ for $t\in[2002,2017]$ (one-time), then re-window the pre-period join. **No new data input.**
+1. **Build the active exposure variants** for the leading candidate margin. Window-axis variants (F, A, E) have no new data dependencies and are built first; gating-axis variants (B, C) require coalition rosters and are deferred:
+   - Variant F *(primary)*: same primitives as A, with $T^{F,c}_t = [e_{F,c}(t)-4,\ e_{F,c}(t)-1]$ where $e_{F,c}(t)=\min_{\ell\in\mathcal{O}(c)} e_\ell(t)$. Tabulate $e_{F,c}(t)$ for $t\in[2002,2017]$ and each channel (one-time), then re-window the pre-period join. **No new data input.**
+   - Variant A *(main robustness)*: existing mayoral-window $w^{M}_{jmp,t}$ from script `3_instruments/31_*` outputs, used for all channels.
+   - Variant E *(second timing robustness)*: same as A, with $T^{G/P}_t$ replacing $T^{M}_t$. New script — joins the existing owner-party-firm panel against gov/pres-election years. **No new data input.**
    - Variant B *(gating robustness, deferred)*: define $\mathcal{K}^{c}(s)$ from federal/state coalition membership records. New data input — coalition rosters by year. For the federal coalition, the source is the *Câmara dos Deputados* coalition records; for state coalitions, *Tribunal Superior Eleitoral* candidate-coalition data. Both are public.
    - Variant C *(gating robustness, deferred)*: compute $\pi^{c}_{p}(s)$ as the fraction of $s\in T^{M}_{t}$ with $p\in\mathcal{K}^{c}(s)$. Same coalition data as B.
    - Variant D: identical to A in implementation (gate is on $\mathrm{Align}$, not $w$); no separate build required.
    - Variant B′: rejected (see §3.1).
 
 2. **Diagnostic comparisons:**
-   - **Cross-variant correlation matrix** of $Z^{c}_{jmt}$ across A, E, F (and later B, C). If $\mathrm{corr}(Z^{c,A}, Z^{c,X}) > 0.95$ for $X\in\{E,F\}$, the choice is empirically immaterial and Variant A wins on simplicity. Likely outcome for E and F if pre-window owner-affiliation distributions are persistent across cycles.
-   - **First-stage F-statistic** at the cross-office channel level, separately under each variant. For the window axis, expect $F_E \approx F_A$ for cross-office channels and $F_E < F_A$ for the pure-mayor channel (window mismatch). For the gating axis, expect $F_B > F_A$ if the coalition-active subset carries the signal.
+   - **Cross-variant correlation matrix** of $Z^{c}_{jmt}$ across F, A, E (and later B, C). If $\mathrm{corr}(Z^{c,F}, Z^{c,X}) > 0.95$ for $X\in\{A,E\}$, the timing choice is empirically immaterial; keep F as primary and report A/E as confirmation. Likely outcome if pre-window owner-affiliation distributions are persistent across cycles.
+   - **First-stage F-statistic** at the cross-office channel level, separately under each variant. For the window axis, expect $F_A$ to be at least as large as $F_F$ if the newer mayoral baseline is less noisy, but $F_F$ remains the cleaner predetermined baseline. For the gating axis, expect $F_B > F_F$ only if the coalition-active subset carries the signal.
    - **Herfindahl of average exposure** across shocks (BJS-3 diagnostic). Variant B is expected to have higher Herfindahl; Variants E and F should be close to A. Quantify.
    - **AR statistic stability:** run the AR test under each variant for the pure-mayoral and the three cross-office channels; report all. BHJ (2025) recommends this kind of robustness as standard practice.
 
 3. **Decision rule:**
-   - **Primary is fixed (Variant A).** Robustness either confirms or qualifies; it does not replace.
-   - For each robustness variant $X \in \{E,\ F,\ B,\ C\}$:
-     - If AR statistics under A and X are within $\pm 5\%$ and AR confidence sets overlap substantially, report X in an appendix robustness table.
+   - **Primary is fixed (Variant F, no gating).** Robustness either confirms or qualifies; it does not replace.
+   - For each robustness variant $X \in \{A,\ E,\ B,\ C\}$:
+     - If AR statistics under F and X are within $\pm 5\%$ and AR confidence sets overlap substantially, report X in an appendix robustness table.
      - If they diverge meaningfully and the AR test rejects under one but not the other, the divergence itself is a finding — flag it and discuss in the paper which window/gating is closer to the structural interpretation of the channel.
    - **Window-axis robustness (E, F) is the binding test of the timing assumption** — these are the variants the referee will ask for.
 
 ### Data inputs needed
 
-**Window-axis variants (E, F):** no new data inputs. The existing owner-party-firm panel (`2_firm_panel/22_*`) plus the existing election-year calendar are sufficient.
+**Window-axis variants (F, A, E):** no new data inputs. The existing owner-party-firm panel (`2_firm_panel/22_*`) plus the existing election-year calendar are sufficient.
 
 **Gating-axis variants (B, C), deferred:**
 - **Federal presidential coalitions, 2002–2017.** Annual list of parties in the federal coalition. Source: *Câmara dos Deputados* legislative records, *DataSenado*, or compilations from CEPESP/FGV.
@@ -218,8 +234,8 @@ where $e_{L}(t) \equiv \max\{e_{M}(t),\ e_{G/P}(t)\}$ — the year of the most r
 
 ### Pipeline extension
 
-**Phase 1 (window axis, E + F):**
-- New script: `3_instruments/31c_build_window_variants.R` — accepts a `--window` argument (`mayor`, `higher_tier`, `pre_last`) and re-windows the existing owner-party-firm panel before averaging to $w_{jmp,t}$. Outputs `w_window_jmpt.fst` with columns `(j, m, p, t, channel, w_A, w_E, w_F)`.
+**Phase 1 (window axis, F + A + E):**
+- New script: `3_instruments/31c_build_window_variants.R` — accepts a `--window` argument (`pre_earliest`, `mayor`, `higher_tier`) and re-windows the existing owner-party-firm panel before averaging to $w_{jmp,t}$. Outputs `w_window_jmpt.fst` with columns `(j, m, p, t, channel, w_F, w_A, w_E)`.
 
 **Phase 2 (gating axis, B + C), deferred:**
 - New script: `3_instruments/30g_build_coalition_rosters.R` — ingests TSE/Câmara data and outputs `coalition_rosters_yearly.fst` with columns `(year, tier, state, party, in_coalition)`.
@@ -230,8 +246,8 @@ where $e_{L}(t) \equiv \max\{e_{M}(t),\ e_{G/P}(t)\}$ — the year of the most r
 
 ## 6. Proposed timing
 
-1. **Now (decided 2026-05-10):** Variant A (mayoral exposure $w^{M}$, no gating) is the **primary** specification of the AR test, recorded in `ar_test_specification.tex` Remark `rem:weights`. Variants E and F (window-axis robustness) are committed for build. Variants B and C (gating-axis robustness) are deferred. Variant B′ is rejected.
-2. **Next sprint (1–2 weeks):** build Variants E and F (no new data inputs) via `3_instruments/31c_build_window_variants.R`. Run the §5.2 diagnostic comparisons across A, E, F.
+1. **Now (decided 2026-05-13):** Variant F (channel-specific pre-earliest-election exposure, no gating) is the **primary** specification of the AR test, recorded in `ar_test_specification.tex` Remark `rem:weights`. Variant A (mayoral-window exposure for all channels) is the main mechanism-aligned robustness. Variant E (higher-tier pre-window) is a second timing robustness. Variants B and C (gating-axis robustness) are deferred. Variant B′ is rejected.
+2. **Next sprint (1–2 weeks):** build the window-axis stack F/A/E (no new data inputs) via `3_instruments/31c_build_window_variants.R`. Run the §5.2 diagnostic comparisons across F, A, E.
 3. **Following sprint (2–3 weeks):** read BHJ (2022, 2025) closely — §4 of BHJ (2022) on shock-level inference and §3 of BHJ (2025) on share-construction sensitivity. If they argue for coalition-gated exposure, proceed to ingest TSE/Câmara coalition data and build Variants B and C; otherwise document the gating axis as a known-but-untested robustness in the paper's appendix.
 4. **Decision:** lock the full robustness suite (which variants enter the paper's robustness table) by the time the AR test moves out of exploration.
 

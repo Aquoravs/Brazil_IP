@@ -522,7 +522,40 @@ which it has few. Equivalently, $\omega^{\ell}_{fp,t}$ is the
 owner-year-weighted average of the annual affiliation shares
 $L_{f,p,s}/L_{f,s}$. The residual $1-\sum_{p}\omega^{\ell}_{fp,t}$ is
 the unaffiliated-owner share at the firm level. The exposure is
-office-specific because the pre-election window $T^{\ell}_{t}$ is office-specific, but it does not vary across municipalities in the case of firms that operate in multiple municipalities.
+office-specific because the pre-election window $T^{\ell}_{t}$ is
+office-specific, but it does not vary across municipalities in the case
+of firms that operate in multiple municipalities.
+
+\paragraph{Primary channel-specific baseline window.}
+For the cross-office instruments, the primary exposure window is the
+pre-earliest-election window for the offices entering the channel. Let
+\[
+  \mathcal{O}(\mathrm{M})=\{\mathrm{M}\},\quad
+  \mathcal{O}(\mathrm{M{\cdot}P})=\{\mathrm{M},\mathrm{P}\},\quad
+  \mathcal{O}(\mathrm{M{\cdot}G})=\{\mathrm{M},\mathrm{G}\},\quad
+  \mathcal{O}(\mathrm{M{\cdot}G{\cdot}P})=\{\mathrm{M},\mathrm{G},\mathrm{P}\}.
+\]
+Define
+\begin{equation}\label{eq:channel-window}
+  e_c^{\min}(t)\equiv\min_{\ell\in\mathcal{O}(c)} e_\ell(t),
+  \qquad
+  T^c_t\equiv [\,e_c^{\min}(t)-4,\ e_c^{\min}(t)-1\,]\cap[2002,2017].
+\end{equation}
+The channel-specific firm exposure is
+\begin{equation}\label{eq:omega-channel}
+  \omega^{c}_{fp,t}
+  \;\equiv\;
+  \frac{\sum_{s\in T^{c}_{t}} L_{f,p,s}}
+       {\sum_{s\in T^{c}_{t}} L_{f,s}}.
+\end{equation}
+For the pure mayoral channel, $T^c_t=T^{\mathrm{M}}_t$. For the
+cross-office channels, $T^c_t$ is the last four-year window before the last election among the offices in the channel. The associated pre-period firm support is
+\[
+  \cF^{\mathrm{pre},c}_{jm,t}
+  \;\equiv\;
+  \big\{\, f\in\cF(j,m) : L_{f,s}>0
+       \text{ for some } s\in T^{c}_{t} \,\big\}.
+\]
 
 \paragraph{Firm-level cross-office instrument.}
 For channel $c\in\{\mathrm{M},\mathrm{M{\cdot}P},\mathrm{M{\cdot}G},
@@ -531,107 +564,35 @@ is
 \begin{equation}\label{eq:FA-firm}
   \FA^{c}_{fmt}
   \;\equiv\;
-  \sum_{p}\,\omega^{\mathrm{M}}_{fp,t}\,\Align^{c}_{mpt},
+  \sum_{p}\,\omega^{c}_{fp,t}\,\Align^{c}_{mpt},
 \end{equation}
-i.e.\ firm $f$'s mayoral baseline exposure inner-producted with the
-channel-$c$ shift in municipality $m$ at time $t$. We use the mayoral
-exposure $\omega^{\mathrm{M}}_{fp,t}$ uniformly across channels; the
-substantive justification is in \autoref{rem:weights} below.
+i.e.\ firm $f$'s pre-earliest-election baseline exposure for channel
+$c$, inner-producted with the channel-$c$ shift in municipality $m$ at
+time $t$.
 
-\begin{remark}[Mayoral exposure for all channels]\label{rem:weights}
-We use the mayoral exposure $w^{\mathrm{M}}_{jmp,t}$ for all four
-cross-office instruments. This choice concerns the timing of the share
-component, not the definition of the cross-office shift. The share
-$w^{\mathrm{M}}_{jmp,t}$ measures the pre-municipal-election distribution
-of owner-party affiliation in sector $j$ and municipality $m$ for each
-party $p$. The cross-office component enters only through
-$\Align^{c}_{mpt}$, which records whether party $p$ holds the mayoralty
-and, for $c\in\{\mathrm{M{\cdot}P},\mathrm{M{\cdot}G},
-\mathrm{M{\cdot}G{\cdot}P}\}$, the relevant higher-tier office(s). Thus
-using the mayoral window does not assume that owner affiliation is caused
-by mayor--higher-tier alignment, nor that affiliation to the mayor's party
-is the only relevant political affinity. It fixes the baseline before the
-local officeholder common to every channel is chosen.
-
-The identifying rationale is predetermination with respect to the local
-component of the channel. Since mayoral and gubernatorial/presidential
-elections alternate every two years, no four-year baseline window is
-completely insulated from all electoral politics. A higher-tier
-pre-window is a natural robustness check for cross-office channels if
-owner affiliation responds mainly to federal or state electoral incentives.
-A channel-specific window before the earliest election entering the
-current cross-office state is cleaner in the strict sense that it precedes
-both offices, but it is also mechanically older and may be a noisier
-measure of the relevant party-affiliation stock. A window before the
-latest election is not an admissible baseline for the cross-office
-channels because it can be post-treatment with respect to the office
-chosen earlier.
+\begin{remark}[Primary exposure window]\label{rem:weights}
+The primary specification uses the pre-earliest-election window $T^c_t$
+in~\eqref{eq:channel-window}. This choice is based on the predetermination rationale: the baseline exposure should be measured before any of the offices in the channel can turn over, so that it is not contaminated by post-treatment changes in owner-party affiliation. Since mayoral and
+gubernatorial/presidential elections alternate every two years, the
+pre-earliest window is mechanically older for part of each cycle and may
+be a noisier measure of the relevant affiliation stock. We therefore
+report a mayoral-window exposure, $w^{\mathrm{M}}_{jmp,t}$ used for all
+channels, as the mechanism-aligned robustness. A higher-tier pre-window
+is a second timing robustness for cases in which owner affiliation
+responds mainly to federal or state electoral incentives.
 \end{remark}
-
-\subsection{The shift-share form of the cross-office instruments}
-
-Building on the firm-level instrument~\eqref{eq:FA-firm} and the
-sector-level baseline exposure~\eqref{eq:wjmp}, the four sector-level
-levels instruments are
-\begin{align}
-  Z^{\mathrm{M}}_{jmt}
-    &\equiv \sum_{p} w^{\mathrm{M}}_{jmp,t}\,\Align^{\mathrm{M}}_{mpt},
-    \label{eq:Z-M}\\
-  Z^{\mathrm{M{\cdot}P}}_{jmt}
-    &\equiv \sum_{p} w^{\mathrm{M}}_{jmp,t}\,\Align^{\mathrm{M{\cdot}P}}_{mpt},
-    \label{eq:Z-MP}\\
-  Z^{\mathrm{M{\cdot}G}}_{jmt}
-    &\equiv \sum_{p} w^{\mathrm{M}}_{jmp,t}\,\Align^{\mathrm{M{\cdot}G}}_{mpt},
-    \label{eq:Z-MG}\\
-  Z^{\mathrm{M{\cdot}G{\cdot}P}}_{jmt}
-    &\equiv \sum_{p} w^{\mathrm{M}}_{jmp,t}\,\Align^{\mathrm{M{\cdot}G{\cdot}P}}_{mpt}.
-    \label{eq:Z-MGP}
-\end{align}
-For backward compatibility with the rest of the document we let
-$Z^{c}_{jmt}$ denote a generic channel
-$c\in\{\mathrm{M},\mathrm{M{\cdot}P},\mathrm{M{\cdot}G},
-\mathrm{M{\cdot}G{\cdot}P}\}$ and $\Align^{c}_{mpt}$ its shift. The
-changes variant is
-\begin{equation}\label{eq:dZ}
-  \Delta Z^{c}_{jmt}
-  \;\equiv\;
-  \sum_{p} w^{\mathrm{M}}_{jmp,t}\,\Delta\Align^{c}_{mpt},
-  \qquad
-  \Delta\Align^{c}_{mpt} \equiv \Align^{c}_{mpt}-\Align^{c}_{mp,t-1},
-\end{equation}
-which is non-zero in any year in which any of the offices entering $c$
-turns over.
-
-\paragraph{The owner-count-weighted aggregation identity.}
-Each $Z^{c}_{jmt}$ is a within-region inner product of \emph{shares}
-$w^{\mathrm{M}}_{jmp,t}$ (sector-municipality exposure to party $p$, on
-the mayoral pre-election window) and \emph{shifts} $\Align^{c}_{mpt}$
-(whether $p$ controls the offices defining $c$ at time $t$). It is the
-sector-aggregated counterpart of the firm-level
-instrument~\eqref{eq:FA-firm}: substituting~\eqref{eq:wjmp-as-avg}
-into~\eqref{eq:Z-M}--\eqref{eq:Z-MGP} and reordering sums gives
-\begin{equation}\label{eq:agg-identity}
-  Z^{c}_{jmt}
-  \;=\;
-  \sum_{p} w^{\mathrm{M}}_{jmp,t}\,\Align^{c}_{mpt}
-  \;=\;
-  \sum_{p}\Bigg[\sum_{f\in\cF^{\mathrm{pre}}_{jm,e_{\mathrm{M}}}}
-       \frac{L_{f,t}}{N^{\mathrm{M}}_{jm,t}}\,\omega^{\mathrm{M}}_{fp,t}\Bigg]
-       \Align^{c}_{mpt}
-  \;=\;
-  \sum_{f\in\cF^{\mathrm{pre}}_{jm,e_{\mathrm{M}}}}
-       \frac{L_{f,t}}{N^{\mathrm{M}}_{jm,t}}\,\FA^{c}_{fmt}.
-\end{equation}
-The sector instrument is a weighted average of the firm-level
-instruments across firms in the pre-period support, with weights given
-by each firm's share of total owner-counts in the cell. The
-identity~\eqref{eq:agg-identity} verifies diagnostically: collapsing
-firm instruments by these weights recovers the sector instrument.
 
 \subsection{Sector-level exposure weights}\label{subsec:sector-weights}
 
-\paragraph{Sector-level baseline exposure.}
-The sector-level baseline exposure aggregates firm-level
+Building the sector-level instruments from the firm-level
+exposures~\eqref{eq:omega-firm} requires two independent choices: across-sector normalization and within-cell aggregation. The former is the choice of the universe over which the sectoral shares are normalized; the latter is the choice of how to aggregate firm-level exposures within a cell. There are two natural normalization universes ---within-cell (cell is its own universe) or within-municipality (municipality is the universe)--- and three natural aggregation methods ---owner-count, equal-firm, or employment weights. We adopt as primary configuration the within-municipality normalization and owner-count aggregation, and report the rest as robustness. The window choice was fixed
+in~\autoref{rem:weights}. The rest of this subsection (i)
+defines the within-cell intensity weights, which are the cleanest
+notation for the BJS conditions and aggregation identity that
+follow; (ii) records that identity; (iii) defines Variants~A and~B.
+
+\paragraph{Sector-level baseline exposure (within-cell intensity, robustness).}
+The within-cell intensity-weighted baseline exposure aggregates firm-level
 exposures~\eqref{eq:omega-firm} across firms within $(j,m)$ using
 owner-count weights, with the office-$\ell$ pre-election window:
 \begin{equation}\label{eq:wjmp}
@@ -649,6 +610,15 @@ enters the exposure control
 $\EC^{\ell}_{jm,t}\equiv\sum_p w^{\ell}_{jmp,t}$ that absorbs total
 political connectedness of $(j,m)$.
 
+For the primary cross-office instruments we use the same construction
+with the channel-specific pre-earliest window $T^c_t$:
+$w^c_{jmp,t}$ is \eqref{eq:wjmp} with $T^\ell_t$ replaced by
+$T^c_t$. For the pure mayoral channel this is exactly
+$w^{\mathrm{M}}_{jmp,t}$; for the cross-office channels it is the
+exposure measured before the earliest election entering the current
+cross-office state. The mayoral-window robustness instead uses
+$w^{\mathrm{M}}_{jmp,t}$ for all channels.
+
 \paragraph{Owner-count normalizer.}
 Let
 \begin{equation}\label{eq:N-norm}
@@ -657,18 +627,20 @@ Let
   \sum_{f\in\cF(j,m)} L_{f,t},
 \end{equation}
 the total number of owners across firms in cell $(j,m)$ at time $t$.
+The notation $N^c_{jm,t}$ denotes the same normalizer evaluated on the
+channel-specific support $\cF^{\mathrm{pre},c}_{jm,t}$.
 
 \paragraph{Frozen pre-election window.}
-The window $T^{\ell}_t=[e_\ell(t)-4,e_\ell(t)-1]$ in~\eqref{eq:window} is
+The primary window $T^c_t$ in~\eqref{eq:channel-window} is
 \emph{frozen} relative to the post-election alignment shocks: it never overlaps
-the post-inauguration interval over which $\Align^{\ell}_{mpt}$ is treated as
+the post-inauguration interval over which $\Align^{c}_{mpt}$ is treated as
 the exogenous shift. This satisfies the predetermined-shares logic of
 \citet{goldsmith2020bartik} and supplies the share-level predetermination that
 \citet{borusyak2022quasi} use to translate shock-level orthogonality
 (\autoref{cond:BJS1}) into unit-level orthogonality. The within-cell sum
-$\EC^{\mathrm{M}}_{jm,t}=\sum_p w^{\mathrm{M}}_{jmp,t}\in[0,1]$ measures the
+$\EC^{c}_{jm,t}=\sum_p w^{c}_{jmp,t}\in[0,1]$ measures the
 fraction of cell $(j,m)$'s pre-window owner mass affiliated with any party; the
-residual $\mathrm{slack}_{jm,t}\equiv 1-\EC^{\mathrm{M}}_{jm,t}$ is unaffiliated
+residual $\mathrm{slack}_{jm,t}\equiv 1-\EC^{c}_{jm,t}$ is unaffiliated
 mass that contributes zero to $Z^{c}_{jmt}$. In the language of
 \citet[\S4.4]{borusyak2022quasi}, this is the \emph{incomplete shares} setup,
 and the cell-level slack must be carried as a control in the muni panel.
@@ -698,7 +670,7 @@ Equation~\eqref{eq:wjmp-as-avg} is the bridge between the firm-level
 instrument~\eqref{eq:FA-firm} and the sector-level
 instruments~\eqref{eq:Z-M}--\eqref{eq:Z-MGP}.
 
-The intensity-based exposure $w^{\mathrm{M}}_{jmp,t}$ in~\eqref{eq:wjmp}
+The intensity-based exposure $w^{c}_{jmp,t}$ in~\eqref{eq:wjmp}
 normalizes owner-party counts \emph{within} each $(j,m)$ cell, so it
 captures the intensity of political affiliation in the cell but discards
 information about the cell's mass in the local economy. For predicting
@@ -708,102 +680,102 @@ with a high aligned-fraction generates a large instrument value but can
 move little employment when credit arrives, while a large cell with a
 moderate aligned-fraction can move a lot. This subsection records two
 alternative exposure specifications, both predetermined on
-$T^{\mathrm{M}}_{t}$ and both preserving the shift-share decomposition,
+$T^{c}_{t}$ and both preserving the shift-share decomposition,
 that bring mass back into the share component.
 
 \paragraph{Pre-window employment primitives.}
 Let $E_{f,t}$ denote firm $f$'s employment at time $t$. Define the
 pre-window firm employment, sector-muni pre-window employment, and muni
-pre-window employment as the natural averages over the mayoral
-pre-election window $T^{\mathrm{M}}_t$:
+pre-window employment as the natural averages over the channel-specific
+pre-earliest-election window $T^{c}_t$:
 \begin{equation}\label{eq:Ebar}
-  \bar E_{f,t}\;\equiv\;
-   \frac{1}{|T^{\mathrm{M}}_t|}\sum_{s\in T^{\mathrm{M}}_t} E_{f,s},
+  \bar E^c_{f,t}\;\equiv\;
+   \frac{1}{|T^{c}_t|}\sum_{s\in T^{c}_t} E_{f,s},
   \qquad
-  \bar E_{jm,t}\;\equiv\;\sum_{f\in\cF(j,m)} \bar E_{f,t},
+  \bar E^c_{jm,t}\;\equiv\;\sum_{f\in\cF(j,m)} \bar E^c_{f,t},
   \qquad
-  \bar E_{m,t}\;\equiv\;\sum_{j'} \bar E_{j'm,t}.
+  \bar E^c_{m,t}\;\equiv\;\sum_{j'} \bar E^c_{j'm,t}.
 \end{equation}
 The pre-window matches the one used for owner-party counts
 in~\eqref{eq:omega-firm} and~\eqref{eq:wjmp}, so the predetermination
-argument that justifies $w^{\mathrm{M}}_{jmp,t}$ extends without
+argument that justifies $w^{c}_{jmp,t}$ extends without
 modification to any object built from $\bar E$.
 
-\paragraph{Variant A: muni-relative aligned-owner share.}
-The first variant keeps the owner-count primitives but replaces the
+\paragraph{Variant A: muni-relative aligned-owner share (primary).}
+The primary spec keeps the owner-count primitives but replaces the
 within-cell normalization in~\eqref{eq:wjmp} with a muni-level
 normalization over affiliated owners. Let
 \(
-  \bar L_{jmp,t}\equiv\sum_{s\in T^{\mathrm{M}}_t}
+  \bar L^c_{jmp,t}\equiv\sum_{s\in T^{c}_t}
     \sum_{f\in\cF(j,m)} L_{f,p,s}
 \)
 be the pre-window owner-years in $(j,m)$ affiliated with party $p$, and
 \(
-  \bar L^{\mathrm{affil}}_{m,t}\equiv\sum_{j'}\sum_{p'}\bar L_{j'mp',t}
+  \bar L^{c,\mathrm{affil}}_{m,t}\equiv\sum_{j'}\sum_{p'}\bar L^c_{j'mp',t}
 \)
 the muni-level pre-window total of owner-years affiliated with any party.
 Define
 \begin{equation}\label{eq:w-own-rel}
-  \tilde w^{\mathrm{own}}_{jmp,t}
+  \tilde w^{c,\mathrm{own}}_{jmp,t}
    \;\equiv\;
-   \frac{\bar L_{jmp,t}}{\bar L^{\mathrm{affil}}_{m,t}},
+   \frac{\bar L^c_{jmp,t}}{\bar L^{c,\mathrm{affil}}_{m,t}},
    \qquad
    \tilde Z^{c,\mathrm{own}}_{jmt}
    \;\equiv\;
-   \sum_p \tilde w^{\mathrm{own}}_{jmp,t}\,\Align^{c}_{mpt}.
+   \sum_p \tilde w^{c,\mathrm{own}}_{jmp,t}\,\Align^{c}_{mpt}.
 \end{equation}
-The share $\tilde w^{\mathrm{own}}_{jmp,t}$ is the fraction of the
+The share $\tilde w^{c,\mathrm{own}}_{jmp,t}$ is the fraction of the
 muni's politically-engaged pre-window owner-mass that sits in sector
 $j$ at party $p$; it carries information about cell size through
-$\bar L_{jmp,t}$ that the intensity $w^{\mathrm{M}}_{jmp,t}$ discards.
+$\bar L^c_{jmp,t}$ that the intensity $w^{c}_{jmp,t}$ discards.
 Both numerator and denominator are pre-window quantities, so
-$\tilde w^{\mathrm{own}}_{jmp,t}$ is channel-independent (consistent
-with~\autoref{rem:weights}) and predetermined relative to the shift
+$\tilde w^{c,\mathrm{own}}_{jmp,t}$ is predetermined relative to the shift
 $\Align^{c}_{mpt}$. Across sectors, $\sum_j \tilde Z^{c,\mathrm{own}}_{jmt}
-\in[0,1]$ equals the muni's share of pre-window affiliated owners that
-lean toward coalition-$c$ parties.
+\in[0,1]$ equals the muni's share of pre-window affiliated owners whose
+party is aligned under channel $c$.
 
-\paragraph{Variant B: muni-relative aligned-employment share.}
-The second variant replaces owner-mass by employment-mass at every
+\paragraph{Variant B: muni-relative aligned-employment share (within-cell-aggregation robustness).}
+This robustness keeps the muni-level normalization but swaps
+owner-mass for employment-mass at every
 aggregation level. Using the firm-level
 instrument~\eqref{eq:FA-firm}, define
 \begin{equation}\label{eq:Z-emp-rel}
   \tilde Z^{c,\mathrm{emp}}_{jmt}
    \;\equiv\;
-   \frac{\displaystyle\sum_{f\in\cF(j,m)} \bar E_{f,t}\,\FA^{c}_{fmt}}
-        {\bar E_{m,t}}.
+   \frac{\displaystyle\sum_{f\in\cF(j,m)} \bar E^c_{f,t}\,\FA^{c}_{fmt}}
+        {\bar E^c_{m,t}}.
 \end{equation}
-This is the pre-window employment of firms in $(j,m)$ whose owners lean
-toward coalition-$c$ parties (with $\FA^{c}_{fmt}\in[0,1]$ as the
+This is the pre-window employment of firms in $(j,m)$ whose owners are
+aligned under channel $c$ (with $\FA^{c}_{fmt}\in[0,1]$ as the
 per-firm alignment-intensity weight), expressed as a fraction of the
 muni's total pre-window employment. The same object admits the
 shift-share decomposition
 \begin{equation}\label{eq:Z-emp-rel-ss}
   \tilde Z^{c,\mathrm{emp}}_{jmt}
    \;=\;
-   \sum_p \tilde w^{\mathrm{emp}}_{jmp,t}\,\Align^{c}_{mpt},
-   \qquad
-   \tilde w^{\mathrm{emp}}_{jmp,t}
+   \sum_p \tilde w^{c,\mathrm{emp}}_{jmp,t}\,\Align^{c}_{mpt},
+    \qquad
+   \tilde w^{c,\mathrm{emp}}_{jmp,t}
    \;\equiv\;
-   \frac{\displaystyle\sum_{f\in\cF(j,m)} \bar E_{f,t}\,\omega^{\mathrm{M}}_{fp,t}}
-        {\bar E_{m,t}}.
+   \frac{\displaystyle\sum_{f\in\cF(j,m)} \bar E^c_{f,t}\,\omega^{c}_{fp,t}}
+        {\bar E^c_{m,t}}.
 \end{equation}
 The share admits a size-times-intensity decomposition
 \begin{equation}\label{eq:w-emp-decomp}
-  \tilde w^{\mathrm{emp}}_{jmp,t}
+  \tilde w^{c,\mathrm{emp}}_{jmp,t}
    \;=\;
-   \underbrace{\frac{\bar E_{jm,t}}{\bar E_{m,t}}}_{\text{sector size}}\;\;
-   \underbrace{\bar\omega^{\mathrm{M},E}_{jmp,t}}_{\text{employment-weighted intensity}},
-   \qquad
-   \bar\omega^{\mathrm{M},E}_{jmp,t}\;\equiv\;
-   \sum_{f\in\cF(j,m)} \frac{\bar E_{f,t}}{\bar E_{jm,t}}\,
-   \omega^{\mathrm{M}}_{fp,t},
+    \underbrace{\frac{\bar E^c_{jm,t}}{\bar E^c_{m,t}}}_{\text{sector size}}\;\;
+    \underbrace{\bar\omega^{c,E}_{jmp,t}}_{\text{employment-weighted intensity}},
+    \qquad
+    \bar\omega^{c,E}_{jmp,t}\;\equiv\;
+    \sum_{f\in\cF(j,m)} \frac{\bar E^c_{f,t}}{\bar E^c_{jm,t}}\,
+    \omega^{c}_{fp,t},
 \end{equation}
-in which $\bar\omega^{\mathrm{M},E}_{jmp,t}$ is the
+in which $\bar\omega^{c,E}_{jmp,t}$ is the
 employment-weighted within-cell average of firm-level intensities ---
 the direct analogue of~\eqref{eq:wjmp-as-avg} with owner-count weights
 replaced by employment weights. Both factors are pre-window and
-channel-independent; the shift sits exclusively in
+predetermined; the shift sits exclusively in
 $\Align^{c}_{mpt}$ as in the base spec.
 
 \paragraph{Comparison of A and B.}
@@ -836,28 +808,96 @@ industry-towns load disproportionately on a single sector under
 Variants~A and B.
 
 \paragraph{Exposure controls.}
-The base-spec exposure control $\EC^{\ell}_{jm,t}\equiv\sum_p
-w^{\ell}_{jmp,t}$ adapts mechanically:
+The base-spec exposure control $\EC^{c}_{jm,t}\equiv\sum_p
+w^{c}_{jmp,t}$ adapts mechanically:
 $\widetilde\EC^{\mathrm{own}}_{jm,t}\equiv
-\sum_p \tilde w^{\mathrm{own}}_{jmp,t}$ is cell $(j,m)$'s share of
+\sum_p \tilde w^{c,\mathrm{own}}_{jmp,t}$ is cell $(j,m)$'s share of
 muni affiliated owners under Variant~A, and
 $\widetilde\EC^{\mathrm{emp}}_{jm,t}\equiv
-\sum_p \tilde w^{\mathrm{emp}}_{jmp,t}$ its employment-mass analogue
+\sum_p \tilde w^{c,\mathrm{emp}}_{jmp,t}$ its employment-mass analogue
 under Variant~B. The muni-level political-mass scales
-$\log\bar L^{\mathrm{affil}}_{m,t}$ (Variant~A) and $\log\bar E_{m,t}$
+$\log\bar L^{c,\mathrm{affil}}_{m,t}$ (Variant~A) and $\log\bar E^c_{m,t}$
 (Variant~B) are added to the controls in~\eqref{eq:struct} to absorb
 the level of muni political mass without absorbing the across-sector
 tilt that identifies $\beta$.
 
 \paragraph{Implementation.}
-We treat the intensity-based
-instruments~\eqref{eq:Z-M}--\eqref{eq:Z-MGP} as the base specification
-and report $\tilde Z^{c,\mathrm{own}}_{jmt}$ and
-$\tilde Z^{c,\mathrm{emp}}_{jmt}$ alongside in first-stage and AR
-robustness tables. The three specifications are non-nested but share
-the same identification skeleton; differences across them are
-informative about which mass concept actually predicts sector
-employment shares in the data.
+The primary instrument in first-stage and AR tables is
+$\tilde Z^{c,\mathrm{own}}_{jmt}$ (Variant~A). The intensity-based
+$Z^{c}_{jmt}$ in~\eqref{eq:Z-M}--\eqref{eq:Z-MGP} is reported as the
+across-sector-normalization robustness and
+$\tilde Z^{c,\mathrm{emp}}_{jmt}$ (Variant~B) as the
+within-cell-aggregation robustness. The three are non-nested but
+share the same identification skeleton; differences across them are
+informative about which mass concept predicts sector employment
+shares in the data.
+
+\subsection{The shift-share form of the cross-office instruments}
+
+We present the shift-share form using the within-cell intensity
+weights $w^{c}_{jmp,t}$ from~\eqref{eq:wjmp}; this is the cleanest
+notation for the BJS derivation that follows. The primary instrument
+$\tilde Z^{c,\mathrm{own}}_{jmt}$ is the analogous shift-share with
+the muni-level weights of~\eqref{eq:w-own-rel} substituted for
+$w^{c}_{jmp,t}$. With $w^{c}_{jmp,t}$ and the firm-level
+instrument~\eqref{eq:FA-firm} in hand, the four sector-level
+levels instruments are
+\begin{align}
+  Z^{\mathrm{M}}_{jmt}
+    &\equiv \sum_{p} w^{\mathrm{M}}_{jmp,t}\,\Align^{\mathrm{M}}_{mpt},
+    \label{eq:Z-M}\\
+  Z^{\mathrm{M{\cdot}P}}_{jmt}
+    &\equiv \sum_{p} w^{\mathrm{M{\cdot}P}}_{jmp,t}\,\Align^{\mathrm{M{\cdot}P}}_{mpt},
+    \label{eq:Z-MP}\\
+  Z^{\mathrm{M{\cdot}G}}_{jmt}
+    &\equiv \sum_{p} w^{\mathrm{M{\cdot}G}}_{jmp,t}\,\Align^{\mathrm{M{\cdot}G}}_{mpt},
+    \label{eq:Z-MG}\\
+  Z^{\mathrm{M{\cdot}G{\cdot}P}}_{jmt}
+    &\equiv \sum_{p} w^{\mathrm{M{\cdot}G{\cdot}P}}_{jmp,t}\,\Align^{\mathrm{M{\cdot}G{\cdot}P}}_{mpt}.
+    \label{eq:Z-MGP}
+\end{align}
+For backward compatibility with the rest of the document we let
+$Z^{c}_{jmt}$ denote a generic channel
+$c\in\{\mathrm{M},\mathrm{M{\cdot}P},\mathrm{M{\cdot}G},
+\mathrm{M{\cdot}G{\cdot}P}\}$ and $\Align^{c}_{mpt}$ its shift. The
+changes variant is
+\begin{equation}\label{eq:dZ}
+  \Delta Z^{c}_{jmt}
+  \;\equiv\;
+  \sum_{p} w^{c}_{jmp,t}\,\Delta\Align^{c}_{mpt},
+  \qquad
+  \Delta\Align^{c}_{mpt} \equiv \Align^{c}_{mpt}-\Align^{c}_{mp,t-1},
+\end{equation}
+which is non-zero in any year in which any of the offices entering $c$
+turns over.
+
+\paragraph{The owner-count-weighted aggregation identity.}
+Each $Z^{c}_{jmt}$ is a within-region inner product of \emph{shares}
+$w^{c}_{jmp,t}$ (sector-municipality exposure to party $p$, on
+the pre-earliest-election channel window) and \emph{shifts}
+$\Align^{c}_{mpt}$ (whether $p$ controls the offices defining $c$ at
+time $t$). It is the
+sector-aggregated counterpart of the firm-level
+instrument~\eqref{eq:FA-firm}: substituting~\eqref{eq:wjmp-as-avg}
+into~\eqref{eq:Z-M}--\eqref{eq:Z-MGP} and reordering sums gives
+\begin{equation}\label{eq:agg-identity}
+  Z^{c}_{jmt}
+  \;=\;
+  \sum_{p} w^{c}_{jmp,t}\,\Align^{c}_{mpt}
+  \;=\;
+  \sum_{p}\Bigg[\sum_{f\in\cF^{\mathrm{pre},c}_{jm,t}}
+       \frac{L_{f,t}}{N^{c}_{jm,t}}\,\omega^{c}_{fp,t}\Bigg]
+       \Align^{c}_{mpt}
+  \;=\;
+  \sum_{f\in\cF^{\mathrm{pre},c}_{jm,t}}
+       \frac{L_{f,t}}{N^{c}_{jm,t}}\,\FA^{c}_{fmt}.
+\end{equation}
+The sector instrument is a weighted average of the firm-level
+instruments across firms in the pre-period support, with weights given
+by each firm's share of total owner-counts in the cell. The
+identity~\eqref{eq:agg-identity} verifies diagnostically: collapsing
+firm instruments by these weights recovers the sector instrument.
+
 
 \subsection{BJS conditions, mapped to our setting}
 
@@ -939,7 +979,7 @@ quasi-random assignment condition \autoref{cond:BJS1} if, between
 consecutive inauguration dates $e,e'\in E_c$ with $e<e'$,
 \begin{equation}\label{eq:lvl-cond}
   \E\!\left[\Align^{c}_{mp,e+\tau}\,\big|\,
-    \{w^{\mathrm{M}}_{jmp,e}\}_{j},\,\mathcal{H}_{m,e-1},\, q_{k}\right]
+    \{w^{c}_{jmp,e}\}_{j},\,\mathcal{H}_{m,e-1},\, q_{k}\right]
   \;=\;
   \mu_\tau(q_k),
   \qquad \tau=1,\dots,e'-e,
@@ -952,7 +992,7 @@ post-inauguration interval.
 \autoref{cond:BJS1} if, for every $t\in E_c$,
 \begin{equation}\label{eq:chg-cond}
   \E\!\left[\Delta\Align^{c}_{mpt}\,\big|\,
-    \{w^{\mathrm{M}}_{jmp,t}\}_{j},\,\mathcal{H}_{m,t-1},\, q_{k}\right]
+    \{w^{c}_{jmp,t}\}_{j},\,\mathcal{H}_{m,t-1},\, q_{k}\right]
   \;=\;
   \mu(q_k),
 \end{equation}
@@ -1018,7 +1058,7 @@ mayoral cycle, so $q_k$ must absorb anything that correlates persistently
 within a cycle with both alignment and outcomes (e.g.\ a slow-moving
 regional growth differential). Including a pre-period GDP trend, lagged
 $Y_{m,t-1}$, or muni-specific linear trends are natural strengthenings;
-the 2002-fixed baseline in $\omega^{\mathrm{M}}_{fp,t}$ also reduces the
+the 2002-fixed baseline in $\omega^{c}_{fp,t}$ also reduces the
 dependence on contemporaneous alignment-cycle dynamics. For the cross-office
 channels, the inter-inauguration intervals are at most two years, so the
 within-interval persistence requirement is correspondingly weaker: the
