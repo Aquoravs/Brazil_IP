@@ -1,0 +1,182 @@
+\documentclass{article}
+\usepackage[top=2.3cm, bottom=2.3cm, left=2.1cm, right=2.1cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{bbm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{iftex}
+\usepackage[default,regular,black]{sourceserifpro}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+\fi
+\hypersetup{colorlinks,linkcolor={blue},citecolor={blue},urlcolor={red}}
+
+% Colour for the controls toggled on/off across the four specifications.
+\definecolor{toggle}{RGB}{179,89,0}
+\newcommand{\tog}[1]{\textcolor{toggle}{#1}}
+
+% ====== Notation macros (identical to ar_test_specification.tex) ======
+\newcommand{\Align}{\mathrm{Align}}
+\newcommand{\FA}{\mathrm{FA}}
+\newcommand{\EC}{\mathrm{EC}}
+\newcommand{\Vol}{\mathrm{Vol}}
+\newcommand{\ind}{\mathbf{1}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\bzero}{\mathbf{0}}
+\newcommand{\iotaVec}{\boldsymbol{\iota}}
+
+% Allow line breaks in \texttt for long paths
+\renewcommand{\ttdefault}{lmtt}
+\sloppy
+
+\begin{document}
+
+\title{Anderson--Rubin Test: Specification and Variable Construction\\[2pt]
+       \large Companion to the May 14, 2026 slides}
+\author{}
+\date{}
+\maketitle
+
+\noindent
+
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{12pt}
+
+\section{The estimating equation}\label{sec:eq}
+
+Every cell on the slides comes from one cluster-robust OLS regression at the
+municipality--year level:
+\begin{equation}\label{eq:rf}
+  \log\mathrm{GDP}_{mt}
+  \;=\;
+  \alpha_m + \delta_t
+  \;+\; \gamma^{c\prime}\,Z^{c}_{mt}
+  \;+\; \tog{\psi^{c\prime}\,\EC^{c}_{mt}}
+  \;+\; \tog{\lambda\,\Vol_{mt}}
+  \;+\; \eta_{mt}.
+\end{equation}
+This is the AR \emph{reduced form}: the GDP equation with the sector
+employment-share vector $s_{mt}$ substituted out through its first stage on the
+instruments. The exposure controls
+$\EC^{c}_{mt}$ and the volume control $\Vol_{mt}$ are toggled on and off
+across the four control specifications of \autoref{sec:specs}; the instruments
+$Z^{c}_{mt}$ and the fixed effects $\alpha_m, \delta_t$ enter every regression.
+
+\begin{itemize}[leftmargin=*,nosep]
+\item $Z^{c}_{mt}$ stacks the $K-1$ retained sector instruments for alignment channel
+  $c$; $\EC^{c}_{mt}$ stacks the matching $K-1$ exposure controls. Both are
+  defined in \autoref{sec:vars}.
+\item $\alpha_m,\delta_t$ are municipality and year fixed effects. Standard
+  errors are clustered by municipality.
+\item The reported \textbf{AR joint $F$} is the cluster-robust Wald statistic
+  for $\gamma^{c}=\bzero$---the joint significance of \emph{channel $c$'s
+  instruments only}. Under the optimality null $H_0:\beta=\bzero$ this Wald
+  test is the AR test.
+  $\EC^{c}_{mt}$ and $\Vol_{mt}$ are partialled out, not tested.
+\item This is a \emph{per-channel} run: each regression carries one channel's
+  instruments, not a stacked four-channel set.
+\end{itemize}
+
+\section{The four control specifications}\label{sec:specs}
+
+The four columns of every slide table differ only in which controls join
+$Z^{c}_{mt}$ on the right-hand side of~\eqref{eq:rf}.
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Slide label & Regressors beyond FE & Purpose of the added control \\
+\midrule
+No controls   & $Z^{c}$                                & --- \\
+$+$ EC        & $Z^{c},\ \tog{\EC^{c}}$                & absorb the baseline exposure share channel \\
+$+$ Vol       & $Z^{c},\ \tog{\Vol}$                   & absorb the BNDES volume channel \\
+$+$ Vol $+$ EC& $Z^{c},\ \tog{\EC^{c}},\ \tog{\Vol}$   & both \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{The four channels}\label{sec:channels}
+
+Each alignment channel $c$ pairs a set of political offices with an alignment shock
+$\Align^{c}_{mpt}$. The cross-office shocks are products of tier-specific
+alignment indicators.
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Channel & Offices & $\Align^{c}_{mpt}=1$ when party $p$\ldots \\
+\midrule
+M       & mayor                  & holds the mayoralty of $m$ \\
+M$\cdot$P   & mayor, president   & holds the mayoralty \emph{and} is in the presidential coalition \\
+M$\cdot$G   & mayor, governor    & holds the mayoralty \emph{and} is in the governor's coalition of $s(m)$ \\
+M$\cdot$G$\cdot$P & mayor, gov., pres. & is aligned at all three tiers simultaneously \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Variable construction}\label{sec:vars}
+
+\subsection*{Outcome --- $\log\mathrm{GDP}_{mt}$}
+Municipal log GDP (at 2018 prices), 2002--2017.
+
+\subsection*{Instrument --- $Z^{c}_{jmt}$ (muni-relative owner share)}
+
+\begin{enumerate}[leftmargin=*,nosep]
+\item \textbf{Primitive: owner-party counts.} $L_{f,p,s}$ is the number of
+  owners of firm $f$ affiliated with party $p$ in year $s$. Owners with no party affiliation are
+  dropped: the denominator counts politically-affiliated owner-years
+  only.
+\item \textbf{Pre-earliest-election window.}
+  $T^{c}_{t}=[\,e^{\min}_{c}(t)-4,\ e^{\min}_{c}(t)-1\,]\cap[2002,2017]$, where
+  $e^{\min}_{c}(t)$ is the most recent election, on or before $t$, among the
+  offices in channel $c$ (mayoral elections 2000/04/08/12/16; coincident
+  governor and president 2002/06/10/14). The window closes before any office in
+  the channel can turn over, so the weights are predetermined relative to the
+  shock.
+\item \textbf{Owner-share weight.}
+  \[
+    \tilde w^{c}_{jmp,t}
+    \;=\;
+    \frac{\bar L^{c}_{jmp,t}}{\bar L^{c,\mathrm{affil}}_{m,t}}
+    \;=\;
+    \frac{\displaystyle\sum_{s\in T^{c}_{t}}\ \sum_{f\in\cF(j,m)} L_{f,p,s}}
+         {\displaystyle\sum_{j'}\sum_{p'}\ \sum_{s\in T^{c}_{t}}\
+          \sum_{f\in\cF(j',m)} L_{f,p',s}},
+  \]
+  the share of municipality $m$'s pre-window affiliated owner-years that sit in
+  sector $j$ at party $p$. The numerator $\bar L^{c}_{jmp,t}$ is the count of
+  pre-window owner-years in cell $(j,m)$ affiliated with party $p$ --- the
+  firm-level counts $L_{f,p,s}$ of step~1 summed over the firms ever active in
+  sector $j$ of municipality $m$, $\cF(j,m)$, and over the window years
+  $s\in T^{c}_{t}$. The denominator $\bar L^{c,\mathrm{affil}}_{m,t}$ sums that
+  numerator over all sectors $j'$ and parties $p'$ in $m$. The muni-level
+  normalization carries information about each cell's \emph{size} in the local
+  economy, which a within-cell intensity weight discards.
+\item \textbf{Shift and stack.}
+  $Z^{c}_{jmt}=\sum_{p}\tilde w^{c}_{jmp,t}\,\Align^{c}_{mpt}$, then reshaped to
+  one column per retained sector.
+\end{enumerate}
+
+\subsection*{Exposure control --- $\EC^{c}_{jm,t}$}
+The same weights, summed over parties \emph{without} the shift:
+\[
+  \EC^{c}_{jm,t}\;=\;\sum_{p}\tilde w^{c}_{jmp,t},
+\]
+cell $(j,m)$'s share of the municipality's affiliated owner mass. It absorbs
+the share-component confounding of the shift-share instrument. One column per retained sector per
+channel.
+
+\subsection*{Volume control --- $\Vol_{mt}$}
+\[
+  \Vol_{mt}
+  \;=\;
+  \frac{\mathrm{BNDES\_total}_{mt}}{\mathrm{GDP}_{m,2002}},
+\]
+represents the current-year total municipal BNDES disbursements over \emph{initial-period}
+(2002) municipal GDP. The denominator is fixed pre-treatment, so $\Vol_{mt}$
+varies in $t$ only through the numerator.
+
+\end{document}

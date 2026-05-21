@@ -13,41 +13,34 @@
 \usepackage{graphicx}
 \usepackage{makecell}
 \title{\textbf{Updated AR Test Results}}
-\date{}
+\date{May 14, 2026}
 \begin{document}
 
 \begin{frame}
 \titlepage
 \end{frame}
 
-\begin{frame}{Headline date}
-\centering
-\vfill
-{\Large May 14, 2026}
-\vfill
-\end{frame}
-
 \begin{frame}{Overview}
 \begin{itemize}\setlength{\itemsep}{0.45em}
-\item \textbf{Question.} Under the updated instrument convention (Variant A muni-relative owner-share, pre-earliest-election window), does the Anderson-Rubin test reject $H_0\!:\!\beta=0$ on sector employment shares?
-\item \textbf{Two taxonomies.} Policy block (Agriculture, Industry, Infrastructure, Services; $K=4$); firm-size (MPME, Media, Grande; $K=3$).
+\item \textbf{Instrument} An updated version of the instrument was implemented (muni-relative owner-share, pre-earliest-election window).
+\item \textbf{Two taxonomies.} Aggregate BNDES industries (Agriculture, Industry, Infrastructure, Services); firm-size (Small $\leq$ 49, Medium 50--249, Big $\geq$ 250).
 \item \textbf{Four control specs.} (1) No controls; (2) $+$ EC (per-cell exposure control); (3) $+$ Vol (volume control); (4) $+$ Vol $+$ EC.
-\item \textbf{Four channels.} Mayor; Mayor $\cdot$ President; Mayor $\cdot$ Governor; Mayor $\cdot$ Gov.\ $\cdot$ President.
-\item All regressions use municipality and year FE; one-way cluster on \texttt{muni\_id}.
+\item Volume control: total BNDES disbursements over 2002 municipal GDP.
+\item \textbf{Four alignment channels.} Mayor; Mayor $\cdot$ President; Mayor $\cdot$ Governor; Mayor $\cdot$ Gov.\ $\cdot$ President.
+\item \textbf{Sample.} 5,544 municipalities; 88,694 municipality-years.
+\item All regressions use municipality and year fixed effects; standard errors clustered by municipality.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Summary of Results}
+\begin{itemize}\setlength{\itemsep}{0.45em}
+\item The AR test \textit{rejects} at 5\% in some specs for both BNDES sectors and firm size.
+\item The volume control shifts $F$ negligibly and does not have a significant nor relevant coefficient; the EC controls (per-cell) move $F$ in both directions.
 \end{itemize}
 \end{frame}
 
 \input{slides_body_policy_block.tex}
 \input{slides_body_size_bin.tex}
-
-\begin{frame}{Bottom Line}
-\begin{itemize}\setlength{\itemsep}{0.45em}
-\item Under Variant A weights with pre-earliest-election windows, the AR test \textit{rejects} at 5\% in two cells: (M $\cdot$ G, $+$ EC) and (M $\cdot$ G, $+$ Vol $+$ EC) for policy\_block; (M $\cdot$ P, no controls / $+$ Vol) and (M $\cdot$ G, $+$ EC / $+$ Vol $+$ EC) for size\_bin.
-\item The volume control (single coefficient) shifts $F$ negligibly; the EC controls (per-cell, $K-1$ columns) move $F$ in both directions.
-\item Size\_bin power is constrained ($K-1=2$ instruments per channel).
-\item Per-channel coefficients reported on the following slides for inspection.
-\end{itemize}
-\end{frame}
 
 \end{document}
 

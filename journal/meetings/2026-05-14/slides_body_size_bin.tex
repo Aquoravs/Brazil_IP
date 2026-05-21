@@ -1,15 +1,5 @@
-\begin{frame}{Firm Size (S3) --- Setup}
-\begin{itemize}\setlength{\itemsep}{0.4em}
-\item \textbf{Taxonomy:} Firm Size (S3). $K=3$; hold-out sector: \textbf{Grande}.
-\item \textbf{Levels:} MPME, Media, Grande.
-\item Weights: Variant A (muni-relative aligned-owner share), pre-earliest-election window.
-\item Volume control: $\mathrm{vol}_{mt} = \mathrm{total\_bndes\_real}_{mt} / \mathrm{pib\_real}_{m,2002}$.
-\item FE: municipality + year. SE: one-way cluster on \texttt{muni\_id}.
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Firm Size (S3) --- AR joint $F$}
-{\footnotesize Variant A weights, pre-earliest-election window.}
+\begin{frame}{Firm Size --- AR joint $F$}
+{\footnotesize Muni-relative owner-share weights, pre-earliest-election window.}
 \vskip 0.25em
 \resizebox{\textwidth}{!}{%
 \setlength{\tabcolsep}{4pt}%
@@ -22,25 +12,25 @@ $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.
 [$p$] is the $p$-value; reject at 5\% iff $p<0.05$.}
 \end{frame}
 
-\begin{frame}{Firm Size (S3) --- Coefficients: Mayor}
+\begin{frame}{Firm Size --- Coefficients: Mayor}
 \input{tables/ar_table_coefs_size_bin_M.tex}
 \vskip 0.25em
 {\footnotesize SE in parentheses. EC (mean) row reports the mean coefficient across the $K-1$ EC controls. Stars: $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.}
 \end{frame}
 
-\begin{frame}{Firm Size (S3) --- Coefficients: Mayor $\cdot$ President}
+\begin{frame}{Firm Size --- Coefficients: Mayor $\cdot$ President}
 \input{tables/ar_table_coefs_size_bin_MP.tex}
 \vskip 0.25em
 {\footnotesize SE in parentheses. EC (mean) row reports the mean coefficient across the $K-1$ EC controls.}
 \end{frame}
 
-\begin{frame}{Firm Size (S3) --- Coefficients: Mayor $\cdot$ Governor}
+\begin{frame}{Firm Size --- Coefficients: Mayor $\cdot$ Governor}
 \input{tables/ar_table_coefs_size_bin_MG.tex}
 \vskip 0.25em
 {\footnotesize SE in parentheses. EC (mean) row reports the mean coefficient across the $K-1$ EC controls.}
 \end{frame}
 
-\begin{frame}{Firm Size (S3) --- Coefficients: Mayor $\cdot$ Gov. $\cdot$ President}
+\begin{frame}{Firm Size --- Coefficients: Mayor $\cdot$ Gov. $\cdot$ President}
 \input{tables/ar_table_coefs_size_bin_MGP.tex}
 \vskip 0.25em
 {\footnotesize SE in parentheses. EC (mean) row reports the mean coefficient across the $K-1$ EC controls.}

@@ -1,15 +1,5 @@
-\begin{frame}{Policy Block --- Setup}
-\begin{itemize}\setlength{\itemsep}{0.4em}
-\item \textbf{Taxonomy:} Policy Block. $K=4$; hold-out sector: \textbf{Services}.
-\item \textbf{Levels:} Agriculture, Industry, Infrastructure, Services.
-\item Weights: Variant A (muni-relative aligned-owner share), pre-earliest-election window.
-\item Volume control: $\mathrm{vol}_{mt} = \mathrm{total\_bndes\_real}_{mt} / \mathrm{pib\_real}_{m,2002}$.
-\item FE: municipality + year. SE: one-way cluster on \texttt{muni\_id}.
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Policy Block --- AR joint $F$}
-{\footnotesize Variant A weights, pre-earliest-election window.}
+\begin{frame}{BNDES Sectors --- AR joint $F$}
+{\footnotesize Muni-relative owner-share weights, pre-earliest-election window.}
 \vskip 0.25em
 \resizebox{\textwidth}{!}{%
 \setlength{\tabcolsep}{4pt}%
@@ -22,25 +12,25 @@ $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.
 [$p$] is the $p$-value; reject at 5\% iff $p<0.05$.}
 \end{frame}
 
-\begin{frame}{Policy Block --- Coefficients: Mayor}
+\begin{frame}{BNDES Sectors --- Coefficients: Mayor}
 \input{tables/ar_table_coefs_policy_block_M.tex}
 \vskip 0.25em
 {\footnotesize SE in parentheses. EC (mean) row reports the mean coefficient across the $K-1$ EC controls. Stars: $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.}
 \end{frame}
 
-\begin{frame}{Policy Block --- Coefficients: Mayor $\cdot$ President}
+\begin{frame}{BNDES Sectors --- Coefficients: Mayor $\cdot$ President}
 \input{tables/ar_table_coefs_policy_block_MP.tex}
 \vskip 0.25em
 {\footnotesize SE in parentheses. EC (mean) row reports the mean coefficient across the $K-1$ EC controls.}
 \end{frame}
 
-\begin{frame}{Policy Block --- Coefficients: Mayor $\cdot$ Governor}
+\begin{frame}{BNDES Sectors --- Coefficients: Mayor $\cdot$ Governor}
 \input{tables/ar_table_coefs_policy_block_MG.tex}
 \vskip 0.25em
 {\footnotesize SE in parentheses. EC (mean) row reports the mean coefficient across the $K-1$ EC controls.}
 \end{frame}
 
-\begin{frame}{Policy Block --- Coefficients: Mayor $\cdot$ Gov. $\cdot$ President}
+\begin{frame}{BNDES Sectors --- Coefficients: Mayor $\cdot$ Gov. $\cdot$ President}
 \input{tables/ar_table_coefs_policy_block_MGP.tex}
 \vskip 0.25em
 {\footnotesize SE in parentheses. EC (mean) row reports the mean coefficient across the $K-1$ EC controls.}
