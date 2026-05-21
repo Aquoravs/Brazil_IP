@@ -17,6 +17,7 @@
 7. **Exit plan mode** — only after approval
 8. **Save initial session log** — capture goal and key context while fresh
 9. **Implement via orchestrator** — see Section 2
+10. **Close the plan** — when all phases are verified complete, update the plan's `status:` frontmatter to `COMPLETED` and add `completed: YYYY-MM-DD`. Update the Status prose to a one-paragraph summary of what was done and what remains deferred. This step is **mandatory** — a plan that was executed but left as `IN PROGRESS` is a documentation lie. Do it in the same commit as the final work, or as a standalone commit immediately after.
 
 ### Requirements Specification (For Complex/Ambiguous Tasks)
 
