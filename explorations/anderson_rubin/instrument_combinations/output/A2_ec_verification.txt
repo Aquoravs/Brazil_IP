@@ -1,0 +1,16 @@
+# A2 EC adequacy — built-object verification
+# generated 2026-05-20 19:54:39.171299 | tax=policy_block
+
+A1  EC == sum_p w_tilde (recomputed vs saved): max abs dev = 6.661e-16 [PASS]
+A1  weights table columns: muni_id, year, channel, sector, party, w_tilde, T_Fc_lo, T_Fc_hi
+A1  channels in weights: M, MG, MGP, MP
+A2  `slack`-type columns carried in pipeline: NONE [PASS — correct for muni-relative weight]
+A2  sum_j EC over full sector set: n(=1)=264168  n(=0)=0  n(other)=0 [PASS]
+A2  per-sector EC_val range: [0.0002, 1.0000]; mean = 0.3380
+A2  share of cells with EC_val strictly in (0,1): 96.5% (incomplete shares => per-sector EC is the BHJ control)
+A3  hold-out sector: Serv; retained: Agro, Ind, Infra
+A3  panel Z columns (12): Z_MGP_Agro, Z_MGP_Ind, Z_MGP_Infra, Z_MG_Agro, Z_MG_Ind, Z_MG_Infra, Z_MP_Agro, Z_MP_Ind, Z_MP_Infra, Z_M_Agro, Z_M_Ind, Z_M_Infra
+A3  panel EC columns (12): EC_MGP_Agro, EC_MGP_Ind, EC_MGP_Infra, EC_MG_Agro, EC_MG_Ind, EC_MG_Infra, EC_MP_Agro, EC_MP_Ind, EC_MP_Infra, EC_M_Agro, EC_M_Ind, EC_M_Infra
+A3  Z sector set == EC sector set == retained set: [PASS]
+A4  window rows with T_Fc_hi >= t (contemporaneous leakage): 0 [PASS]
+A4  window span: T_Fc_hi - t ranges [-4, -1] (all negative => pre-t)

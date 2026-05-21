@@ -1,0 +1,22 @@
+# A6 coverage / concentration audit
+# generated 2026-05-20 20:01:44.083725 | tax=policy_block
+
+(b) Effective number of shocks n_eff = 1 / sum w_tilde^2, per channel:
+    M     n_eff: min=1.00 p10=2.46 med=8.48 mean=9.42 p90=17.64 max=37.11
+    MG    n_eff: min=1.00 p10=2.38 med=8.22 mean=9.14 p90=17.12 max=36.07
+    MGP   n_eff: min=1.00 p10=2.38 med=8.22 mean=9.14 p90=17.12 max=36.07
+    MP    n_eff: min=1.00 p10=2.38 med=8.22 mean=9.14 p90=17.12 max=36.07
+
+(a) Cell affiliated-owner count L_{jm,t}, per channel (thin <= 5):
+    M     L: min=1 p10=2.0 med=15 mean=78.9 p90=150.0 max=49615 | thin cells=28.1%
+    MG    L: min=1 p10=2.0 med=16 mean=81.9 p90=158.0 max=46683 | thin cells=27.2%
+    MGP   L: min=1 p10=2.0 med=16 mean=81.9 p90=158.0 max=46683 | thin cells=27.2%
+    MP    L: min=1 p10=2.0 med=16 mean=81.9 p90=158.0 max=46683 | thin cells=27.2%
+
+(c) GDP mass in thin-identified muni-years (dominant retained cell <= 5 owners):
+    M     thin muni-years=21.7%  but GDP share in them=1.77%
+    MG    thin muni-years=20.8%  but GDP share in them=1.76%
+    MGP   thin muni-years=20.8%  but GDP share in them=1.76%
+    MP    thin muni-years=20.8%  but GDP share in them=1.76%
+
+Reading: the muni-relative denominator keeps the per-channel weight thick; thin cells exist (small munis) but carry a tiny share of GDP mass, so the AR estimand is not driven by them.

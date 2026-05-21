@@ -1,0 +1,18 @@
+# A5 — EC functional-form sensitivity
+# generated 2026-05-20 19:56:33.611296 | tax=policy_block
+
+EC functional forms compared: linear (production) / quad (EC + EC^2) /
+bins (EC terciles). `none` = no EC (uncontrolled benchmark, reported but
+outside the stability test).
+AR statistic = muni-clustered joint Wald F on the channel's Z's.
+
+  M    vol=FALSE | EC-forms AR_F in [0.477, 0.506] (spread 0.030), reject@5%: FALSE/FALSE/FALSE [STABLE] | benchmark none: F=0.617 p=0.6042
+  M    vol=TRUE  | EC-forms AR_F in [0.477, 0.506] (spread 0.030), reject@5%: FALSE/FALSE/FALSE [STABLE] | benchmark none: F=0.617 p=0.604
+  MP   vol=FALSE | EC-forms AR_F in [1.026, 1.394] (spread 0.368), reject@5%: FALSE/FALSE/FALSE [STABLE] | benchmark none: F=1.861 p=0.1337
+  MP   vol=TRUE  | EC-forms AR_F in [1.026, 1.394] (spread 0.368), reject@5%: FALSE/FALSE/FALSE [STABLE] | benchmark none: F=1.861 p=0.1337
+  MG   vol=FALSE | EC-forms AR_F in [3.632, 3.986] (spread 0.354), reject@5%: TRUE/TRUE/TRUE [STABLE] | benchmark none: F=2.147 p=0.09207
+  MG   vol=TRUE  | EC-forms AR_F in [3.640, 3.993] (spread 0.353), reject@5%: TRUE/TRUE/TRUE [STABLE] | benchmark none: F=2.151 p=0.09152
+  MGP  vol=FALSE | EC-forms AR_F in [0.786, 1.126] (spread 0.341), reject@5%: FALSE/FALSE/FALSE [STABLE] | benchmark none: F=1.022 p=0.3817
+  MGP  vol=TRUE  | EC-forms AR_F in [0.786, 1.127] (spread 0.341), reject@5%: FALSE/FALSE/FALSE [STABLE] | benchmark none: F=1.022 p=0.3817
+
+CONCLUSION STABLE across EC functional forms (linear/quad/bins) for every channel x volume combination — EC functional-form dependence is not a concern.
