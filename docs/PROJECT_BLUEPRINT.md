@@ -15,6 +15,7 @@ Read this at the start of every session. This repository is in an exploration an
 |---|---|
 | Current state catalog | [research_state.md](research_state.md) |
 | Decisions and supersession status | [decision_log.md](decision_log.md) |
+| Defenses of design choices (advisor / referee Q&A) | [design_defenses.md](design_defenses.md) |
 | Evidence and use-status map | [evidence_index.md](evidence_index.md) |
 | Taxonomy and margin catalog | [taxonomies.md](taxonomies.md) |
 | AR method draft | [methodology/ar_test_specification.tex](methodology/ar_test_specification.tex) |
@@ -53,7 +54,7 @@ Current working method facts:
 
 - Endogenous object: sector employment shares on the RAIS contemporaneous-unbalanced skeleton, with per-cell BHJ §4.4 slack control carried through to the muni panel (D29).
 - Volume channel: primary control = `total_bndes_real / initial_gdp_m,0` on RAIS-merged productive-firm disbursements; split-volume robustness adds non-RAIS productive, FI, and public components separately (D30).
-- Exposure weights: frozen on `[e(t)-4, e(t)-1]`, Variant A primary (D27, D29).
+- Exposure weights: cross-office primary uses channel-specific pre-earliest-election windows with no coalition gating; mayoral-window exposure is the main robustness (D31). Existing production weight code must be aligned to this timing decision before the cross-office stack is treated as final implementation.
 - Instrument draft: cross-office channels `M`, `MP`, `MG`, and `MGP` are in the methodology draft.
 - F-link status: F1 CONFIRMED at graduated margins; F2 CONFIRMED at `policy_block` primary (F=4.37) and `cnae_section` robustness (F=2.05); F3 PARTIAL (pre-trend characterization complete; presidential residual flagged; mayor clean; governor resolved as specification artifact); F4 PARTIAL — `policy_block x S3` weight graduation still BLOCKED per D28.
 - Implementation: stage 32c (new) feeds modified stages 41/53/54.
@@ -118,9 +119,11 @@ Any taxonomy requiring a new production crosswalk is production-ready only after
 | `explorations/firm_universe/rais_coverage_audit/` | COMPLETED. |
 | `explorations/firm_universe/bndes_recipient_audit/` | COMPLETED. |
 | `explorations/anderson_rubin/mass_weighted_first_stage/` | Open (diagnostic). |
+| `explorations/anderson_rubin/instrument_combinations/` | Open. Phase A (EC adequacy audit) complete 2026-05-20 — D32 reinforced. Phases B (seven-channel saturated first stages + routing) and C (`policy_block × S3` 12-group margin) complete 2026-05-20 — D33–D37 logged; results carried by the 2026-05-21 meeting deck. Deferred: per-channel F3 placebo/falsification on the routing-relevant channels (run after the meeting). |
+| `explorations/anderson_rubin/ar_meeting_2026_05_13/` | Open. Wide-form first-stage plan (2026-05-21): relevance is now judged by the wide-form first stage, not the stacked-long form — D38 logged. Phase 1A (`B7`) found the wide-form instrument block well-conditioned at both margins. Phase 1B (`B8` + `B4`) is complete: all 18 stacks were evaluated, and all seven singleton channels route to composition at both margins. Awaiting user checkpoint #2 before Phase 2. |
 
 ## Next Action
 
-Phase 4 documentation (in flight). After E4.1 (methodology PDF) and E4.3 (memo) complete, the blueprint front-door is up to date and the project is ready for the next research-question step — likely (a) further pre-trend documentation, (b) AKM SE implementation, or (c) the deferred `policy_block x S3` production margin work.
+Resolve **checkpoint #2** of the wide-form first-stage plan (`journal/plans/2026-05-21_multi-channel-first-stages.md`): choose which composition instrument set(s) to carry into Phase 2. Phase 1B (`B8`) evaluated all 18 stacks at both margins with the AR-matching wide-form first stage; `B4` now routes from the B8 wide-form verdict rather than stacked-form B2/B3 outputs. After the user selects the set(s), run Phase 2 (the `B6` AR-test extension). Still deferred: the per-channel F3 placebo/falsification on the routing-relevant channels, Phase 4 documentation (E4.1 methodology PDF, E4.3 memo), and the `policy_block × S3` production-margin work.
 
 Do not relitigate the econometrics in this front door. Update the detailed state files when decisions change, then keep this file short.

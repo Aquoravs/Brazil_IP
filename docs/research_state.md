@@ -33,7 +33,7 @@ Phase 4 documentation is in flight. The firm-support hybrid (D29) graduated `pol
 |---|---|---|---|
 | Production margin | GRADUATED for `policy_block` primary + `cnae_section` robustness (D29); BLOCKED for `policy_block_active x S3` (D28) | Hybrid skeleton implemented in stage 32c -> 41/53/54. | Phase 4 documentation; then optionally revisit `policy_block_active x S3` graduation. |
 | Instrument form | PROVISIONAL | Methodology draft uses cross-office channels `M`, `MP`, `MG`, `MGP`; office-specific electoral coalitions for higher-tier alignment. | Theory/econometric review continues in E4.1. |
-| Exposure timing / weights | SETTLED for hybrid window | Weights frozen on `[e(t)-4, e(t)-1]` per D29; Variant A primary per D27. A7 supports `w_owners_muni_univ` at `policy_block`. | Size-crossed weight graduation deferred. |
+| Exposure timing / weights | SETTLED for cross-office timing (D31) | Primary cross-office weights use the channel-specific pre-earliest-election window with no coalition gating. Mayoral-window exposure is the main mechanism-aligned robustness; higher-tier window is a second timing robustness. A7 supports `w_owners_muni_univ` at `policy_block`. | Align production weight builder / stage 31c with D31; size-crossed weight graduation deferred. |
 | Endogenous variable | SETTLED | Sector employment shares on RAIS contemporaneous-unbalanced skeleton; per-cell BHJ §4.4 slack control. | Implemented in stages 41/53/54. |
 | Volume control | SETTLED (D30) | Primary: `total_bndes_real / initial_gdp_m,0` (RAIS-merged productive-firm disbursements). Split-volume robustness includes non-RAIS productive, FI, and public flows. | Documented in methodology PDF (E4.1). |
 
