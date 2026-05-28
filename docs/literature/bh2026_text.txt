@@ -1,0 +1,3780 @@
+
+
+===== PAGE 1 =====
+
+Optimal Formula Instruments
+Kirill Borusyak
+UC Berkeley
+Peter Hull
+Brown∗
+May 2026
+Abstract
+When estimating the effects of treatments defined by complex formulas,
+researchers often use simple functions of exogenous shocks as instruments.
+A leading example is “simulated instruments” for public policy eligibility,
+which capture variation in state-level policy generosity. We show how
+more powerful instruments can be constructed by incorporating heteroge-
+neous shock exposure while using a recentering procedure to avoid bias.
+We characterize the asymptotically eﬀicient instruments in this class and
+propose an algorithm for constructing feasible approximations to them.
+Compared to a simulated instrument approach, our approach yields a
+44% smaller standard error on the private insurance crowd-out effect of
+Medicaid enrollment from the 2014 Affordable Care Act expansions.
+∗Contact: k.borusyak@berkeley.edu and peter_hull@brown.edu. Portions of this paper are based on material in
+a previously circulated working paper, Non-Random Exposure to Exogenous Shocks: Theory and Applications . We
+thank Dmitry Arkhangelsky, Tim Armstrong, Stephane Bonhomme, Kevin Chen, Tetsuya Kaji, Michal Kolesár, Lihua
+Lei, and Stefan Wager for helpful conversations. OpenAI’s ChatGPT contributed valuable insights. Refine.ink was
+used to check the paper for consistency and clarity. We thank Molly Frean, Jonathan Gruber, and Ben Sommers for
+sharing code and data; we thank David Roodman for help with the Stata boottest package. Elise Parrish provided
+outstanding research assistance.
+
+===== PAGE 2 =====
+
+1 Introduction
+Many economic variables are given by complex formulas, incorporating multiple sources of variation.
+Examples include an individual’s eligibility for a public program like Medicaid or their level of un-
+employment insurance benefits, both of which are functions of state-level policy decisions as well as
+various individual characteristics (e.g. family structure, household income, or work history). When
+estimating the causal effects of such treatments, researchers often construct instrumental variables
+(IVs) as simple functions of only one source of variation. For example, the influential “simulated
+instrument” approach of Currie and Gruber ( 1996a, 1996b) leverages state-level policy shocks by
+constructing an index of Medicaid generosity which is then used to instrument an individual’s Med-
+icaid eligibility.1 These instruments are valid when the policy shocks are exogenous and the chosen
+function of them predicts eligibility.
+This paper shows how more powerful instruments can be constructed and used in such settings.
+Intuitively, power gains can come from the instrument predicting the treatment better. This can be
+achieved by constructing the instrument as a treatment prediction that is a function (or “formula”)
+of not only the exogenous shocks but also other observables capturing observations’ differential shock
+exposure. Such treatment predictions need not be valid instruments, because of the non-random
+observables used in their construction. However, following Borusyak and Hull ( 2023), this problem
+can be addressed by “recentering” the treatment prediction: i.e., subtracting its expectation over
+the exogenous shocks, holding fixed the other observables. The class of valid formula instruments
+is therefore much broader than functions of exogenous shocks only.
+We first characterize optimal formula instruments in a general setting. We show that the asymp-
+totically eﬀicient IV involves three steps: obtaining the best predictor of the treatment from both
+the shocks and other predetermined measures of shock exposure, recentering it to avoid bias, and
+adjusting for the error term’s dependence on shock exposure and for heteroskedasticity. This result
+does not require iid data, covering a wide range of empirical settings where both observed and
+unobserved shocks—potentially varying at different “levels”—affect many observations jointly.
+We then propose an algorithm to approximate optimal IVs in practice, focusing on the first two
+steps: obtaining the best treatment predictor and recentering it. While implementing both steps
+nonparametrically may be feasible in some settings, in general they represent a high-dimensional
+problem that may be impractical or infeasible—especially in non- iid data. Instead, we propose using
+knowledge the researcher has on the treatment formula as well as the “design” (i.e., data-generating
+process) of the exogenous shocks. First, the researcher predicts the treatment from the shocks
+and other observables which enter the treatment formula, setting any unobserved or endogenous
+components of the formula to a base value (such as zero). When there are no unobserved or
+endogenous components, this prediction is the treatment itself. Second, the researcher recenters
+this prediction by drawing counterfactual sets of exogenous shocks. Optionally residualizing the
+1See also Cullen and Gruber ( 2000) and East and Kuka ( 2015) for simulated instruments in the unemployment
+insurance setting. Other simulated instrument applications include Cohodes et al. ( 2016), Frean et al. ( 2017), Brown
+et al. ( 2018), and Hackmann ( 2019).
+2
+
+===== PAGE 3 =====
+
+recentered prediction on covariates yields an approximation to the optimal instrument, up to the
+heteroskedasticity adjustment that is not popular in practice.
+Specializing this algorithm to the program eligibility setting yields a likely improvement over
+the conventional simulated instruments approach. If program eligibility is fully determined by
+predetermined observables and the policy shock, our proposed approach involves instrumenting
+an individual’s eligibility with the difference between her actual eligibility (as the best possible
+predictor) and her expected eligibility, where the expectation is taken for each individual across
+the exogenous policy shocks that could have been realized (such as realized policies of comparable
+states). If program eligibility depends on other variables, such as income that can respond endoge-
+nously to policy shocks, the researcher can imperfectly predict eligibility using lagged income and
+recenter that prediction instead.
+The proposed algorithm can also be helpful in popular settings where researchers construct
+formula instruments as certain treatment predictions, often without formal justification. Consider,
+for instance, Boustan et al. ( 2013) who construct an instrument for the change in the Gini index of
+regional income distribution. They use exogenous national shocks to incomes of different population
+groups along with initial local shares of those groups. From these data, they measure and use as an
+IV the Herfindahl change that would follow if the exogenous income shocks were the only changes
+that took place, in a nonlinear version of a Bartik ( 1991) instrument. While this instrument is
+generally not valid without recentering, our results show that the recentered version of their IV
+is approximately optimal. Our results similarly justify the shift-share instrument construction
+proposed informally by Borusyak et al. ( 2025a), from a decomposition of the endogenous treatment.
+We then demonstrate the power gains empirically, in an application to the partial 2014 Medicaid
+expansion from the Affordable Care Act (ACA). A recentered IV which incorporates variation in
+individuals’ exposure to state expansion decisions yields a 44% smaller standard error on the private
+insurance crowdout effect of Medicaid enrollment, compared to a more conventional simulated IV
+approach leveraging expansion shocks only. These power gains are robust to different IV specifica-
+tions and assumptions on the expansion shock design. Monte Carlo simulations show the minimum
+detectable effects of recentered IV are roughly three times smaller than those of simulated IV.
+Our theoretical results build on the classical literature on eﬀiciency bounds and optimal instru-
+ments in linear and partially linear models. For linear models without functional nuisance param-
+eters, Chamberlain ( 1987) characterizes the semi-parametric eﬀiciency bound (SEB) and gives an
+IV estimator that achieves the bound. More closely connected to our setting is the partially linear
+model of, e.g., Robinson ( 1988): it is the special case when the outcomes, treatments, shocks, and
+other observed characteristics are iid, with the role of the nuisance function played by the expecta-
+tion of the error term given the characteristics. There Chamberlain ( 1992) characterizes the SEB,
+Newey ( 1989) proposes an estimator that achieves this bound in the special case when the treat-
+ment is exogenous, and Ai and Chen ( 2003) derive an eﬀicient sieve-based estimator in the general
+case. Against this backdrop, our theoretical contribution is to characterize optimal instruments in
+a broad class of non- iid settings including shift-share IV and many other popular designs (Borusyak
+3
+
+===== PAGE 4 =====
+
+et al. 2025b). We develop a proof technique for such settings: we characterize the estimator that
+minimizes an approximation to the estimator variance in finite samples and verify that the approx-
+imation is accurate in large samples under suitable regularity conditions. 2 We further establish
+conditions under which split-sample estimation of the optimal instrument preserves its asymptotic
+properties and show that our optimal IV attains the Chamberlain ( 1992) SEB in the iid case.
+Most directly, we build on Borusyak and Hull ( 2023) who show how valid IVs can be derived,
+through recentering, from any formulas combining exogenous shocks and non-random measures of
+shock exposure. Here we show which formulas are theoretically best to recenter and use as IVs, and
+propose a general algorithm for approximating them in practice. 3
+In contemporaneous work, Coussens and Spiess ( 2021) characterize optimal instruments given by
+interactions of a single observation-specific shock with predetermined characteristics, highlighting
+the benefit of interacting the shock with the complier status of the individual. Our result nests
+theirs, with individual’s exposure to the shocks generalizing the complier status beyond binary
+instruments and allowing multiple shocks to affect the same observation’s treatment and the same
+shocks to affect multiple observations’ treatments. While Coussens and Spiess ( 2021) focus on
+learning the compliance status nonparametrically in iid data, we leverage a priori information on
+the structure of the treatment to approximate the optimal IV.
+We organize the rest of the paper as follows. The next section builds intuition with a simple
+example in the simulated instrument setting. Section 3 develops the theoretical results while Section
+4 demonstrates them in an application. Section 5 concludes. Additional theoretical results are given
+in Appendix A; Appendix B provides details for the application. Proofs are given in Appendix C.
+2 Motivating Example
+Consider estimating the causal effect of eligibility for a public program like Medicaid on an outcome
+like program takeup or later health. Formally, we consider a simple causal model of
+yi = βxi + εi,
+relating outcome yi for individual i to her Medicaid eligibility xi. Here εi denotes the potential
+outcome that individual i would see when ineligible for Medicaid (i.e., when xi = 0 ) and β is the
+causal parameter of interest. We wish to estimate β while allowing for the possibility of endogenous
+eligibility: i.e., that xi and εi are correlated. To focus on estimation eﬀiciency, we assume here that
+the causal effect β is homogeneous.
+2The analysis of eﬀiciency with non- iid data dates back at least to generalized least squares estimation (Aitken
+1935); optimal instruments under conditional moment restrictions in non- iid data have been most thoroughly studied
+with time-series data (e.g., Hansen ( 1985); see Anatolyev ( 2007) for a review). Our proof technique bypasses the
+need for additional structure in such analyses, such as an assumption of Gaussianity in the examples in Section 6.4
+of Newey ( 1990).
+3Our application to Medicaid eligibility effects similarly builds on an example that Borusyak and Hull ( 2023) use to
+motivate instrument recentering as a means to avoid omitted variables bias; here, we use it to motivate and illustrate
+eﬀiciency gains with our optimal IV approximation.
+4
+
+===== PAGE 5 =====
+
+Medicaid eligibility can be represented as a formula which incorporates state-level government
+policy and individual characteristics that determine an individual’s exposure to different polices.
+To formalize this, let ci be a vector of characteristics for individual i (e.g., family structure and
+income), let s(i) ∈ {1, . . . ,50} index i’s state of residence, and let gk be the Medicaid policy in state
+k formalized as the set of family types and income combinations that make one eligible for Medicaid
+in that state. Eligibility is then given by:
+xi = 1
+
+ci ∈ gs(i)
+
+.
+Consider estimation of β in an idealized scenario where Medicaid policies are drawn in a natural
+experiment: i.e., randomly from some pool of potential policies. Formally we suppose the gk are
+drawn from some distribution, independently of all ci, s(i), and εi. We do not assume the other de-
+terminants of eligibility are exogenous (i.e., unrelated to εi): individuals with certain characteristics
+or living in particular states may have systematically higher or lower potential outcomes. Hence,
+despite the exogeneity of state policies, ordinary least squares (OLS) estimation of β is likely biased.
+We need an instrument for eligibility, which is uncorrelated with εi but correlated with xi.
+Simulated instruments leverage the exogenous policy shocks by constructing an IV as a function
+of state policy only: zi = f
+ 
+gs(i)
+
+. The function f (·) is chosen to make the instrument powerful—
+specifically, to make zi a strong predictor of the eligibility treatment. The strongest predictor that
+only varies through state policy is E
+
+xi | gs(i)
+
+, which can be interpreted as the average generosity
+of i’s state policy. Currie and Gruber ( 1996a, 1996b) propose a simple approximation to this pre-
+dictor. They build a large and nationally-representative group of individuals j = 1, . . . , J, simulate
+individuals’ eligibility under each state policy ¯g, and define f (¯g) as the fraction of individuals who
+would be eligible under that policy:
+f (¯g) = 1
+J
+JX
+j=1
+1 [cj ∈ ¯g] .
+The simulated instrument zi = f
+ 
+gs(i)
+
+is a fixed function of the exogenous policy in an individual’s
+state and is therefore uncorrelated with εi.4 It is nevertheless correlated with xi because we expect
+the eligibility of any given individual to be higher in states where the policy is more generous.
+A drawback of such instruments, which limits their power, is that they discard all within-state
+variation in eligibility due to ci. This may seem unavoidable, as such variation is non-random
+and using it may introduce bias. For example, one might consider constructing an instrument to
+approximate E
+
+xi | gs(i), ci
+
+instead of E
+
+xi | gs(i)
+
+; the former has a stronger first-stage correlation
+with xi, so using this IV would likely produce a smaller standard error than zi. However, this
+instrument may be correlated with εi through some characteristics in ci, making the IV estimates
+biased. Indeed, here E
+
+xi | gs(i), ci
+
+= xi, since eligibility is fully determined by gs(i) and ci. Using
+4Formally, for any fixed f (·), E [zi | s(i), εi] = E
+[
+f
+(
+gs(i)
+)
+| s(i), εi
+]
+=
+∫
+f (¯g)dG(¯g) = E [zi] ≡ µz where G(·) is the
+distribution of potential Medicaid policies. Thus Cov [zi, εi] = E [(zi − µz) εi] = E [(E [zi | s(i), εi] − µz) εi] = 0 .
+5
+
+===== PAGE 6 =====
+
+it as an instrument is thus equivalent to OLS estimation, with the same bias concerns as before.
+The main practical insight of this paper is that improved predictions of formula treatments,
+including xi itself, can be used to construct valid and more powerful instruments. Consider:
+˜zi = 1[ci ∈ gs(i)]
+| {z }
+=xi
+− 1
+50
+50X
+k=1
+1[ci ∈ gk]
+| {z }
+≡µi
+.
+The first term of ˜zi is individual i’s eligibility, determined by both her characteristics ci and the
+realized policy draw in her state gs(i). The second term is her expected eligibility over policy
+draws. This µi is derived from a thought experiment in which the realized policies are randomly
+reshuffled across the 50 states, since each permutation of (g1, . . . , g50) is as likely to have been
+realized when policies are drawn randomly from some set. On average, an individual’s eligibility
+across such permutations equals the share of states in which her characteristics would make her
+eligible. Borusyak and Hull ( 2023) show that the recentering of xi by µi makes ˜zi a valid instrument.
+Intuitively, IV regressions that use ˜zi compare individuals who have more Medicaid eligibility than
+expected given the policy experiment (i.e., those with ˜zi > 0) to those with less-than-expected
+eligibility (with ˜zi < 0). Since this delineation is by chance, driven only by the random policy
+shocks, such IV regressions are free from bias. In the next section we discuss different strategies for
+recentering that follow from different assumptions of how the shocks are drawn.
+The recentered instrument ˜zi is likely more powerful than the simulated instrument zi, as it is
+more predictive of the treatment. By construction, the policy generosity measure f
+ 
+gs(i)
+
+is not
+tailored to an individual’s exposure to the policies, limiting zi’s correlation with xi. In contrast,
+˜zi is perfectly correlated with xi conditional on ci (i.e., among individuals with the same family
+structure and income but who reside in different states). Only individuals for whom the policy
+variation is relevant are in the effective sample with ˜zi, since ˜zi = 0 for any individual who is, e.g.,
+so rich that they are not eligible under any policy or so poor that they are eligible under all policies.
+The next section formalizes the sense in which such instruments likely yield precise estimates of β,
+and proposes a general algorithm for producing them from formula treatments like xi.5
+Power when using ˜zi may be further increased by including functions of ci (e.g. family size or
+some income bins) as controls. Such controls soak up residual variation in εi while not affecting the
+instrument’s first stage (because ˜zi is uncorrelated with all predetermined characteristics as well
+as with εi), typically increasing estimation eﬀiciency. 6 The next section formalizes this logic by
+showing how the theoretically most eﬀicient IV estimation of β involves such residual adjustment
+in addition to forming the recentered best predictor ˜zi; we add an optional step to the algorithm
+that involves such adjustment. Although extra covariates can increase the power of simulated IV
+5Precision gains may also yield additional benefits: the more powerful recentered instrument may be less prone to
+finite-sample weak-IV bias and sizable asymptotic bias from small violations of instrument exogeneity (Wooldridge
+2002, Ch. 5.2.6), and may also yield more powerful placebo tests (as we show in the application).
+6If the included controls linearly span expected eligibility µi, using ˜zi as the instrument is numerically equivalent
+to using OLS estimation on xi with the same controls—slightly simplifying implementation (Borusyak and Hull 2023).
+6
+
+===== PAGE 7 =====
+
+estimation too, the two approaches do not coincide even when controlling for ci flexibly.7
+Before proceeding, we note that while xi in this example is fully determined by the exogenous
+policy shocks gk and predetermined variables ci and s(i), similar recentered IVs may be constructed
+for treatments with endogenous components. For example, suppose an individual’s income ui is
+relevant to Medicaid eligibility, ci = ( ui, ˜ci), but is not predetermined: income may respond to
+the policy shocks as individuals change employment. In this case ˜zi will not be a valid IV, as
+recentering by µi will not account for the endogenous response of ci to gs(i). Still, a strong predictor
+of xi can be formed from its formula: one can compute the predicted eligibility based on the realized
+policy shocks, other characteristics ˜ci, and an earlier measure of income u0i that replaces ui. This
+approximation of E
+
+xi | gs(i), u0i, ˜ci
+
+can then be recentered, as before, to obtain a valid and likely
+powerful instrument. The same logic applies when an individual’s state of residence s(i) is not
+predetermined, such as when individuals move in response to the policy shocks. Cases where some
+characteristics relevant for eligibility are unobserved can also be handled similarly. 8
+3 Theory
+We now develop general theory for optimal formula instruments. Section 3.1 introduces the set-
+ting and the class of valid recentered instruments. Section 3.2 derives the recentered instrument
+that is asymptotically most eﬀicient, while Section 3.3 develops an algorithm for obtaining feasible
+approximations to the optimal IV.
+3.1 Setting
+An outcome yi and treatment xi = hi(g, w, u) are observed for a set of units i = 1 , . . . , N. Here
+h1(·), . . . , hN (·) is a set of known functions, g = ( g1, . . . , gK) is a set of observed shocks (poten-
+tially varying at a different level than i), w is a set of observed predetermined variables, and u is
+another set of variables (potentially unobserved and also potentially varying at different levels). 9
+This formulation of xi is so far without loss of generality; Assumption 1, below, makes it restric-
+tive by introducing substantive distinctions between g, w, and u (in particular g will be assumed
+exogenous, as in the motivating example). Since multiple observations may be exposed to the same
+observed and potentially unobserved shocks, we do not make any assumptions of independently
+or identically distributed ( iid) data and instead work with a fixed sample of size N ; that is, we
+7The two approaches would coincide if policy generosity was measured for each combination of characteristics in
+ci separately, which amounts to interacting flexible functions of ci with eligibility in addition to controlling for them.
+This strategy, however, is only feasible if ci is discrete with a suﬀiciently small number of distinct values, which is not
+the case in most applications of simulated IV (see., e.g., Gruber ( 2003, p.47)).
+8For example, we might be interested in the effects of Medicaid enrollment rather than eligibility and not observe an
+individual’s compliance status (i.e. whether they would take up Medicaid when eligible). This ui can be ignored when
+predicting xi from the shocks and predetermined observables, e.g. by presuming that all individuals are compliers. If
+compliance status can be partially predicted, incorporating this may yield further precision gains.
+9In some settings, like the motivating Medicaid example, it may be more natural to write xi = h(g, wi, ui) for an
+“anonymous” formula h(·) and observation-specific inputs wi and ui. Not all settings with formula treatments are
+naturally written this way, however; see, e.g., footnote 12 of Borusyak et al. ( 2025b).
+7
+
+===== PAGE 8 =====
+
+consider (x1, . . . , xN , y1, . . . , yN , g, w, u) as drawn from some joint distribution. 10 The results apply
+to observations randomly sampled from some population as well.
+A causal effect or structural parameter β relates the outcome to treatment by
+yi = βxi + εi, (1)
+where εi is an unobserved error. Here we assume the outcome model is linear with a constant
+effect.11 For notational simplicity, we do not include a constant in the model (as when, e.g.,
+E [P
+i εi] = 0 ); Appendix A.1 generalizes our results to settings where yi and xi are demeaned or
+otherwise residualized on a vector of predetermined covariates. 12
+To estimate β, we look for an instrument z = (z1, . . . , zN )′ that satisfies an exogeneity condition:
+E
+"
+1
+N
+X
+i
+ziεi
+#
+= 0 (2)
+as well as a relevance condition E
+ 1
+N
+P
+i zixi
+
+̸= 0 , such that β = E [P
+i ziyi] /E [P
+i zixi]. The IV
+estimator corresponding to z is then given by ˆβ [z] = (P
+i ziyi) / (P
+i zixi).
+While the class of IV estimators is restrictive relative to the more general class considered in,
+for instance, Chamberlain ( 1992), our non- iid analysis makes it much less restrictive than it may
+seem. In particular, by the Frisch-Waugh-Lovell theorem, it includes IV estimators with covariates
+since zi can be chosen to be an in-sample residualization of some instrument on those covariates.
+Indeed, as we show below, the optimal instrument involves such adjustment.
+We form instruments by assuming the shocks are exogenous and relevant to the treatment.
+Specifically, we suppose that, conditional on the observed variables w, the outcome errors are
+mean-independent of g and the treatment is affected by g:
+Assumption 1. (Shock exogeneity): E [εi | g, w] = E [εi | w] a.s. for all i.
+Assumption 2. (Relevance): E [xi | g, w] ̸= E [xi | w] with positive probability for some i.
+In the basic Medicaid example, g is the vector of state eligibility policies and w contains the relevant
+characteristics ci of all individuals along with their states of residence, s(i). Then hi(·) is the known
+algorithm which checks the eligibility of individual i using these inputs, and u is empty. If income
+changes in response to the policy, we include it in u while adding pre-period income to w.
+10We allow this distribution to be partly degenerate, such as when potential outcomes and predetermined observables
+are treated as fixed as in a more conventional design-based analysis (e.g., Athey and Imbens ( 2022)). See footnote 14
+in Borusyak and Hull ( 2023) for more discussion.
+11The constant effects assumption follows the optimal IV literature, facilitating an analysis of relative eﬀiciency
+across different IV estimators—since different instrument constructions will generally identify different weighted aver-
+ages of heterogeneous effects. Online Appendix D.1 characterizes these averages, showing they involve convex weights
+under natural generalizations of the classic independence, exclusion, and monotonicity assumptions in Imbens and
+Angrist (1994). We note that a weaker independence condition suﬀices under constant effects, which we impose below.
+12See also Online Appendix D.2, which discusses an extension of our framework with yi and xi residualized on a
+set of fixed effects in panel data.
+8
+
+===== PAGE 9 =====
+
+Two remarks about Assumption 1 are due here. First, in some applications, the shocks are
+randomized after the realization of w. This makes them fully independent from w as well as from
+the errors under an exclusion restriction (that shocks only affect outcomes through the treatment),
+satisfying Assumption 1. Second, Assumption 1 allows εi to be arbitrarily correlated with the
+variables in w such that OLS estimation is generally biased even if u is empty.13
+The class of instruments satisfying exogeneity under Assumption 1 can be sharply characterized.
+We refer to instruments constructed as zi = fi(g, w) for a set of non-stochastic functions {fi(·)}N
+i=1
+as formula instruments . We further call them recentered formula instruments, or just recentered
+instruments, if they are mean-zero given w:
+E [fi(g, w) | w] = 0 a.s. for all i. (3)
+Let R denote the class of recentered instruments. The class of estimators induced by them is wider
+than it may appear: in particular, it includes estimators that use any formula instrument pi(g, w)
+while controlling for a vector mi(w) that linearly spans the “expected instrument” E [pi(g, w) | w].14
+For example, the simulated IV estimator from Section 2 that has a constant expected instrument
+(see footnote 4) is induced by a z ∈ R as long as the intercept is controlled for.
+We then have the following result, letting ε be the vector collecting the εi:
+Proposition 1. Under Assumption 1, all recentered instruments satisfy the exogeneity condition
+(2). Conversely, only recentered instruments satisfy ( 2) absent further assumptions on ε: for any
+distribution of (z, g, w) there exists a conditional distribution of ε | (z, g, w) such that Assumption 1
+holds but ( 2) fails, unless z is a deterministic function of (g, w) satisfying ( 3).
+The first part of the proposition follows Borusyak and Hull ( 2023) to show that recentered instru-
+ments are valid (here, under a weaker mean-independence condition). The second part is new, and
+highlights two ideas. First, formula instruments that are not recentered include some variation from
+w and are thus prone to exogeneity failures without further restrictions on the error term. Second,
+naturally, Assumption 1 alone would not justify the validity of instruments constructed from any
+other data besides the shocks and predetermined variables in w. With this characterization, we
+next look for the most eﬀicient recentered instrument.
+13As in Borusyak and Hull ( 2023, footnote 14), we allow (ε, w) to be stochastic or (as is often assumed in design-
+based analyses of finite populations) fixed. With fixed (ε, w), Assumption 1 holds trivially but its role is shifted to
+the assumption, below, that the distribution of g | w is known.
+14To see this, first note that R clearly includes instruments of the form zi = pi(g, w)−E [pi(g, w) | w] with no controls.
+Moreover, estimators that use any such z ∈ R as an IV while controlling for some set of functions m(w) = ( mi(w))N
+i=1
+are also recentered IV estimators. This follows because, by the Frisch–Waugh–Lovell theorem, they can be represented
+as IV estimators that use the in-sample projection of z on m(w) as the instrument. It is easy to see that R is closed
+with respect to such residualizations. Furthermore, estimators that instrument with pi(g, w) while controlling for a
+m(w) that linearly spans E [pi(g, w) | w] are also equivalent to those using z ∈ R since they are identical to using
+pi(g, w) − E [pi(g, w) | w] as an IV while controlling for m(w). Note that residualization has an additional impact on
+the error term, which the extended results in Appendix A.1 allow for.
+9
+
+===== PAGE 10 =====
+
+3.2 Optimal IV
+We take a non-standard approach to deriving the asymptotically eﬀicient instrument, given the
+non-iid setup. In this setting, there may be multiple asymptotic regimes under which recentered
+IV estimators are consistent, possibly with different convergence rates. 15 We therefore develop an
+approach that does not rely on a specific asymptotic approximation, in two steps. We first introduce
+a finite-population approximation to the variance of any recentered IV estimator, which we show
+is accurate in large samples in any asymptotic sequence in which the estimator is asymptotically
+normal and satisfies regularity conditions. We then find the recentered instrument that minimizes
+this approximation in finite samples.
+The approximate variance of the IV estimator using recentered instrument z ∈ R is defined as:
+V [z] = Var [z′ε]
+E [z′x]2 ,
+for x = ( x1, . . . , xN )′, assuming the relevant variance and expectation exist. This expression rep-
+resents the variance of 1
+N z′ε/E
+ 1
+N z′x
+
+; if the first-stage covariance 1
+N z′x converges to a non-zero
+constant Π as N → ∞, we expect V [z]−1 to be a good measure of estimation precision when N is
+large and appropriate regularity conditions hold.
+To formalize this asymptotic approximation, we say that a recentered IV estimator is asymp-
+totically normal if, for non-random rN → ∞ , rN
+
+ˆβ [z] − β
+ D→ N (0, V ) for some 0 < V < ∞ as
+N → ∞. We say that ˆβ [z] converges to β at rate rN and refer to V as the asymptotic variance of
+ˆβ [z]. We further consider two high-level conditions on z:
+Condition 1. 1
+N z′x
+p
+→ Π for some Π ̸= 0;
+Condition 2. 1
+N z′x and
+ 
+rN 1
+N z′ε
+2 are uniformly integrable.
+While Condition 1 is standard and Condition 2 is a weak regularity condition, the asymptotic
+normality of recentered IV estimators deserves further discussion. Adão et al. ( 2019) give suﬀicient
+conditions for instruments that are linear in the shocks (i.e., shift-share instruments, discussed
+more below). In Appendix A.4 we give an alternative path to asymptotic normality with general
+recentered instruments that depend only on a small set of mutually independent shocks, with non-
+overlapping sets of shocks for most observation pairs. Both results require the number of shocks to
+be large. However, a growing number of shocks is not generally necessary: as shown by Goldsmith-
+Pinkham et al. ( 2020) in the shift-share case, asymptotically normal estimators may also exist
+with as few as one shock when the errors are suﬀiciently weakly correlated and shock exposure is
+exogenous.16
+15For instance, recentered shift-share IV estimators can be consistent with fixed K under additional restrictions on
+the error term (Goldsmith-Pinkham et al. 2020) as well as in the K → ∞ regime without these restrictions (Adão
+et al. 2019; Borusyak et al. 2022). The convergence rate is
+√
+N in the former regime but typically
+√
+K in the latter
+regime, which may be slower than
+√
+N .
+16 Section I.B of Goldsmith-Pinkham et al. ( 2020) details the single-shock case. See also Propositions 3–5 of
+Borusyak and Hull ( 2023), which show a growing number of shocks is essentially necessary for consistency of recentered
+10
+
+===== PAGE 11 =====
+
+We then have the following result:
+Proposition 2. For any recentered IV estimator ˆβ [z] that is asymptotically normal with convergence
+rate rN and asymptotic variance V and satisfies Conditions 1 and 2, V [z] provides a good large-
+sample approximation to the variance:
+lim
+N →∞
+V [z]
+V /r2
+N
+= 1.
+This result justifies looking for the recentered IV estimator with the smallest approximate variance
+V [z]. The following theorem characterizes the solution:
+Theorem 1. Suppose Assumption 1 holds, E [εε′ | g, w] = E [εε′ | w] a.s., and this matrix is a.s.
+invertible. Consider the recentered instrument
+z∗ = E
+
+εε′ | w
+−1 ˜z for ˜z = E [x | g, w] − E [x | w] . (4)
+The associated ˆβ [z∗] has the smallest approximate variance of all recentered IV estimators:
+z∗ ∈ arg min
+z∈R
+V [z] ,
+with
+V [z∗] = E
+h
+(E [x | g, w] − E [x | w])′ E
+
+εε′ | w
+−1 (E [x | g, w] − E [x | w])
+i−1
+.
+Three comments are due here. First, note that we impose weak conditions on the data-generating
+process: only that the shocks are exogenous in the sense of Assumption 1 and that the errors are not
+perfectly collinear. 17 While Theorem 1 also requires the second moments of ε to be independent of
+g given w (which holds when g ⊥ ⊥(ε, w), as when shocks are fully randomized), Appendix Theorem
+A1 provides a more cluttered expression for the optimal IV without that assumption. Second, we
+note that the approximate variance is minimized among all recentered IV estimators, regardless
+of whether they are asymptotically normal, although V [z] need not be a useful object otherwise.
+Third, note that by Assumption 2 the instruments ˜z and z∗ are non-trivial.
+Theorem 1 builds on classic results on eﬀicient estimation in iid data. In particular, Chamberlain
+(1987) characterizes optimal instruments in the iid linear model (see also Newey and McFadden
+(1994) for a different characterization that our proof leverages). Newey ( 1989, Section 5) derives
+an optimal estimator for the partially linear model with conditionally exogenous treatment, in
+which the functional nuisance parameter corresponds to E [ε | w] in our notation. 18 Ai and Chen
+IV estimators absent restrictions on the correlation structure of the errors. We note that the results below would hold
+even if the asymptotic distribution is not Gaussian, although this case is non-standard.
+17The invertibility requirement precludes the existence of a function c(w) satisfying c(w)′ε = 0 (almost-surely or at
+least conditional on a set of w of non-zero measure), which rules out two distinct cases. The first case is when the data
+have been residualized on the covariates c(w), so that c(w)′x = 0 whenever c(w)′ε = 0 ; Appendix A.1 generalizes all
+results to that case. The second case is if c(w)′x ̸= 0 ; then β can be revealed exactly for some realizations of w—an
+unrealistic scenario.
+18Conditional treatment exogeneity means E [ε − E [ε | w] | x] = 0 , which here holds when u = ∅.
+11
+
+===== PAGE 12 =====
+
+(2003) propose a sieve-based eﬀicient estimator in the general iid case. While the key advantage
+of Theorem 1 is that it applies in non- iid data, it is also instructive to specialize it to the iid case
+in which the semi-parametric eﬀiciency bound (SEB) of Chamberlain ( 1992) applies. Appendix
+Proposition A4 shows that z∗ attains this SEB asymptotically, suggesting that our limiting of the
+estimator class to recentered IV does not carry an asymptotic eﬀiciency cost. 19
+Equation (4) reveals the structure of the optimal instrument z∗. It is based on the best predictor
+of treatment given the exogenous shocks and predetermined variables, E [x | g, w], recentered by its
+expectation over the shocks E [x | w] = E [E [x | g, w] | w]. This recentered best predictor ˜z is then
+adjusted by E [εε′ | w]−1. The following proposition unpacks this last step:
+Proposition 3. Let ψ = E [ε | w] and Ω = Var [ε | w] be the conditional mean and variance of the
+errors, with Ω a.s. invertible. Then z∗ from Theorem 1 can be written as
+z∗ = Ω −1 (˜z − νρψ ) , (5)
+where ρψ = ψ′Ω−1 ˜z
+ψ′Ω−1ψ ψ is the Ω−1-weighted projection of ˜z on ψ, and ν = ψ′Ω−1ψ
+1+ψ′Ω−1ψ ∈ [0, 1).
+This result shows that z∗ is obtained by two sequential adjustments to the recentered best predictor
+˜z. First, ˜z is partially residualized on ψ. In many cases, ν → 1 when N → ∞ ; by the Frisch-
+Waugh-Lovell theorem, the limit case of ν = 1 amounts to controlling for ψ while instrumenting
+with ˜z.20 Second, there is an adjustment for the inverse conditional variance of the errors Ω−1, as
+in conventional generalized least squares estimation.
+Appendix Proposition A3 specializes Theorem 1 to the class of shift-share instruments that are
+linear in the shocks, for which feasible versions may be easier to obtain (as discussed below). The
+optimal instrument in this class resembles z∗, except with ˜z replaced by an optimal linear prediction
+of the treatment—i.e., the fitted value from a linear regression of xi on the (recentered) vector of
+shocks, with coeﬀicients that can vary across i and depend on w. This linear regression parallels
+the non-parametric regression of xi on the shocks that yields E [xi | g, w] in Theorem 1.
+3.3 Feasible Approximations
+Drawing on the above results, we propose an approach (Algorithm 1) for obtaining feasible ap-
+proximations to z∗ in three steps: approximating the best predictor E [x | g, w], recentering it, and
+(optionally) adjusting for E [εε′ | w]−1. The algorithm leverages the researcher’s knowledge of the
+formula of the treatment and the “design” (i.e. data-generating process) of the exogenous shocks.
+Consequently, it can be used even in situations when the conditional means and variances underlying
+19Despite this, the estimators in Newey ( 1989) and Ai and Chen ( 2003) do not coincide with the one in Theorem 1 in
+iid data: both are weighted versions of the Robinson ( 1988) estimator, which involves non-parametric residualization
+of y and x on w, while ˆβ [z∗] involves partially controlling for E [ε | w] (see Proposition 3 and footnote 20 below).
+20In general the residualization is partial for the same reason why, in conventional panel data settings, the eﬀicient
+random effects estimator partially demeans the data by unit (e.g. Wooldridge ( 2002, p.286)). As with the unit-specific
+residual means in the random effects case, ψ is orthogonal to ˜z in expectation but not in the observed realization. Full
+residualization which imposes in-sample orthogonality is thus generally ineﬀicient, as with the fixed effect estimator.
+12
+
+===== PAGE 13 =====
+
+z∗ cannot be consistently estimated because the data are high-dimensional or non- iid. We compare
+the Algorithm 1 estimator with an alternative plug-in estimator using nonparametric estimates of
+the terms in z∗ at the end of this subsection.
+The first step is to approximate the best predictor E [xi | g, w] with some pi(g, w) using the treat-
+ment formula xi = hi(g, w, u). This is trivial when u is empty, as in the initial Section 2 example,
+since then E [xi | g, w] = xi ≡ pi(g, w). Otherwise, we propose forming a predictor by integrating
+hi(g, w, u) over some hypothetical distribution of u | g, w. In the simplest case, if there is a typical
+or default value ¯u of u, it can be plugged in to form a prediction of pi(g, w) = hi(g, w, ¯u). This
+is the approach suggested at the end of Section 2, where lagged income u0i substitutes for the po-
+tentially endogenous contemporaneous income ui.21 Importantly, per Proposition 1, a misspecified
+distribution for u | g, w may lead to an imperfect approximation of E [xi | g, w]. This inaccuracy will
+generally reduce eﬀiciency, but it will not introduce bias so long as the approximation is recentered.
+The second step is to recenter the predictor pi(g, w) using knowledge of the shock assignment pro-
+cess: formally, the distribution of g | w. Here we summarize several approaches, following Borusyak
+and Hull ( 2023) and Borusyak et al. ( 2025b). Recentering is straightforward when the shock as-
+signment process is known, such as when g is generated by a randomized control trial with some
+experimental protocol (conditional on w, or more typically independent from w). The researcher
+can draw a large number of counterfactual shock vectors g(j) from this protocol, recompute the pre-
+dictor pi(g(j), w) for each j = 1 , . . . , J, and average them: 1
+J
+PJ
+j=1 pi(g(j), w). This approximation
+to E [pi(g, w) | w] can then be subtracted from pi(g, w), or controlled for in estimation. 22 The same
+steps can be followed in observational data when the elements of g are assumed to be exchangeable
+conditional on w, as with the exchangeable policy shocks in Section 2. The counterfactual g(j) can
+then be generated as a permutation of g, bypassing the challenge of specifying the distribution of the
+shocks.23 More generally, g(j) could be drawn from conditional permutations of shocks within—but
+not across—groups with the same shock distribution; we illustrate this approach below.
+Recentering requires weaker yet assumptions when pi(·) is linear in the shocks—as in shift-share
+instrument constructions. In that case, only the expectation of the shocks matters for E [pi(g, w) | w]
+and thus needs to be modeled. In cases where that approach to recentering is more tenable, Borusyak
+et al. ( 2025b, Section 3.3) propose approximating a nonlinear pi(g, w) with its linear approximation
+in g around some fixed g = ¯g. This approach yields coeﬀicients approximating those in the infeasible
+regressions of Appendix Proposition A3, discussed above. As with other imperfect predictions of
+E [xi | g, w], the cost of such simpler recentering is a likely power loss from the linear approximation.
+21Berry et al. ( 1999) take a similar approach in the context of estimating demand for differentiated products, setting
+unobserved product quality shifters to zero when constructing a (non-recentered) instrument. Conlon and Gortmaker
+(2020) propose a refinement to this approach, integrating over the empirical distribution of estimated quality shifters
+rather than using a single default value.
+22While a large J reduces noise in the instrument p(g, w) − 1
+J
+∑J
+j=1 p(g(j), w), approximating µi with any finite
+number of draws J ≥ 1 is suﬀicient for identification. To see this, redefine the shocks as ˜g =
+(
+g, g(1), . . . , g(J)
+)
+. The
+original Assumption 1 implies Assumption 1 with respect to ˜g. Moreover, p(g, w) − 1
+J
+∑J
+j=1 p(g(j), w) is in R redefined
+with respect to ˜g because E
+[
+p(g, w) − 1
+J
+∑J
+j=1 p(g(j), w) | w
+]
+= 0 when g | w and g(j) | w have the same distribution.
+23Formally, this requires including the permutation class of g in w.
+13
+
+===== PAGE 14 =====
+
+Algorithm 1 Feasible Approximation to the Optimal IV
+0. Represent the treatment as a formula xi = hi(g, w, u) for known functions hi(·), where the
+inputs are exogenous shocks g, predetermined variables w, and possibly other variables u that
+are either unobserved or may respond to the shocks.
+1. Construct a treatment prediction pi(g, w). If the treatment is a function of g and w only, set
+pi(g, w) = xi. Otherwise, set pi(g, w) = hi(g, w, ¯u) by replacing u with some base value ¯u.
+• Optional: Replace pi(g, w) with its linear approximation in g around some base value ¯g.
+2. Form the instrument by recentering the prediction: ˜zi = pi(g, w) − µi for µi = E [pi(g, w) | w].
+• To obtain µi, draw some (preferably large) number J of counterfactual shock vectors
+g(j) from the data-generating process of g (e.g., permutations of g when the shocks are
+exchangeable). Set µi = 1
+J
+PJ
+j=1 pi(g(j), w).
+• If pi(g, w) is linear in the shocks, µi can be computed analytically from a specification
+for E [g | w] without a full specification of the shock data-generating process.
+3. Optional: Residualize ˜z on predetermined variables (i.e., functions of w) that may predict the
+error ε, and reweight it by an estimate of Var [ε | w]−1.
+An optional third step in Algorithm 1 adjusts the ˜z approximation by an estimate of E [εε′ | w]−1.
+Per Proposition 3, this involves two adjustments: residualizing on (i.e., controlling for) functions
+of w that predict ε, and weighting by an estimate of Var [ε | w]−1 (akin to feasible generalized
+least squares). In non- iid or high-dimensional settings, both steps may be challenging. Moreover,
+weighting by a flexible but noisy estimate of Var [ε | w]−1 may introduce bias, as in conventional
+settings (e.g., Angrist and Pischke 2008, p. 93).
+A practical option is therefore to disregard the third step of Algorithm 1 and just instrument
+with the recentered pi(g, w) as an approximation to ˜z. This approach has two formal justifications.
+First, it is straightforward to show that the unadjusted ˜z has the highest correlation with the
+treatment among all recentered IVs:
+Lemma 1. ˜z ∈ arg maxz∈R
+E[z′x]2
+E[z′z]E[x′x] .
+This result immediately implies that ˜z produces the highest first-stage R2, and so approximations
+to it should have favorable power. Second, because of this property, ˜z minimizes the worst-case
+estimator variance absent sharp information on the conditional error distribution:
+Lemma 2. Let ¯λ ≥ 0 be some constant and let E be the class of random vectors e = ( e1, . . . , eN )′
+such that the maximum eigenvalue of E [ee′ | g, w] is bounded by ¯λ uniformly over (g, w). Suppose
+the only knowledge a researcher has about ε is ε ∈ E . Then ˜z is approximately minimax, in that:
+˜z ∈ arg min
+z∈R
+max
+e∈E
+Var [z′e]
+E [z′x]2 .
+14
+
+===== PAGE 15 =====
+
+This result captures the intuition that maximizing the first-stage R2 is optimal when one has weak
+priors on the distribution of ε, and worries about making further incorrect adjustments.
+Rather than skipping Step 3, the researcher could control for an arbitrary low-dimensional func-
+tion of w that may be expected to predict E [ε | w]. This may improve eﬀiciency, though this is
+not guaranteed (see Appendix C.9 of Borusyak and Hull ( 2021) for a counterexample). Alterna-
+tively, when nonparametric estimation of the nuisance functions in z∗ is possible, one could use
+a plug-in instrument ˆz∗ =bE [εε′ | w]−1
+
+bE [x | g, w] − E
+h
+bE [x | g, w] | w
+i
+instead of the Algorithm
+1 approximation. Online Appendix D.3 formalizes this strategy by deriving regularity conditions
+under which ˆβ [ˆz∗] has the same asymptotic distribution as ˆβ [z∗] and thereby attains the minimal
+asymptotic variance. This result requires that bE [x | g, w] is recentered by E
+h
+bE [x | g, w] | w
+i
+rather
+than by a generic nonparametric estimate of E [x | w], showing the importance of Step 2 whether or
+not nonparametric estimation is additionally pursued. 24 Moreover, the result requires that the non-
+parametric estimates bE [x | g, w] and bE [εε′ | w] are consistent and obtained via cross-fitting, which
+is challenging if not impossible without iid data.25 Algorithm 1 does not involve non-parametric
+estimation or cross-fitting, which highlights its practical value especially in complex settings.
+4 Application
+We illustrate our approach by estimating the private insurance crowdout effects of Medicaid eligi-
+bility, using the partial Affordable Care Act (ACA) expansion in 2014. Section 4.1 describes the
+setting and adapts our theoretical results to this setting while Section 4.2 presents the results.
+4.1 Setting and Estimators
+In January 2014, many US states expanded Medicaid eligibility under the ACA to cover non-
+elderly adults with incomes up to 138% of the federal poverty level (FPL). This expansion did
+not cover all states since a 2012 Supreme Court decision (NFIB v. Sebelius, 567 U.S. 519) let
+individual state governors opt out of the more generous ACA coverage level. In practice, expansion
+decisions partially followed partisan lines: among the 43 states with less generous Medicaid policies
+in 2013, only 8 out of 30 states with Republican governors expanded while 11 out of 13 states with
+Democratic governors did. 26 Non-expansion states mostly kept their 2013 eligibility rules in place,
+24This makes our plug-in estimator different from other nonparametric estimators, such as those studied by Ai and
+Chen ( 2003) and Chernozhukov et al. ( 2018) in the iid setting, which estimate E [x | w] fully nonparametrically but
+require nontrivial smoothness conditions on the nuisance functions or rate conditions on their estimates. Our results
+avoid such conditions, similarly to the results on double machine learning with a known propensity score (Wager 2025,
+Corollary 3.3).
+25For example, Borusyak et al. ( 2025b, Section 6.1) show how nonparametric estimation of E [x | g, w] can be
+impossible in a shift-share setting. If all observations are exposed to the same vector of aggregate shocks, of which
+only one realization is observed, it is not possible to consistently estimate E [x | g, w] except by leveraging information
+on the formula and shock design, as in Step 1 of Algorithm 1. Similarly, when all observations are exposed to the same
+shocks, standard cross-fitting methods are not applicable. Even in the context of our Section 4 application, where
+individuals in the sample are drawn randomly but the shocks are assigned to a relatively small number of clusters
+(states), nonparametric estimation of E [x | g, w] would be challenging.
+26See Frean et al. ( 2017) for more background on the partial Medicaid expansions and related ACA policy changes.
+15
+
+===== PAGE 16 =====
+
+though some increased coverage slightly. Expansion states mostly adopted the ACA’s 138% FPL
+threshold, though some extended coverage further.
+We use state expansion decisions as policy shocks for estimating Medicaid eligibility effects.
+To formalize this approach, consider a repeated cross section of individuals i observed in years
+t(i) ∈ {2013, 2014} with states of residence s(i). We write i’s Medicaid eligibility, xi ∈ {0, 1}, as:
+xi = ht(i)(ci, e2013
+s(i) , gs(i), e∆
+s(i)) (6)
+where ci collects relevant individual characteristics (income, work status, and parental status), e2013
+k
+is state k’s Medicaid eligibility policy in 2013, gk ∈ {0, 1} indicates whether or not state k expanded
+coverage under the ACA in 2014, and e∆
+k includes other 2014 changes to Medicaid coverage (i.e.
+non-ACA coverage increases or ACA expansions beyond the 138% FPL threshold). These inputs are
+suﬀicient to determine individual i’s eligibility, as formalized by the h2013(·) and h2014(·) functions.27
+We assume the expansion shocks are exogenous, conditional on the political party of states’
+governors, when estimating eligibility effects in a difference-in-differences setup. Formally, let qk be
+an indicator for state k having a Republican governor in 2013. We relate individual outcomes to
+eligibility in the repeated cross section by:
+yi = βxi + αs(i) + τqs(i),t(i) + εi, (7)
+where αk and τq,t are state and party-by-year fixed effects. Following Assumption 1, we formalize
+shock exogeneity as E [εi | g, w] = E [εi | w] where g collects the 43 expansion dummies and w collects
+all ci, s(i), t(i), e2013
+k , and qk.28 This assumption is broadly consistent with earlier difference-in-
+differences analyses that compare outcome trends of expansion and non-expansion states before and
+after 2014, either without adjustment for state-level confounders (e.g. Miller and Wherry ( 2017)) or
+with adjustment for state party or other observables (e.g. A verett et al. ( 2019)). It is nevertheless
+a strong assumption, requiring states with potentially very different socioeconomic characteristics
+affecting εi to not be systematically more or less likely to expand coverage conditional on the
+governor’s party. We thus relax it in robustness checks below, allowing expansion decisions to
+depend on other observables like household income. Note that we impose no assumptions on other
+coverage changes e∆
+k , which we collect in u.
+Our baseline design assumption is that the shocks are drawn from the same (unknown) distri-
+bution among states with the same-party governor. This view of the 2014 expansion decisions, as
+arising from a natural experiment, conforms with some earlier analyses (e.g. Black et al. 2019) and
+27Here, as in the initial Section 2 motivating example, we assume income (and other characteristics) does not
+respond to expansion decisions. In our repeated cross-section, we do not observe pre-period income so we cannot
+apply the extension at the end of that section. We allow, however, income (and other characteristics) to be arbitrarily
+correlated with potential outcomes.
+28State fixed effects can be justified here by a state-level unobservable which drives the expansion decision, has a
+time-invariant effect on the outcome, and is independent of w. Idiosyncratic policy preferences of the state’s governor
+is one example; see Online Appendix D.2 for details. Party-by-year fixed effects are included to span the expectation
+of the simulated instrument, as discussed below.
+16
+
+===== PAGE 17 =====
+
+allows us to construct counterfactual g(j) vectors by permuting the shocks conditional on state party.
+That is, all g(j) with expansions in some 8 Republican-governor states and some 11 Democratic-
+governor states are valid shock counterfactuals. We again check sensitivity to richer designs below,
+allowing expansion probabilities to vary by additional state observables.
+Following Section 2, we consider two IV specifications using these assumptions. First, we con-
+struct a simulated instrument zi = f t(i) 
+gs(i)
+
+which only leverages the shock variation. Since the
+policy only changes in 2014, we set zi to zero for all individuals in 2013 as well as those in non-
+expansion states. For the expansion states in 2014, the instrument measures the change in the policy
+generosity. Specifically, it equals the difference in the fraction of the 2014 nationally representa-
+tive sample who would be eligible for Medicaid between two situations: had all states adopted the
+ACA’s 138% FLP threshold vs. had all of them kept their 2013 policies intact. Exogeneity of the
+expansion shocks and the design assumption make this zi uncorrelated with εi controlling for state
+and party-by-year fixed effects—controls that span the expected instrument. Note that estimation
+with this zi is equivalent to instrumenting by the interaction of gs(i) and a 2014 indicator, as in an
+instrumented difference-in-differences specification. 29
+Next, we construct an approximation to the recentered best predictor ˜zi by applying the first
+two steps of Algorithm 1 to the formula for Medicaid eligibility. In the first step, we predict
+eligibility from the exogenous policy shocks g and predetermined variables w, ignoring the non-
+ACA eligibility changes in u. In our notation, this involves replacing e∆
+k with ∅ in equation ( 6)
+which yields a predicted eligibility of pi(g, w) = ht(i)(ci, e2013
+s(i) , gs(i), ∅). Second, we recenter this
+prediction by subtracting its expectation µi with respect to the expansion shocks, conditional on
+individual characteristics, 2013 policies, and the party of every state governor. Consistent with our
+design assumption, we account for differences in expansion probabilities by state party when taking
+the expectation:
+µi ≡ E [pi(g, w) | w] = π(qs(i)) · ht(i)
+
+ci, e2013
+s(i) , 1, ∅
+
++ (1 − π(qs(i))) · ht(i)
+
+ci, e2013
+s(i) , 0, ∅
+
+,
+where π(0) = 11/13 and π(1) = 8/30 correspond to the fractions of expansion states among those
+with Democratic and Republican governors, respectively.
+The recentered instrument pi(g, w) − µi equals zero for all individuals in 2013, as well as indi-
+viduals in 2014 whose characteristics make them eligible (or ineligible) with or without an ACA
+expansion in their state. It only varies among individuals in 2014 whose eligibility is affected by
+expansion decisions. We thus restrict estimation to these “exposed” individuals in 2014 and, in
+keeping with the difference-in-differences structure, the corresponding group of individuals in 2013
+(i.e., those whose characteristics and state of residence would make them exposed to the expansion
+shocks in 2014)—what we call the exposed sample. We control for state fixed effects, year fixed
+effects, and the interaction of the state party indicator qs(i) and year, as in the simulated IV spec-
+ification. With these controls and the restriction to the exposed sample, recentered IV estimation
+29Indeed, given state and year fixed effects, the specific values of the instrument in the four cells (2013 vs. 2014
+and treated vs. untreated states) are immaterial as long as zi increases more in 2014 in the treated states.
+17
+
+===== PAGE 18 =====
+
+is again equivalent to instrumenting by the interaction of gs(i) and a 2014 indicator. 30
+We apply both IV strategies using data from the 2013 and 2014 American Community Surveys,
+using representative 1% samples of non-disabled U.S. adults (ages 21-64) residing in the 43 states
+eligible for ACA expansion in 2014. Appendix B.1 details the sample construction.
+Our primary outcomes are indicators for Medicaid enrollment and for private insurance coverage.
+Effects on the former outcome capture takeup of the expanded Medicaid coverage; effects on the
+latter outcome capture how Medicaid eligibility crowds out other forms of insurance—an important
+policy parameter in the literature (e.g. Frean et al. 2017; Leung and Mas 2018). We also look at
+effects on an indicator for employer-sponsored insurance coverage, which is the most common type
+of private insurance and is the focus of the classic literature on Medicaid crowdout (e.g. Cutler and
+Gruber ( 1996)). In our setting, Medicaid may also crowdout private insurance obtained directly
+on ACA state health exchanges (as documented by Frean et al. ( 2017)). This would have different
+economic implications, as such crowdout would not typically have employment effects.
+4.2 Results
+Our recentered IV is much more predictive of actual Medicaid eligibility than the simulated IV.
+First-stage estimates in Table 1 show that the simulated IV predicts eligibility with a coeﬀicient of
+0.85 and a standard error of 0.11 (column 1) while the recentered IV in the exposed sample has a
+higher coeﬀicient of 0.97 and a smaller standard error of 0.02 (column 2); the latter coeﬀicient is
+statistically indistinguishable from one, as should be the case with the recentered best predictor. 31
+The partial R2 for the recentered IV is also dramatically higher (0.80, vs. 0.01 for the simulated IV).
+Column 3 of the table shows that just adding the recentered IV to the simulated IV specification
+increases the partial R2 meaningfully (to 0.10) and renders the simulated IV coeﬀicient small and
+statistically insignificant. All of these results are consistent with the recentered IV giving a better
+approximation to the recentered best predictor ˜zi.
+This improved first-stage prediction translates to meaningful precision gains for the effects of
+eligibility on Medicaid and private insurance coverage. Columns 1 and 2 of Table 2, Panel A,
+show the standard error is 64% smaller with recentered IV vs. simulated IV (0.010 vs. 0.028)
+when estimating the effects of Medicaid eligibility on Medicaid enrollment. For crowdout effects,
+which take private insurance coverage as the outcome, standard errors are reduced by 70% (0.007
+vs. 0.023; columns 3 and 4) from an insignificant simulated IV estimate to a significant recentered
+IV estimate. These estimates incorporate effects from both the conventional crowdout margin of
+employer-sponsored insurance as well as crowdout from ACA state health exchanges; in columns 5
+and 6 we isolate crowd-out of employer-sponsored plans. Here neither simulated nor recentered IV
+yields significant estimates, though the latter is again much more precise.
+30This is because the recentered instrument can be written in the exposed sample as gs(i) × 1 [t(i) = 2014] − π(0) ×
+1 [t(i) = 2014] − (π(1) − π(0)) × qs(i) × 1 [t(i) = 2014] with the latter two terms absorbed by the controls.
+31Throughout we report state-clustered standard errors. To address finite-sample concerns with a relatively small
+number of states, we report confidence intervals by a wild score bootstrap as suggested by Kline and Santos ( 2012)
+and use them for hypothesis testing. This computationally eﬀicient approach requires inverting bootstrapped test
+statistics, which generally makes confidence intervals asymmetric around the IV point estimate.
+18
+
+===== PAGE 19 =====
+
+Table 1: Medicaid Application: First-Stage Effects on Eligibility
+(1) (2) (3)
+Simulated IV 0.851 0.032
+(0.113) (0.140)
+[0.585,1.108] [-0.252,0.479]
+Recentered IV 0.972 0.817
+(0.015) (0.171)
+[0.941,1.014] [0.394,1.161]
+Partial R2 0.012 0.799 0.103
+Exposed Sample N Y N
+States 43 43 43
+Individuals 2,397,313 421,042 2,397,313
+Notes: This table reports first-stage coeﬀicients for the two instruments described in the text: a
+conventional simulated instrument and a recentered prediction of Medicaid eligibility. Columns 1
+and 3 estimate regressions in the full sample of individuals in 2013–14, while Column 2 restricts
+to the sample of individuals in both years whose characteristics and state of residence make them
+exposed to the partial ACA Medicaid expansion in 2014. All regressions control for state and year
+fixed effects and an indicator for Republican-governed states interacted with year. State-clustered
+standard errors are reported in parentheses; 95% confidence intervals, obtained by a wild score
+bootstrap, are reported in brackets. R2 statistics partial out the controls.
+In economic terms, the recentered IV estimates suggest a total private insurance crowdout rate
+of 32.1%, with a 7.2 percentage point increase in Medicaid coverage offset by a 2.3 percentage point
+decrease in private insurance coverage. This relative effect, reported in Panel B column 4 as the
+coeﬀicient from an IV regression of private insurance coverage on Medicaid enrollment (instead of
+eligibility), is similar to the 42% crowd-out that Leung and Mas ( 2018) find in applying a difference-
+in-differences specification to the 2014 Medicaid expansion. 32 However, we find minimal evidence
+for crowdout from employer-sponsored insurance plans even with our more powerful recentered
+IV. Instead, our estimates suggest crowdout arises from direct-purchase private insurance via state
+health exchanges (implying minimal employment effects). This aligns with the findings of Frean et
+al. (2017), who exploit multiple sources of ACA-induced policy variation with a simulated instrument
+(see also Courtemanche et al. ( 2017), Kaestner et al. ( 2017), and Maclean and Saloner ( 2019)). For
+both private insurance and employer-sponsored insurance, the standard errors of the recentered IV
+crowdout parameter estimates in Panel B are around 44% smaller than those of simulated IV.
+Importantly, the recentered IV power gains are not a product of the relatively simple simulated
+32The corresponding simulated IV specification yields a private insurance crowd-out rate of 36.1%, reported in
+Panel B column 3, which is not statistically distinguishable from the recentered IV estimate ( p = 0.726). Recentered
+and simulated IV also yield statistically indistinguishable estimates for the employer-sponsored insurance outcome
+(p = 0 .116), reported in Panel B columns 5-6. In contrast, the recentered and simulated IV estimates which use
+Medicaid eligibility as the endogenous variable are statistically distinguishable, while they should have the same
+estimating according to the theory presented thus far. Online Appendix D.4 discusses how this pattern can be
+explained by measurement error in self-reported income and demographics entering the eligibility calculation. The
+specifications which use Medicaid enrollment as the endogenous variable are free from such bias.
+19
+
+===== PAGE 20 =====
+
+Table 2: Medicaid Application: IV Estimates
+Has Medicaid Has Private Insurance Has Employer-Sponsored
+Insurance
+Simulated IV Recentered IV Simulated IV Recentered IV Simulated IV Recentered IV
+(1) (2) (3) (4) (5) (6)
+Panel A. Medicaid Eligibility Effects
+Eligible 0.132 0.072 −0.048 −0.023 0.009 −0.009
+(0.028) (0.010) (0.023) (0.007) (0.014) (0.005)
+[0.079,0.217] [0.051,0.094] [-0.109,0.010] [-0.040,-0.007] [-0.035,0.052] [-0.021,0.004]
+Panel B. Medicaid Enrollment Effects
+Has Medicaid −0.361 −0.321 0.068 −0.125
+(0.165) (0.092) (0.111) (0.061)
+[-0.825,0.069] [-0.561,-0.110] [-0.232,0.429] [-0.264,0.065]
+Exposed Sample N Y N Y N Y
+States 43 43 43 43 43 43
+Individuals 2,397,313 421,042 2,397,313 421,042 2,397,313 421,042
+Notes: Panel A of this table reports second-stage coeﬀicients from the two IV regressions described in the text: one using a conventional
+simulated instrument and the other using as an instrument a recentered prediction of Medicaid eligibility. Columns 1, 3, and 5 estimate
+regressions in the full sample of individuals in 2013–2014, while Columns 2, 4, and 6 restrict to the sample of individuals whose char-
+acteristics and state of residence make them exposed to the partial ACA Medicaid expansion in 2014. All regressions control for state
+and year fixed effects and an indicator for Republican-governed states interacted with year. Panel B shows estimates from IV regressions
+which use an indicator for Medicaid enrollment as the endogenous variable, instead of an indicator for Medicaid eligibility. State-clustered
+standard errors are reported in parentheses; 95% confidence intervals, obtained by a wild score bootstrap, are reported in brackets.
+20
+
+===== PAGE 21 =====
+
+IV specification. Online Appendix Table A1 shows that adding flexible controls for the individual
+characteristics which drive exposure to Medicaid expansions (specifically: full interactions of house-
+hold income deciles, parental status, work status, and year) has little effect on the point estimates
+and standard errors for both estimators. Here the similar power of recentered IV with and without
+flexible controls suggests little added benefit from trying to approximate the adjustment for ψ in
+the optimal IV after approximating the recentered best predictor.
+Three additional checks are presented in the Online Appendix. First, we check the assumption of
+expansion exogeneity with a pre-trend test that replaces the 2013-2014 difference-in-differences IVs
+with a comparable 2012-2013 analysis. 33 Table A2 shows that the increased precision of recentered
+IV lets us reject the null hypothesis of no pre-trends, highlighting how our approach can improve
+power of specification tests as well as effect estimates. While strictly speaking the rejection invali-
+dates the identifying assumption underlying our approach (as well as those of earlier analyses), we
+proceed with it as the baseline since the magnitude of the placebo coeﬀicient is reassuringly small
+(around 0.01–0.02) regardless of the outcome and the instrument. We then check sensitivity to
+allowing a state’s decision to expand to depend not only on the governor’s political party but also
+on the state’s median household income and the 2012 rate of Medicaid coverage (specifically, by
+adding these two state characteristics as controls, interacted with year and state party dummies).
+Table A3 shows that estimated effects of eligibility remain very similar across these specifications.
+Third, we explore robustness to using the recentered IV without restricting to the exposed sample.
+Table A4 shows that this approach only yields power gains when the additional demographic con-
+trols (those from Table A1) or an indicator for being in the exposed sample interacted with year
+are included as covariates. We discuss the reason for this in Online Appendix D.5 by relating it to
+our general eﬀiciency theory of Section 3.2.
+Large power gains from recentered IV are confirmed in a Monte Carlo study based on our
+baseline estimates. Figure 1 plots simulated power curves for the primary Medicaid enrollment
+outcome and the employer-sponsored insurance coverage outcome, while Online Appendix Figure
+A2 plots the simulated estimator distributions (Appendix B.2 details the simulation procedure).
+In this controlled environment the true causal effect and the shock assignment process are known,
+allowing us to verify that the recentered IV estimator is both close to unbiased and substantially
+more eﬀicient than the simulated IV estimator. We find, for example, that the minimum detectable
+effects of recentered IV (i.e., the smallest null hypotheses which are rejected by a 0.05-size test with
+probability 0.8) are roughly three times smaller than those of simulated IV.
+5 Conclusion
+Many economic treatments are given by formulas which incorporate multiple sources of variation,
+only some of which are exogenous. Rather than discarding the other non-random variation, we show
+33Specifically, we replace 2013 individuals with 2012 individuals and replace 2014 individuals with 2013 individuals.
+We continue to construct the endogenous variable and instrument as an individual’s Medicaid eligibility in 2013 and
+2014 for comparability, and also keep all controls unchanged.
+21
+
+===== PAGE 22 =====
+
+Figure 1: Medicaid Application: Simulated Power Curves
+A. Has Medicaid
+5%0.2.4.6.81Rejection Rate-.15-.1-.050.05.1.15CoefficientSimulated IVRecentered IV
+B. Has Employer-Sponsored Insurance
+5%0.2.4.6.81Rejection Rate-.15-.1-.050.05.1.15CoefficientSimulated IVRecentered IV
+Notes: This figure plots the simulated rejection rates of the two IV regressions discussed in the text:
+one using a conventional simulated instrument and the other using as an instrument a recentered
+prediction of Medicaid eligibility. See Appendix B.2 for a description of the simulation procedure.
+Rejection rates are for nominal 5%-level tests of each coeﬀicient based on wild score bootstraps,
+clustered by state. The true effect of zero is indicated by the dashed vertical line. The nominal 5%
+level of the tests is indicated by the dashed horizontal lines.
+22
+
+===== PAGE 23 =====
+
+how it can be used to construct powerful formula instruments. By combining the known treatment
+structure with knowledge of the design of exogenous shocks, researchers can construct recentered
+instruments which strongly predict the treatment. We show how such recentered best predictors are
+formally justified, and how they can be further adjusted to approximate the asymptotically optimal
+formula instrument. Empirically, we show substantial power gains from using such instruments to
+estimate the crowdout effects of Medicaid enrollment—with standard errors 44% smaller than those
+from a conventional simulated instrument approach.
+Importantly, while we have focused on the popular setting of simulated instruments, the insights
+of this paper may apply to a large class of formula treatments and instruments from a variety of fields.
+These include linear and nonlinear shift-share instruments, treatments capturing spillovers across
+social networks or geography, instruments based on centralized school assignment mechanisms,
+“free-space” instruments capturing access to mass media, and treatments or instruments leveraging
+weather shocks (Borusyak and Hull 2021). We expect this class to only increase as researchers find
+new and creative ways to exploit exogenous variation in complex treatments.
+References
+Adão, Rodrigo, Michal Kolesár, and Eduardo Morales. 2019. “Shift-Share Designs: Theory
+and Inference. ” Quarterly Journal of Economics 134:1949–2010.
+Ai, Chunrong, and Xiaohong Chen. 2003. “Eﬀicient estimation of models with conditional
+moment restrictions containing unknown functions. ” Econometrica 71:1795–1843.
+Aitken, AC. 1935. “On least squares and linear combination of observations. ” Proceedings of the
+Royal Society of Edinburgh 55:42–48.
+Anatolyev, Stanislav. 2007. “Optimal instruments in time series: A survey. ” Journal of Economic
+Surveys 21:143–173.
+Angrist, Joshua D., and JS Pischke. 2008. Mostly harmless econometrics: An empiricist’s
+companion. Princeton University Press.
+Athey, Susan, and Guido W. Imbens. 2022. “Design-based Analysis in Difference-In-Differences
+Settings with Staggered Adoption. ” Journal of Econometrics 226:62–79.
+A verett, Susan L, Julie K Smith, and Y ang W ang. 2019. “Medicaid expansion and opioid
+deaths. ”Health Economics 28:1491–1496.
+Bartik, Timothy J. 1991. Who Benefits from State and Local Economic Development Policies?
+W. E. Upjohn Institute for Employment Research.
+23
+
+===== PAGE 24 =====
+
+Berry, Steven, James Levinsohn, and Ariel Pakes. 1999. “Voluntary Export Restraints on
+Automobiles: Evaluating a Trade Policy. ” American Economic Review 89:400–430.
+Black, Bernard, Alex Hollingworth, Leticia Nunes, and Kosali Simon. 2019. “The Effect of
+Health Insurance on Mortality: Power Analysis and What We Can Learn from the Affordable
+Care Act Coverage Expansions. ” NBER Working Paper 25568.
+Borusyak, Kirill, and Peter Hull. 2021. “Non-Random Exposure to Exogenous Shocks: Theory
+and Applications. ” Mimeo.
+. 2023. “Non-Random Exposure to Exogenous Shocks. ” Econometrica 91:2155–2185.
+Borusyak, Kirill, Peter Hull, and Xavier Jaravel. 2022. “Quasi-Experimental Shift-Share
+Research Designs. ”Review of Economic Studies 89:181–213.
+. 2025a. “A practical guide to shift-share instruments. ” Journal of Economic Perspectives
+39:181–204.
+. 2025b. “Design-based identification with formula instruments: A review. ” Econometrics
+Journal.
+Boustan, Leah, F ernando F erreira, Hernan Winkler, and Eric M. Zolt. 2013. “The effect of
+rising income inequality on taxation and public expenditures: Evidence from U.S. Municipalities
+and school districts, 1970-2000. ” Review of Economics and Statistics 95:1291–1302.
+Brown, David W., Amanda E. Kowalski, and Ithai Z. Lurie. 2018. “Long-Term Impacts
+of Childhood Medicaid Expansions on Outcomes in Adulthood. ” NBER Working Paper No.
+20835.
+Chamberlain, Gary. 1987. “Asymptotic eﬀiciency in estimation with conditional moment restric-
+tions. ”Journal of Econometrics 34:305–334.
+. 1992. “Eﬀiciency Bounds for Semiparametric Regression. ” Econometrica 60:567–596.
+Chernozhukov, Victor, Denis Chetverikov, Mert Demirer, Esther Duflo, Christian Hansen,
+Whitney Newey, and James Robins. 2018. “Double/debiased machine learning for treat-
+ment and structural parameters. ” Econometrics Journal 21:C1–C68.
+Cohodes, Sarah R., Daniel S. Grossman, Samuel A. Kleiner, and Michael F. Loven-
+heim. 2016. “The Effect of Child Health Insurance Access on Schooling: Evidence from Public
+Insurance Expansions. ” Journal of Human Resources 51:727–759.
+Conlon, Christopher, and Jeff Gortmaker. 2020. “Best practices for differentiated products
+demand estimation with PyBLP. ” RAND Journal of Economics 51:1108–1161.
+24
+
+===== PAGE 25 =====
+
+Courtemanche, Charles, James Marton, Benjamin Ukert, Aaron Y elowitz, and Daniela
+Zapata. 2017. “Early impacts of the Affordable Care Act on health insurance coverage in
+Medicaid expansion and non-expansion states. ” Journal of Policy Analysis and Management
+36:178–210.
+Coussens, Stephen, and Jann Spiess. 2021. “Improving Inference from Simple Instruments
+Through Compliance Estimation. ” Mimeo.
+Cullen, Julie Berry, and Jonathan Gruber. 2000. “Does Unemployment Insurance Crowd out
+Spousal Labor Supply?” Journal of Labor Economics 18:546–572.
+Currie, Janet, and Jonathan Gruber. 1996a. “Health Insurance Eligibility, Utilization of Med-
+ical Care, and Child Health. ” The Quarterly Journal of Economics 111:431–466.
+. 1996b. “Saving Babies: The Eﬀicacy and Cost of Recent Changes in the Medicaid Eligibility
+of Pregnant Women. ” Journal of Political Economy 104:1263–1296.
+Cutler, David M., and Jonathan Gruber. 1996. “Does Public Insurance Crowd out Private
+Insurance?” The Quarterly Journal of Economics 111:391–430.
+East, Chloe N., and Elira Kuka. 2015. “Reexamining the consumption smoothing benefits of
+Unemployment Insurance. ”Journal of Public Economics 132:32–50.
+Fiedler, Miroslav. 2003. “Remarks on the Sherman-Morrison-Woodbury formulae” [in en]. Math-
+ematica Bohemica 128:253–262. Accessed October 18, 2025.
+F rean, Molly, Jonathan Gruber, and Benjamin D. Sommers. 2017. “Premium subsidies,
+the mandate, and Medicaid expansion: Coverage effects of the Affordable Care Act. ” Journal
+of Health Economics 53:72–86.
+Gao, Mengsi. 2024. “Endogenous interference in randomized experiments. ”arXiv preprint arXiv:2412.02183.
+Goldsmith-Pinkham, Paul, Isaac Sorkin, and Henry Swift. 2020. “Bartik Instruments :
+What, When, Why, and How. ” American Economic Review 110:2586–2624.
+Gruber, Jonathan. 2003. “Medicaid. ” In Means-tested transfer programs in the United States,
+15–78. University of Chicago Press.
+Hackmann, Martin B. 2019. “Incentivizing Better Quality of Care: The Role of Medicaid and
+Competition in the Nursing Home Industry. ” American Economic Review 109:1684–1716.
+Hansen, Lars Peter. 1985. “A method for calculating bounds on the asymptotic covariance ma-
+trices of generalized method of moments estimators. ” Journal of Econometrics 30:203–238.
+Imbens, Guido W., and Joshua D. Angrist. 1994. “Identification and Estimation of Local
+A verage Treatment Effects. ”Econometrica 62:467–475.
+25
+
+===== PAGE 26 =====
+
+Kaestner, Robert, Bowen Garrett, Jiajia Chen, Anuj Gangopadhyaya, and Caitlyn
+Fleming. 2017. “Effects of ACA Medicaid Expansions on Health Insurance Coverage and
+Labor Supply. ”Journal of Policy Analysis and Management 36:608–642.
+Kline, Patrick, and Andres Santos. 2012. “A Score Based Approach to Wild Bootstrap Infer-
+ence. ”Journal of Econometric Methods 1:23–41.
+Leung, Pauline, and Alexandre Mas. 2018. “Employment Effects of the ACA Medicaid Expan-
+sions. ”Industrial Relations 57:206–234.
+Maclean, Johanna Catherine, and Brendan Saloner. 2019. “The Effect of Public Insurance
+Expansions on Substance Use Disorder Treatment: Evidence from the Affordable Care Act. ”
+Journal of Policy Analysis and Management 38:366–393.
+Miller, Sarah, and Laura R Wherry. 2017. “Health and access to care during the first 2 years
+of the ACA Medicaid expansions. ” New England Journal of Medicine 376:947–956.
+Newey, Whitney K. 1990. “Semiparametric eﬀiciency bounds. ” Journal of applied econometrics
+5:99–135.
+Newey, Whitney K, and Daniel McF adden. 1994. “Large sample estimation and hypothesis
+testing. ”Handbook of econometrics 4:2111–2245.
+Newey, Whitney K. 1989. “The Asymptotic Variance of Semiparametric Estimators. ”Unpublished
+manuscript.
+Robinson, P .M.1988. “Root-N-Consistent Semiparametric Regression. ”Econometrica 56:931–954.
+Ross, Nathan. 2011. “Fundamentals of Stein’s method” [in en]. Probability Surveys 8:210–293.
+Accessed October 27, 2025.
+Ruggles, Steven, Sarah Flood, Ronald Goeken, Josiah Grover, Erin Meyer, Jose Pacas,
+and Matthew Sobek. 2020. IPUMS USA: Version 10.0. Minneapolis, MN.
+W ager, Stefan. 2025. “Causal inference: A statistical learning approach. ” URL https://web. stan-
+ford. edu/swager/causal_inf_book. pdf.
+W ooldridge, Jeffrey M. 2002. “Econometric analysis of cross section and panel data MIT press. ”
+Cambridge, MA.
+26
+
+===== PAGE 27 =====
+
+A Theory Appendix
+A.1 Predetermined Covariates
+Here we generalize our theoretical results to allow for an intercept and other predetermined covari-
+ates to be included in estimation. Consider:
+Assumption A1. (a) For a symmetric idempotent matrix M which is measurable with respect to
+w, we have y = M ˇy, x = M ˇx, and ε = M ˇε; (b) E [ˇεˇε′ | g, w] is almost surely invertible.
+This assumption nests the case considered in the main text (by setting M = I); by the Frisch–
+Waugh–Lovell theorem it also allows yi, xi, and εi to be residualized in-sample on some vector of lin-
+early independent covariates mi(w). The latter corresponds to M = I−m(w) (m(w)′m(w))−1 m(w)′,
+with m(w) collecting the mi(w). In this case, E [εε′ | g, w] is necessarily rank-deficient which re-
+quires restating several results from the main text. To do so, we let Q† denote the pseudo-inverse
+of a generic matrix Q and let Col (Q) denote the column space of Q. We then have:
+Proposition A1. Under Assumptions 1 and A1(a), all recentered instruments satisfy the exogeneity
+condition (2). Moreover, among instruments in the column space of M , only recentered instruments
+satisfy ( 2): for any distribution of (z, g, w) with z ∈ Col(M ) there exists a conditional distribution
+of ε | (z, g, w) such that ε ∈ Col(M ) and Assumption 1 holds but ( 2) fails unless z is a deterministic
+function of (g, w) satisfying ( 3).
+Proposition 1 is a special case corresponding to M = I. When M is instead reduced-rank, the
+second statement of Proposition A1 imposes an extra constraint on the adversarial choice of ε:
+that it has to be in the column space of M . Because of this, the implication is also weaker: for
+instrument validity, one needs M z ∈ R which is weaker than z ∈ R. However, restricting attention
+to z ∈ Col(M ) is without loss since ˆβ [z] = ˆβ [M z] for any z.
+We next state generalizations of Theorem 1, Proposition 3, and Lemma 2:
+Theorem A1. Suppose Assumptions 1 and A1 hold. Then the recentered instrument
+z∗ = E
+
+εε′ | g, w
+†
+
+E [x | g, w] − E
+h
+E
+
+εε′ | g, w
+† | w
+i†
+E
+h
+E
+
+εε′ | g, w
+† E [x | g, w] | w
+i
+.
+solves
+z∗ ∈ arg min
+z∈R
+V [z] .
+Moreover, for b = E [x | g, w] and A = E [εε′ | g, w],
+V [z∗] = E
+
+b′A†b − E
+h
+b′A† | w
+i
+E
+h
+A† | w
+i†
+E
+h
+A†b | w
+i−1
+.
+When E [εε′ | g, w] = E [εε′ | w] a.s., these simplify to
+z∗ = E
+
+εε′ | w
+† (E [x | g, w] − E [x | w]) (A1)
+27
+
+===== PAGE 28 =====
+
+and
+V [z∗] = E
+h
+(b − E [b | w])′ E
+
+εε′ | w
+† (b − E [b | w])
+i−1
+.
+Proposition A2. Suppose Assumption A1 holds with Var [ˇε | g, w] a.s. invertible, and let ψ =
+E [ε | w] and Ω = Var [ε | w] be the conditional mean and variance of the errors. Then z∗ from
+equation ( A1) can be written as
+z∗ = Ω † (˜z − νρψ ) ,
+where ρψ = ψ′Ω† ˜z
+ψ′Ω†ψ ψ is the Ω†-weighted projection of ˜z on ψ, and ν = ψ′Ω†ψ
+1+ψ′Ω†ψ ∈ [0, 1).
+Lemma A1. Suppose Assumption A1 holds. Let ¯λ ≥ 0 be some constant and let E be the class of
+random vectors e = ( e1, . . . , eN )′ such that the maximum eigenvalue of E [ee′ | g, w] is bounded by
+¯λ uniformly over (g, w). Suppose the only knowledge a researcher has about ε is that ε = M ˇε for
+ˇε ∈ E . Then ˜z is approximately minimax, in that:
+˜z ∈ arg min
+z∈R
+max
+e∈E
+Var [z′M e]
+E [z′x]2 .
+A.2 Optimal Shift-Share Instruments
+Let RS ⊂ R denote the class of recentered shift-share instruments z = S (g − E [g | w]) that are
+characterized by an N × K matrix S that is measurable with respect to w.
+Proposition A3. Suppose Assumptions 1 and A1 hold, E [εε′ | g, w] = E [εε′ | w] a.s., and Var [g | w]
+is a.s. invertible. Let ˜g = g − E [g | w]. Consider the recentered shift-share instrument
+zS = E
+
+εε′ | w
+† ˜zS for ˜zS = E
+
+x˜g′ | w
+
+Var [˜g | w]−1 ˜g.
+The associated ˆβ
+
+zS
+has the smallest approximate variance of all recentered shift-share IV esti-
+mators
+zS ∈ arg min
+z∈RS
+V [z] .
+A.3 Reaching the Semi-Parametric Eﬀiciency Bound
+Proposition A4. Suppose the observations of (yi, xi, εi, gi, wi) are iid across i (with distributions
+not changing with N ) and that Assumptions 1 and 2 hold with w = ( wi)N
+i=1 and g = ( gi)N
+i=1.
+Suppose further E
+
+ε2
+i | gi, wi
+
+= E
+
+ε2
+i | wi
+
+as in Theorem 1. Then if ˆβ [z∗] is asymptotically
+normal and satisfies Assumptions 1 and 2, and if the sequence (˜z′Ω−1ψ)
+2
+1+ψ′Ω−1ψ is uniformly integrable,
+ˆβ [z∗] asymptotically achieves the Chamberlain ( 1992) semi-parametric eﬀiciency bound.
+A.4 Conditions for Asymptotic Normality
+A full analysis of the asymptotic normality of recentered IV estimators and asymptotic inference
+on them—an open problem as pointed out by Borusyak et al. ( 2025b)—is beyond the scope of the
+28
+
+===== PAGE 29 =====
+
+current paper. The special case of shift-share instruments has been worked out by Adão et al. ( 2019,
+Proposition 4), assuming a growing number of shocks and suﬀiciently dispersed shock exposure. It
+is clear their argument can be extended to the case where the instrument can be well approximated
+by a shift-share construction. Building on one of the consistency results of Borusyak and Hull
+(2023, Proposition 5), here we provide a complementary set of conditions for asymptotic normality
+considering the case where the recentered instrument is defined by an arbitrary nonlinear formula
+but depends only on a small set of mutually independent shocks, with non-overlapping sets of shocks
+for most observation pairs. We impose:
+Assumption A2. (a) zi = fi(gAi; w) ∈ R where gAi ≡ {gk : k ∈ Ai} for Ai ≡ Ai(w) ⊆ {1, . . . , K};
+(b) For Di = {j = 1, . . . , N: Ai ∩ Aj ̸= ∅}, |Di| ≤ ¯D uniformly across i and N ;
+(c) g ⊥ ⊥ε | w, and the components of g are mutually independent conditional on w;
+(d) 1
+N
+P
+i zixi
+p
+→ Π ̸= 0;
+(e) VN ≡ 1
+N Var [P
+i ziεi | ε, w]
+p
+→ V > 0;
+(f) E
+
+z4
+i | w
+
+≤ B4
+z , and 1
+N
+P
+i ε4
+i = Op(1).
+Part (a) of Assumption A2 defines the set of shocks the formula instrument depends on while
+part (b) imposes sparsity of the bipartite graph of dependencies between observations and shocks.
+The latter implies a growing number of shocks, K → ∞ . Part (c) imposes a stronger version of
+Assumption 1 as well as mutual independence of the shocks. Part (d) imposes a standard relevance
+condition, which holds if the first-stage relationship between xi and zi is strong and if zi does not
+concentrate as N → ∞. Part (e) requires the conditional variance of 1√
+N
+P ziεi to stabilize. Parts
+(b), (d), and (e) naturally hold together when the number of shocks K, observations N , and shock-
+observation links L =P
+i |Ai| are of the same order (i.e. K/N → κ and L/N → ℓ for 0 < κ, ℓ < ∞)
+and when links are dispersed across observations and shocks. Part (f) imposes regularity conditions.
+Leveraging Stein’s method for proving asymptotic normality with locally dependent random
+variables (specifically as in Ross ( 2011)), we have:
+Proposition A5. Suppose Assumption A2 holds. Then the recentered estimator ˆβ [z] is asymptot-
+ically normal with √
+N
+
+ˆβ [z] − β
+ D→ N (0, V /Π2).
+We conjecture that most parts of Assumption A2 can be relaxed, in particular allowing max i |Di|
+to grow slowly with N . Intuitively, consider the following scenario: each observation is still exposed
+to a small number of shocks, i.e., max i |Ai| is bounded, which implies that L is of the same order
+as N . We maintain that shock exposure is dispersed, which now means that the largest number
+of observations exposed to a given shock is of the same order as the average, O(L/K). However,
+suppose L/K grows suﬀiciently slowly, with max i |Di| of the same order. The proof of Proposition
+A5 extends with no change if part (b) of Assumption A2 is relaxed to have max i |Di| = o(N 1/4V 3/4
+N +
+N 1/3V 2/3
+N ). Part (d) may also expected to hold as zi, which depends only on a fixed number of
+shocks, need not concentrate. Key to the asymptotic normality of ˆβ [z] is then the behavior of
+Var [P
+i ziεi | ε, w] in part (e). Similar to the analysis in Gao ( 2024), different assumptions on mutual
+29
+
+===== PAGE 30 =====
+
+dependence of ziεi among observations exposed to common shocks may lead to asymptotically
+normal estimators with different rates. We leave a formal analysis of this scenario to future work.
+B Empirical Appendix
+B.1 Data Construction
+Our application uses a repeated cross-section of annual data from the American Community Survey
+(ACS; Ruggles et al. 2020). Our main estimates use representative 1% samples from 2013 and
+2014; we use an analogous sample from 2012 to estimate pre-trends. We restrict these samples to
+non-disabled adults (aged 21-64) residing in one of the 43 states eligible for Medicaid expansion
+under the ACA. To define this sample of states we follow Frean et al. ( 2017) in excluding “early
+expansion” states which expanded Medicaid after the ACA but before 2013, as well as Massachusetts
+and Vermont which had made all adults with household income less than 138% FPL eligible prior
+to the ACA. We also follow Frean et al. ( 2017) in designating 19 of these states as having expanded
+under the ACA in 2014, with 24 not expanding. 34
+In each year, we classify an individual as insured under Medicaid when they report being covered
+by Medicaid or an equivalent government-assistance program, excluding Medicare and Veterans
+Affairs insurance. We classify an individual as having private insurance when she is covered by a
+plan purchased through an employer or union, or when she purchases this private coverage directly.
+We further separate individuals covered by employer-sponsored insurance.
+We use the formulas in Frean et al. ( 2017) to define Medicaid eligibility. Income is given by a
+household’s total pre-tax personal income or losses ( inctot), adjusted for inflation. Other inputs to
+the eligibility calculation include an indicator for whether an individual is a parent (i.e. an adult
+with children in the household) and an indicator for whether an individual is in the labor force
+(labforce). We note that these may be noisy proxies for the characteristics actual used to assign
+Medicaid eligibility.
+Our simulated eligibility instrument is constructed by simulating the average Medicaid eligibility
+of a representative 10% sample of our analysis data under different state policies. Namely we use
+the representative sample to simulate two shares: that of individuals who would be eligible had their
+state expanded eligibility in 2014 to everyone under 138% of FPL (24.5%), and that of individuals
+who would be eligible if their state kept 2013 policy intact (11.6%). We assign the difference in
+these shares to all individuals in 2014 residing in expansion states and zero to all other individuals.
+Our recentered instrument is constructed by predicting the actual Medicaid eligibility of each
+individual. In 2013 we use actual 2013 eligibility policies, again following Frean et al. ( 2017). In 2014
+we predict eligibility by combining information on the 2013 policies and a state’s decision to expand.
+An individual is eligible for Medicaid in 2014 if either she was eligible under the 2013 policies of
+34Frean et al. ( 2017) study coverage effects over 2014-2015, designating 24 states as having expanded during this
+time, 21 states as having not expanded, and 6 states as expanding early. We use their classification system as of 2014,
+when only 19 of their 24 states have expanded, and additionally exclude Massachusetts and Vermont.
+30
+
+===== PAGE 31 =====
+
+her state (whether or not the state expanded eligibility) or if her household income is below 138%
+FPL and her state expanded eligibility under the ACA. To compute the expected instrument µi
+we first identify individuals who would have been eligible in 2014 if their state expanded but not
+otherwise (the “exposed sample”). Outside of this sample the expected instrument in 2014 is simply
+the individual’s actual 2014 eligibility, while inside this sample the expected instrument in 2014 is
+the fraction of states which expanded conditional on the governor’s party. The 2013 expected
+instrument is actual 2013 eligibility for all individuals. Political party aﬀiliation of state governors
+is determined as of December 2013. In all regressions we control for a Republican governor indicator
+interacted with year. In robustness checks we control for other time-interacted state characteristics:
+a state’s median income over 2009-2013 or its share insured by Medicaid in 2012 (both from the
+ACS).
+B.2 Power Simulations
+We verify large and robust power gains from recentered IV in a Monte Carlo study, in which the
+true causal effect and the shock assignment process are known. We draw 1,000 counterfactual
+state expansion decisions by choosing random sets of 8 Republican- and 11 Democratic-controlled
+states as expansion states and use these shocks to generate simulated instruments and recentered
+best predictor instruments. We do not specify a model for e∆
+k , and instead take the best predictor
+instrument as the endogenous variable. Finally, for the Medicaid take-up and employer-sponsored
+insurance crowd-out outcomes we take the second-stage residuals from Columns 2 and 6 of Table 2,
+panel A. These outcomes are unrelated to the endogenous variable by design, corresponding to the
+true causal effect of zero for all individuals, while keeping the correlation structure from the actual
+data. With these generated data, we re-estimate the simulated and recentered IV specifications as
+in our baseline implementation in Panel A of Table 2; since the best predictor instrument is the
+endogenous variable, recentered IV is here is just OLS in the exposed sample. By design, both
+sets of estimates should be centered at the true effects of zero, while we expect the recentered IV
+procedure to systematically reject a larger set of alternative hypotheses.
+Appendix Figure A2 shows the distribution of simulated and recentered IV estimates for the
+two outcomes across Monte Carlo draws. Both estimators are approximately unbiased, with the
+distributions in both panels centered around the true effect of zero. However, consistent with
+the much shorter confidence intervals in Table 2, the distribution of recentered IV coeﬀicients is
+dramatically tighter around this mean. The estimator standard deviation falls from 0.018 to 0.008
+as we move from the simulated IV to recentered IV in Panel A, with a larger decline from 0.019
+to 0.006 in Panel B. With minimal bias, these correspond to simulated root mean-squared error
+reductions of 58.3% and 68.7% with the recentered IV, respectively.
+Figure 1 shows that these reductions in estimator variance translate to increased rejection rates
+of false null hypotheses for both outcomes, while also suggesting the wild bootstrap 95% confidence
+intervals in Table 2 have approximately correct size. Away from the true null hypothesis of zero
+the recentered IV power curve is much more steeply sloping, with uniformly higher rejection rates.
+31
+
+===== PAGE 32 =====
+
+With the Medicaid take-up outcome, for example, the recentered IV is found to reject coeﬀicients
+outside the range of [−0.025, 0.020] with probability of at least 0.8, while the simulated IV only has
+such high power outside a nearly three times as long range, of [−0.065, 0.065]. For the employer-
+sponsored insurance crowd-out outcome this contrast in minimum detectable effects is even starker,
+at [−0.019, 0.016] for the recentered IV versus [−0.065, 0.046] for the simulated IV.
+C Proofs
+C.1 Proof of Proposition A1
+The first statement of the propositions follows by the law of iterated expectations, similarly to
+Borusyak and Hull ( 2023) except with a slightly weaker Assumption 1: for a recentered formula
+instrument zi,
+E
+"
+1
+N
+X
+i
+ziεi
+#
+= 1
+N
+X
+i
+E [ziE [εi | g, w]] = 1
+N
+X
+i
+E [ziE [εi | w]] = 1
+N
+X
+i
+E [E [zi | w] E [εi | w]] = 0 .
+We now prove the second statement of the general Proposition A1, focusing for clarity on the
+case of discrete g, w, and z. The continuously-distributed case follows similarly under appropriate
+regularity conditions.
+To show that, if z ∈ Col(M ), z has to be a formula instrument (i.e. measurable with respect to
+g, w), suppose by contradiction there is an observation ι and values (¯g, ¯w) in the support of (g, w)
+such that zι takes distinct values ¯z1 and ¯z2 with probabilities π¯zj |¯g, ¯w > 0, j = 1 , 2. Consider the
+following data-generating process for ε: ε = M ˇε where ˇεi = 0 for i ̸= ι and
+ˇει =
+8
+>>><
+>>>:
+(¯z1 − ¯z2)/π¯z1|¯g, ¯w g = ¯g, w = ¯w, zι = ¯z1
+−(¯z1 − ¯z2)/π¯z2|¯g, ¯w g = ¯g, w = ¯w, zι = ¯z2
+0, otherwise.
+Clearly, ε ∈ Col(M ). It is also straightforward to verify that this ε satisfies 0 = E [ε | g, w] =
+E [ε | w]. Yet,
+E
+
+z′ε
+
+= E
+
+z′M ˇε
+
+= E
+
+z′ ˇε
+
+= (¯z1 · (¯z1 − ¯z2) − ¯z2 · (¯z1 − ¯z2)) · P r (g = ¯g, w = ¯w)
+= (¯z1 − ¯z2)2 · P r (g = ¯g, w = ¯w) ̸= 0,
+violating ( 2), where the second line holds because M z = z for idempotent M and z ∈ Col(M ).
+It remains to be shown that z must be a recentered instrument. Consider a different data-
+generating process for ε, in which E [ε | w] = E [z | w] (and again ε ∈ Col(M ) since z ∈ Col(M )).
+32
+
+===== PAGE 33 =====
+
+Then, using the fact that z is a formula instrument,
+E
+
+z′ε
+
+= E
+
+z′E [ε | g, w]
+
+= E
+
+z′E [ε | w]
+
+= E
+
+E [z | w]′ E [ε | w]
+
+= E
+
+E [z | w]′ E [z | w]
+
+̸= 0,
+unless E [z | w] = 0 a.s., violating ( 2) again.
+C.2 Proof of Proposition 2
+Uniform integrability of 1
+N z′x implies E
+ 1
+N z′x
+
+→ Π. Then, denoting the asymptotic distribution
+of rN
+
+ˆβ [z] − β
+
+by ˜D and using the continuous mapping theorem,
+rN
+1
+N z′ε
+E
+ 1
+N z′x
+ = rN
+
+ˆβ [z] − β
+
+·
+1
+N z′x
+Π · Π
+E
+ 1
+N z′x
+ ⇒ ˜D,
+as
+1
+N z′x
+Π
+p
+→ 1, and Π
+E[ 1
+N z′x] → 1. Furthermore, uniform integrability of
+ 
+rN 1
+N z′ε
+2 implies
+Var
+"
+rN
+1
+N z′ε
+E
+ 1
+N z′x
+
+#
+= r2
+N V [z] → V,
+which is equivalent to the Proposition’s claim.
+C.3 Proof of Theorem A1
+We prove Theorem A1; Theorem 1 is a special case with M (w) = I and E [εε′ | g, w] = E [εε′ | w].
+First, we confirm that z∗ ∈ R. By properties of the pseudo-inverse for the symmetric matrix
+A = M E [ˇεˇε′ | g, w] M , we have Col (M ) = Col(A) = Col(A†) = Col
+ 
+E
+
+A† | w
+
+a.s.. Moreover,
+A†b ∈ Col(M ) a.s. and so E
+
+A†b | w
+
+∈ Col(M ). Thus,
+E [z∗ | w] = E
+h
+A†b | w
+i
+− E
+h
+A† | w
+i
+E
+h
+A† | w
+i†
+E
+h
+A†b | w
+i
+= 0.
+Next, we show that E [z′εε′z∗] = E [z′x] for any z ∈ R. Since both x and ε are in Col (M ) and
+M is symmetric idempotent, we can restrict attention to z ∈ Col(M ) without loss of generality: z
+and M z produce the same IV estimator. Then:
+E
+
+z′εε′z∗
+= E
+
+z′Az∗
+= E
+
+z′AA†
+
+b − E
+h
+A† | w
+i†
+E
+h
+A†b | w
+i
+= E
+
+z′b
+
+− E
+
+z′E
+h
+A† | w
+i†
+E
+h
+A†b | w
+i
+= E
+
+z′x
+
+− 0,
+where the third equality follows because z and E
+
+A† | w
+† are in Col (M ), and the last equality
+33
+
+===== PAGE 34 =====
+
+follows by the law of iterated expectations and because z is mean-zero conditional on any function
+of w. Note that z∗ ∈ Col(M ) a.s. and E [z′εε′z∗] = E [z′x] also implies V [z∗] = E [z∗′x]−1.
+Following the proof of Theorem 5.3 in Newey and McFadden ( 1994), let
+U = z′ε
+E [z′x] − z∗′ε
+E [z∗′x] .
+Then
+E
+
+U 2
+= Var [z′ε]
+E [z′x]2 − 2 E [z′εε′z∗]
+E [z′x] E [z∗′x] + E [z∗′εε′z∗]
+E [z∗′x]2
+= Var [z′ε]
+E [z′x]2 − 1
+E [z∗′x]
+= V [z] − V [z∗] ≥ 0,
+showing that z∗ minimizes the approximate estimator variance.
+It remains to obtain the expression for V [z∗]. Repeatedly applying the law of iterated expecta-
+tions, we have:
+V [z∗] = E
+
+z∗′x
+−1
+= E
+
+b − E
+h
+A† | w
+i†
+E
+h
+A†b | w
+i′
+A†x
+−1
+= E
+
+b − E
+h
+A† | w
+i†
+E
+h
+A†b | w
+i′
+A†b
+−1
+= E
+
+b′A†b − E
+h
+b′A† | w
+i
+E
+h
+A† | w
+i†
+A†b
+−1
+= E
+
+b′A†b − E
+h
+b′A† | w
+i
+E
+h
+A† | w
+i†
+E
+h
+A†b | w
+i−1
+.
+In the special case of A = E [εε′ | w] a.s., we have
+z∗ = A†
+
+E [x | g, w] −
+
+A†
+†
+A†E [x | w]
+
+= E
+
+εε′ | w
+† (E [x | g, w] − E [x | w])
+and
+V [z∗] = E
+
+b′A†b − E [b | w]′ A†
+
+A†
+†
+A†E [b | w]
+−1
+= E
+h
+b′A†b − E [b | w]′ A†E [b | w]
+i−1
+= E
+h
+(b − E [b | w])′ A† (b − E [b | w])
+i−1
+34
+
+===== PAGE 35 =====
+
+where the last line follows because E
+
+b′A†E [b | w]
+
+= E
+
+E [b | w]′ A†E [b | w]
+
+by the law of iterated
+expectations.
+C.4 Proof of Proposition A2
+We prove Proposition A2; Proposition 3 is again a special case. By the law of total variance,
+E [εε′ | w] = Ω + ψψ′. Since Var [ˇε | g, w] is a.s. invertible, Col (Ω) = Col(M ). Moreover, ψ =
+M E [ˇε | w] ∈ Col(M ). By the Sherman-Morrison formula and its extension to the case of possibly
+rank-deficient Ω and rank-one update ψψ′ that does not affect the rank of the sum (Fiedler 2003,
+Theorem 2.9),
+ 
+Ω + ψψ′† = Ω † − Ω†ψ ψ′Ω†
+1 + ψ′Ω†ψ .
+Thus:
+z∗ = Ω †
+
+˜z − ψ′Ω† ˜z
+1 + ψ′Ω†ψ ψ
+
+= Ω † (˜z − ρνψ ) .
+C.5 Proof of Lemma 1
+We have E [z′x] = E [z′E [x | g, w]] = E [z′ ˜z], where the first equality follows from the law of iterated
+expectations and the second equality holds because E [z′E [x | w]] = 0 for any z ∈ R. Thus,
+maximizing E[z′x]2
+E[z′z]E[x′x] is equivalent to maximizing E[z′ ˜z]2
+E[z′z]E[˜z′ ˜z] . By the Cauchy-Schwarz inequality,
+this ratio attains its maximum of one at z = ˜z.
+C.6 Proof of Lemma A1
+We prove Lemma A1; Lemma 2 is again a special case. Since E [z′ε] = 0 and z is measurable with
+respect to (g, w),
+Var
+
+z′ε
+
+= E
+
+z′εε′z
+
+= E
+
+z′E
+
+εε′ | g, w
+
+z
+
+= E
+
+z′M E
+
+ˇεˇε′ | g, w
+
+M z
+
+.
+By standard results in linear algebra,
+max
+e∈E
+z′M ′E
+
+ee′ | g, w
+
+M z = ¯λz′M z,
+which is achieved when E [ee′ | g, w] = ¯λ M zz′M
+z′M z a.s. Thus, the minimax problem simplifies to
+min
+z∈R
+E [z′M z]
+E [z′x]2 .
+Since x ∈ Col(M ), it is without loss to consider
+min
+z∈R,
+z∈Col(M )
+E [z′z]
+E [z′x]2 .
+35
+
+===== PAGE 36 =====
+
+Minimizing this expression over all z ∈ R is equivalent to maxz∈R
+E[z′x]2
+E[z′z] and thus to maxz∈R
+E[z′x]2
+E[z′z]E[x′x] .
+By Lemma 1, ˜z is a solution. Since ˜z ∈ Col(M ), it is a solution to the original problem too.
+C.7 Proof of Appendix Proposition A3
+Let Λ = Var [˜g | w] be the covariance matrix of the shocks and let S∗ = E [εε′ | w]† E [x˜g′ | w] Λ−1.
+For brevity, we suppress the dependence of S, S∗, and Λ on w.
+As with Theorem 1, we follow the proof of Theorem 5.3 in Newey and McFadden ( 1994). We first
+show that E
+
+z′εε′zS
+= E [z′x] for any z ∈ RS: repeatedly using the law of iterated expectations,
+E
+
+z′εε′zS
+= E
+
+˜g′S′εε′S∗˜g
+
+= E
+
+˜g′S′E
+
+εε′ | g, w
+
+S∗˜g
+
+= E
+h
+˜g′S′E
+
+εε′ | w
+
+E
+
+εε′ | w
+† E
+
+x˜g′ | w
+
+Λ−1˜g
+i
+= tr E
+h
+E
+
+εε′ | w
+
+E
+
+εε′ | w
+† E
+
+x˜g′ | w
+
+Λ−1˜g˜g′S′
+i
+= tr E
+h
+E
+
+εε′ | w
+
+E
+
+εε′ | w
+† E
+
+x˜g′ | w
+
+S′
+i
+= tr E
+h
+E
+
+εε′ | w
+
+E
+
+εε′ | w
+† E
+
+xz′ | w
+i
+= tr E
+
+E
+
+xz′ | w
+
+= tr E
+
+xz′
+= E
+
+z′x
+
+,
+where the third line imposed the condition E [εε′ | g, w] = E [εε′ | w] from Theorem 1, and the
+seventh line follows because x ∈ Col(M ) a.s. implies E [xz′ | w] ⊆ Col(M ) = Col(E [εε′ | w]). The
+rest follows identically to Theorem 1, as V [z] − V
+
+zS
+= E
+
+U 2
+≥ 0 for U = z′ε
+E[z′x] − zS ′ε
+E[zS ′x] .
+C.8 Proof of Proposition A4
+By Proposition 2, V [z∗] is the (rescaled) asymptotic variance of the estimator. We have:
+V [z∗] = E
+h
+˜z′ 
+Ω + ψψ′−1 ˜z
+i−1
+= E
+
+˜z′
+
+Ω−1 − Ω−1ψ ψ′Ω−1
+1 + ψ′Ω−1ψ
+
+˜z
+−1
+= E
+"
+˜z′Ω−1 ˜z −
+ 
+˜z′Ω−1ψ
+2
+1 + ψ′Ω−1ψ
+#−1
+,
+where the first line follows from Theorem 1, the second line plugs in the result of Proposition 3,
+and the third line rearranges terms.
+36
+
+===== PAGE 37 =====
+
+We next show that this expression asymptotically coincides with E
+
+˜z′Ω−1 ˜z
+−1. Note that
+E
+"
+˜z′Ω−1 ˜z −
+ 
+˜z′Ω−1ψ
+2
+1 + ψ′Ω−1ψ
+#−1
+− E
+
+˜z′Ω−1 ˜z
+−1
+=
+E
+
+(˜z′Ω−1ψ)
+2
+1+ψ′Ω−1ψ
+
+E [˜z′Ω−1 ˜z]
+
+E [˜z′Ω−1 ˜z] − E
+h
+(˜z′Ω−1ψ)2
+1+ψ′Ω−1ψ
+i
+and, since Var [˜zi | wi] ̸= 0 with positive probability by Assumption 2,
+E
+
+˜z′Ω−1 ˜z
+
+=
+X
+i
+E
+ ˜z2
+i
+Var [εi | wi]
+
+= E
+ Var [˜zi | wi]
+Var [εi | wi]
+
+× N → ∞,
+so long as E
+h
+Var[˜zi|wi]
+Var[εi|wi]
+i
+exists. To establish the result, it remain to show that E
+
+(˜z′Ω−1ψ)
+2
+1+ψ′Ω−1ψ
+
+does
+not diverge to infinity. This is obvious if ψi = 0 a.s. Otherwise, 1√
+N ˜z′Ω−1ψ = Op(1) by the central
+limit theorem while 1
+N
+ 
+1 + ψ′Ω−1ψ
+ p
+→ E
+
+ψ2
+i /Var [εi | wi]
+
+> 0. Thus (˜z′Ω−1ψ)
+2
+1+ψ′Ω−1ψ = Op(1). By
+uniform integrability of (˜z′Ω−1ψ)
+2
+1+ψ′Ω−1ψ , its expectation converges to the finite expectation of the limit
+distribution: specifically, to
+E
+h
+Var [˜zi | wi] ψ2
+i /Var [εi | wi]2
+i
+E
+
+ψ2
+i /Var [εi | wi]
+ .
+Finally, we show that E
+
+˜z′Ω−1 ˜z
+−1 coincides with the semi-parametric eﬀiciency bound in this
+setting. Following the notation of Chamberlain ( 1992), we have a model that satisfies the moment
+condition E [ρ(yi, xi, gi, wi, β, h0(wi)) | gi, wi] = 0 where ρ(y, x, g, w, β, τ ) = y − βx − τ and h0( ¯w) =
+E [εi | wi = ¯w]. Chamberlain ( 1992) shows the eﬀiciency bound is:
+J −1
+0 = E
+h
+E
+
+D′
+0Σ−1
+0 D0 | wi
+
+− E
+
+D′
+0Σ−1
+0 H0 | wi
+
+E
+
+H ′
+0Σ−1
+0 H0 | wi
+−1
+E
+
+H ′
+0Σ−1
+0 D0 | wi
+i−1
+for
+D0 = E
+ ∂
+∂β ρ(yi, xi, gi, wi, β, h0(wi)) | gi, wi
+
+Σ0 = E
+
+ρ(yi, xi, gi, wi, β, h0(wi))ρ(yi, xi, gi, wi, β, h0(wi))′ | gi, wi
+
+H0 = E
+ ∂
+∂τ ρ(yi, xi, gi, wi, β, h0(wi))′ | gi, wi
+
+.
+In our model, D0 = −E [xi | gi, wi] and H0 = −1. Furthermore Σ0 = E
+h
+(εi − E [εi | wi])2 | gi, wi
+i
+=
+37
+
+===== PAGE 38 =====
+
+Var [εi | wi] since E
+
+ε2
+i | gi, wi
+
+= E
+
+ε2
+i | wi
+
+. Hence
+J0 = E
+h
+E
+h
+E [xi | gi, wi]′ Var [εi | wi]−1 E [xi | gi, wi] | wi
+ii
+− E
+
+E
+h
+E [xi | gi, wi]′ Var [εi | wi]−1 | wi
+i
+E
+h
+Var [εi | wi]−1 | wi
+i−1
+E
+h
+Var [εi | wi]−1 E [xi | gi, wi] | wi
+i
+= E
+h
+E
+h
+(E [xi | gi, wi] − E [xi | wi])′ Var [εi | wi]−1 (E [xi | gi, wi] − E [xi | wi]) | wi
+ii
+= E
+ Var [˜zi | wi]
+Var [εi | wi]
+
+,
+while as shown above the variance of the optimal IV asymptotically coincides with E
+
+˜z′Ω−1 ˜z
+−1 =
+1
+N E
+h
+Var[˜zi|wi]
+Var[εi|wi]
+i−1
+, where 1
+N reflects the notational difference between the asymptotic variance (scaled
+by N ) and the approximate variance (not scaled).
+C.9 Proof of Proposition A5
+Consider Ri = ziεi and R =P
+i Ri. Conditional on (ε, w), Ri and Rj are independent if Ai ∩Aj = ∅.
+Moreover, E
+
+R4
+i | ε, w
+
+= E
+
+z4
+i | wi
+
+· ε4
+i and similarly E
+h
+|Ri|3 | ε, w
+i
+≤ B3
+z |εi|3. Thus, by Theorem
+3.6 in Ross ( 2011), the Wasserstein distance dW between the distribution of R/√N VN given (ε, w)
+and the standard normal distribution is bounded as follows:
+dW ≤
+¯D2
+N 1/2V 3/2
+N
+B3
+z
+ 
+1
+N
+NX
+i=1
+|εi|3
+!
++
+√
+28 ¯D3/2
+√πN 1/2VN
+B2
+z
+ 
+1
+N
+NX
+i=1
+ε4
+i
+!1/2
+p
+→ 0
+because 1
+N
+PN
+i=1 |εi|3 ≤
+
+1
+N
+PN
+i=1 ε4
+i
+3/4
+by the Hölder inequality. Thus, R/√N VN
+D→ N (0, 1)
+conditionally on (ε, w) and therefore unconditionally. Moreover, since VN
+p
+→ V > 0,
+1√
+N
+X
+i
+ziεi
+D→ N (0, V ).
+Using that
+√
+N ( ˆβ [z]−β) = 1√
+N
+P
+i ziεi/ 1
+N
+P
+i zixi and that the denominator converges in probability
+to Π concludes the proof.
+38
+
+===== PAGE 39 =====
+
+Online Appendix for Optimal Formula Instruments
+Kirill Borusyak and Peter Hull
+April 2026
+D Additional Results
+D.1 Heterogeneous Treatment Effects
+This appendix shows that recentered IV estimators can identify a convex average of heterogeneous
+treatment effects under natural extensions of the classic assumptions in Imbens and Angrist ( 1994).
+Consider a general causal model with potential outcome functions yi(·) and observed outcomes given
+by yi = yi(xi). We write y(·) for the vector collecting yi(·). For notational simplicity we suppose
+xi is continuously distributed and bounded from below and that yi(·) is differentiable; treatment
+effects are then given as βi(x) = ∂
+∂x yi(x) for treatment margin x. We further normalize the lower
+bound of xi to zero without loss. All of these assumptions are straightforward to relax or modify
+under appropriate regularity conditions (see, e.g., Kolesár and Plagborg-Møller ( 2025)).
+The potential outcome notation implicitly makes an exclusion restriction: that any effects of g
+on yi are only through xi = hi(g, w, u). We further assume a stronger form of shock exogeneity:
+Assumption D1. (Independence): g ⊥ ⊥y(·) | w.
+This assumption is stronger than the mean-independence Assumption 1 since conditions like As-
+sumption 1 are generally not suﬀicient to ensure convex weighting of heterogeneous effects (Borusyak
+and Hull 2024). Assumption D1 is nevertheless standard (e.g., it follows Imbens and Angrist ( 1994))
+and holds by design when the shocks arise from a randomized controlled trial.
+Finally, for a recentered instrument z ∈ R, we consider a stochastic monotonicity assumption:
+Assumption D2. (Monotonicity): Cov [1 [xi ≥ x] , zi | y(·), w] ≥ 0 almost-surely for each x and i.
+We then have the following result for the IV estimand β [z] =
+E[
+∑
+i ziyi]
+E[
+∑
+i zixi] .
+Proposition D1. Under Assumptions D1 and D2,
+β [z] = E
+"
+1
+N
+X
+i
+Z ∞
+0
+βi(x)ωi(x)dx
+#
+where
+ωi(x) = ϕi(x)σ2
+i
+E
+ 1
+N
+P
+i
+R ∞
+0 ϕi(x′)σ2
+i dx′ ≥ 0 a.s.
+gives a convex weighting scheme, for ϕi(x) = Cov[1[xi≥x],zi|y(·),w]
+Var[zi|y(·),w] and σ2
+i = Var [zi | w].
+39
+
+===== PAGE 40 =====
+
+Proof. Write yi = yi(0)+
+R xi
+0 βi(x)dx and note that E [ziyi(0)] = E [E [zi | y(0), w] yi(0)] = E [E [zi | w] yi(0)] =
+0 by iterated expectations, Assumption D1, and z ∈ R. Thus,
+E [ziyi] = E
+
+zi
+Z xi
+0
+βi(x)dx
+
+= E
+
+E
+Z xi
+0
+βi(x)zidx | y(·), w
+
+= E
+
+E
+Z ∞
+0
+βi(x)zi1 [xi ≥ x] dx | y(·), w
+
+= E
+Z ∞
+0
+βi(x)E [zi1 [xi ≥ x] | y(·), w] dx
+
+= E
+Z ∞
+0
+βi(x)ϕi(x)σ2
+i dx
+
+where the final line uses E [zi | y(·), w] = 0 and Var [zi | y(·), w] = Var [zi | wi] = σ2
+i to show that
+E [zi1 [xi ≥ x] | y(·), w] = Cov [zi, 1 [xi ≥ x] | y(·), w] = ϕi(x)σ2
+i . Similar steps show
+E [zixi] = E
+Z ∞
+0
+ϕi(x)σ2
+i dx
+
+,
+completing the proof.
+The result shows that different recentered IV estimands β [z] generally identify different weighted
+averages of treatment effects βi(x). The weights are driven by two factors: the slope coeﬀicient ϕi(x)
+in the conditional-on-( y(·), w) observation-specific population regression of 1[xi ≥ x] on zi, and the
+conditional-on-w variance of the recentered IV, σ2
+i . Assumption D2 makes ωi(x) non-negative.
+The monotonicity assumption here is similar to those in Small et al. ( 2017) and Borusyak and
+Hull ( 2024) by restricting the conditional relationship between the treatment and the recentered
+instrument given potential outcomes and w, rather than defining potential treatment functions as
+in Imbens and Angrist ( 1994).35 If such xi(z) are well-defined and weakly increasing in z then
+Assumption D2 holds. More generally Assumption D2 can hold when the relationship between
+xi = hi(g, w, u) and zi is not causal, such as when u ̸= ∅ and zi = pi(g, w) − E [pi(g, w) | w] for some
+function pi(·). See Appendix C of Borusyak and Hull (2024) for an example in the shift-share case.
+In the special case where the treatment xi = hi(g, w) is a function of g and w only and zi = xi −
+E [hi(g, w) | w], Assumption D2 holds automatically: Cov [xi, 1 [xi ≥ x] | y(·), w] ≥ 0 implies ϕi(x) ≥
+0. If furthermore treatment effects are linear, yi = βixi + εi, Proposition D1 shows β [z] identifies a
+conditional-variance-weighted average effect, E
+ 1
+N
+P
+i βiσ2
+i
+
+/E
+ 1
+N
+P
+i σ2
+i
+
+, extending a classic result
+in Angrist ( 1998). If zi is not only recentered by E [xi | w] but also rescaled by Var [xi | w]−1,
+Proposition D1 shows β [z] identifies an unweighted average treatment effect, E
+ 1
+N
+P
+i βi
+
+.
+35Small et al. (2017) consider stochastic monotonicity only for binary treatments while Assumption 3 in Borusyak
+and Hull (2024) is stronger than the above condition by restricting the conditional distribution of the treatment
+given the instrument. By restricting only the conditional covariance of 1[xi ≥ x] and zi, Assumption D2 better
+accommodates formula instruments; see Appendix C of Borusyak and Hull (2024) for a discussion.
+40
+
+===== PAGE 41 =====
+
+Proposition D1 also implies that dropping observations with Var [zi | w] = 0 does not change the
+estimand, as ϕi(x) = 0 for them. Thus, while our application focused on the sample of “exposed”
+individuals for eﬀiciency reasons assuming constant effects, this choice has no consequences for the
+interpretation of the estimates even when the effects are heterogeneous.
+D.2 Including Fixed Effects
+This appendix shows how the framework can be extended to settings where a set of fixed effects, like
+the state effects in the Section 4 application, are necessary in estimation. We consider a repeated
+cross section of individuals i in years t(i) and states s(i) and a set of state-level shocks g = {gs} to
+match our application; the ideas apply more generally. 36
+Consider the following causal model (illustrated with a diagram in Appendix Figure A1):
+yit = βxit + αs(i) + εit,
+where here, in the repeated cross section, t = t(i) and, as before, xit = hit(g, w, u). The αs(i)
+capture unobserved time-invariant factors that affect the outcome additively. We assume there are
+two groups of such factors: αs = α(γs, δs). The former, γs, is a confounder that affects expansion
+decisions gs but is statistically independent of the characteristics of individuals in the states, w =
+{cit, s(i)}. The latter, δs, is statistically independent of γs and g but potentially related to w and
+u. For example, γs might capture idiosyncratic preferences of the state’s governor while δs captures
+long-run economic conditions in the state. 37 The error term εit(i) can be arbitrarily related to w.
+Shocks are exogenous in this model, in the sense of Assumption 1, only after removing state fixed
+effects: E
+
+εit(i) | g, w
+
+= E
+
+εit(i) | w
+
+, but generally E
+
+αs(i) + εit(i) | g, w
+
+̸= E
+
+αs(i) + εit(i) | w
+
+.
+Furthermore, a candidate formula instrument zit = fit(g, w) can be recentered by using permutations
+of g as counterfactual shocks. This is because the dependence of gs and γs does not affect the
+distribution of g given w and thus permutations of g are equally likely conditional on w. As usual,
+recentering is generally needed here since E [εit | w] is unrestricted.
+Our theoretical results for optimal formula instruments apply here on the residualized model
+˜yit = β ˜xit + ˜εit, (A2)
+where ˜vit denotes the residual from a sample projection of generic variable vit on state-of-residence
+indicators (see Appendix A.1). Indeed, since s(i) is included in w, such residualization involves
+premultiplying the vectors of yit and xit (and therefore of εit) by an annihilator matrix M (w).
+Thus Assumption 1 holds for ˜εit, since E [˜ε | g, w] = E [M (w)ε | g, w] = E [M (w)ε | w] = E [˜ε | w].
+36Relative to the application, we simplify some details—such as considering simple permutations of expansion shocks
+that do not condition on the state governor’s party aﬀiliation.
+37Appendix Figure A1 indicates that δs affects the demographics in cit and other policies in u and those variables
+affect of yit, but the nature and direction of these relationships is immaterial. Note also that we draw the arrow from
+γs to gs and not the other way around only because it is natural to think that the expansion shocks arise later than
+the time-invariant factors in γs.
+41
+
+===== PAGE 42 =====
+
+Moreover, if E [εε′ | g, w] = E [εε′ | w] as in Theorem 1, we similarly have E [˜ε˜ε′ | g, w] = E [˜ε˜ε′ | w].
+Our algorithm for approximating the optimal instrument also applies. The key step is to ap-
+proximate E [˜x | g, w] − E [˜x | w] = M (w) (E [x | g, w] − E [x | w]) (with ˜x and x collecting ˜xit and
+xit, respectively), which can be accomplished by forming a prediction pit(g, w) of xit, recentering it
+by E [pit(g, w) | w] (e.g., by permuting state shocks), and residualizing the recentered prediction by
+state indicators. The last step can be automated by including state indicators in estimation, as we
+do in the application.
+D.3 Plug-In Estimation of the Optimal Instrument
+Let E [ε | g, w] = E [ε | w] = ψ, Var [ε | g, w] = Var [ε | w] = Ω , and D ≡ E [εε′ | g, w] = Ω + ψψ′.
+Also let E [x | g, w] = p, E [x | w] = E [p | w] = µ, and h = p − µ. Suppose we have estimates
+ˆΩ (assumed symmetric and positive semi-definite), ˆψ, and ˆp obtained with cross-fitting; i.e., with
+the relevant functions estimated from an independent sample. Set ˆD = ˆΩ + ˆψ ˆψ′, ˆµ = E [ˆp | w]
+(computed exactly by integrating over the g | w distribution), and ˆh = ˆp − ˆµ. We will condition
+on the sample used for cross-fitting throughout, treating the estimated functions as fixed and thus
+ˆD, ˆΩ, ˆψ, ˆµ as measurable with respect to w, and ˆp, ˆh measurable with respect to g, w. The estimates
+from multiple folds can be combined using standard DML1 and DML2 arguments (Chernozhukov
+et al. 2018; Wager 2025). We also define δ = ˆh − h and ˜ε = ε − ψ, with E [δ | w] = 0 , E [˜ε | g, w] = 0 ,
+and E [˜ε˜ε′ | g, w] = E [˜ε˜ε′ | w] = Ω . We write λmin for the smallest eigenvalue and ∥·∥ and ∥·∥op for
+the L2-norm and operator norm, respectively. Throughout we omit the phrase “almost surely. ” All
+random variables are implicitly indexed by N ; we omit this dependence for notational ease.
+We consider the case where the estimator ˆβ [z∗] = z∗′y/z∗′x corresponding to the oracle instru-
+ment z∗ = D−1h, is asymptotically normal. We are interested in whether the feasible estimator
+ˆβ [ˆz∗] = ˆz∗′y/ˆz∗′x corresponding to the instrument ˆz∗ = ˆD−1ˆh has the same asymptotic distribution.
+We impose:
+Assumption D3. (a)
+r
+1
+N
+P
+i
+
+ˆhi − hi
+2 p
+→ 0,
+r
+1
+N
+P
+i
+
+ˆψi − ψi
+2 p
+→ 0, and
+ ˆΩ−1 − Ω−1
+
+op
+p
+→ 0;
+(b) There exists c > 0 such that λmin (Ω) ≥ c and λmin
+
+ˆΩ
+
+≥ c with probability approaching 1;
+(c) The following are Op(1): ∥Var [ε | w]∥op, ∥Var [h | w]∥op, ∥Var [δ | w]∥op, and 1√
+N ∥x∥;
+(d) rN = O(
+√
+N ).
+Assumption D3 gives regularity conditions. Part (a) says says that ˆh, ˆψ, and ˆΩ−1 are consistent
+in the appropriate sense. Part (b) requires the eigenvalues of Ω and ˆΩ to be bounded away from
+zero, yielding stability of their inverses. Part (c) requires that ε and h are suﬀiciently mutually
+independent, that δ is either suﬀiciently small or suﬀiciently mutually independent, and a mild reg-
+ularity condition on x. Part (d) precludes unusually fast convergence rates of the oracle recentered
+IV estimator. Then we have:
+Proposition D2. Suppose Assumption D3 holds. Then if ˆβ [z∗] is asymptotically normal and
+satisfies Condition 1 then ˆβ [ˆz∗] has the same asymptotic distribution.
+42
+
+===== PAGE 43 =====
+
+Cross-fitting and the fact that the instrument is recentered are key to the proof of Proposition
+D2. It is also important that, when we set ˆD = ˆΩ + ˆψ ˆψ′, we are effectively using a Neyman-
+orthogonal moment for estimation because—by the Sherman–Morrison formula—the estimator is
+effectively controlling for ˆψ (up to the regularization; see Proposition 3).
+Before proving Proposition D2, we state and prove four useful lemmas.
+Lemma D1. Let random variable V be measurable with respect to the information set F and
+suppose E
+
+U 2 | F
+
+≤ V . Then U = Op(1) if V = Op(1), and U = op(1) if V = op(1).
+Proof. If V = Op(1), fix ϵ > 0 and choose K < ∞ and N0 such that P r (V > K ) < ϵ /2 for all
+N ≥ N0. Then for any M > 0,
+P r (|U | > M ) ≤ P r (V > K ) + P r (|U | > M, V ≤ K) .
+For the second term, condition on F and use conditional Markov:
+P r (|U | > M, V ≤ K) = E [1 [V ≤ K] · P (|U | > M | F )]
+≤ E
+"
+1 [V ≤ K] · E
+
+U 2 | F
+
+M 2
+#
+≤ E
+
+1 [V ≤ K] · V
+M 2
+
+≤ K
+M 2 .
+Choose M large enough that K/M 2 < ϵ /2. Then P r (|U | > M ) < ϵ for suﬀiciently large N , i.e.
+U = Op(1).
+If V = op(1), fix ϵ > 0 and δ > 0. Choose K > 0 small enough that K/ϵ2 < δ /2. There exists N0
+such that P r (V > K ) < ϵ/2 for all N > N 0. Then by an analogous conditional Markov argument,
+P r (|U | > ε) ≤ P r (V > K ) + P r (|U | > ε, V ≤ K)
+≤ δ/2 + K/ϵ2 < δ
+for N large enough, which means U = op(1).
+Lemma D2. Let A be an N × N matrix measurable with respect to information set F with ∥A∥op =
+Op(1); v be an N × 1 vector measurable with respect to F with 1
+N ∥v∥2 = op(1); and u be an N × 1
+vector such that E [u | F ] = 0 and ∥Var [u | F ]∥op = Op(1). Then
+1√
+N
+v′Au = op(1).
+43
+
+===== PAGE 44 =====
+
+Proof. We have:
+E
+" 1√
+N
+v′Au
+2
+| F
+#
+= 1
+N E
+
+v′Auu′A′v | F
+
+= 1
+N v′AE
+
+uu′ | F
+
+A′v
+≤
+ 1
+N ∥v∥2
+
+∥A∥2
+op
+E
+
+uu′ | F
+
+op
+=
+ 1
+N ∥v∥2
+
+∥A∥2
+op ∥Var [u | F ]∥op
+= op(1)Op(1)Op(1) = op(1),
+with this bound F-measurable. By Lemma D1, 1√
+N v′Au = op(1).
+Lemma D3. Let v be an N ×1 vector measurable with respect to information set F with ∥v∥2 = Op(1)
+and u be an N × 1 vector such that E [u | F ] = 0 and ∥Var [u | F ]∥op = Op(1). Then v′u = Op(1).
+Proof. We have
+E
+h 
+v′u
+2 | F
+i
+= v′E
+
+uu′ | F
+
+v
+≤
+E
+
+uu′ | F
+
+op ∥v∥2
+= ∥Var [u | F ]∥op ∥v∥2
+= Op(1)Op(1) = Op(1),
+with this bound F-measurable. By Lemma D1, v′u = Op(1).
+Lemma D4. Suppose ˆβ [z∗] is asymptotically normal with rate rN . Suppose also rN
+N
+
+ˆh − h
+′
+ˆD−1ε
+p
+→
+0, rN
+N h′
+
+ˆD−1 − D−1
+
+ε
+p
+→ 0, and 1
+N ˆz∗′x
+p
+→ Π ̸= 0 . Then rN
+
+ˆβ [ˆz∗] − β
+
+converges to the same
+distribution as rN
+
+ˆβ [z∗] − β
+
+.
+Proof. We have
+rN
+
+ˆβ − β
+
+=
+rN
+N ˆz∗′ε
+1
+N ˆz∗′x
+with 1
+N ˆz∗′x − 1
+N z∗′x
+p
+→ 0. Moreover,
+rN
+N ˆz∗′ε − rN
+N z∗′ε = rN
+N
+
+ˆD−1ˆh − D−1h
+′
+ε
+= rN
+N h′
+
+ˆD−1 − D−1
+
+ε + rN
+N
+
+ˆh − h
+′
+ˆD−1ε
+p
+→ 0
+by the assumptions. Thus, given 1
+N z∗′x
+p
+→ Π ̸= 0,
+rN
+
+ˆβ [ˆz∗] − β
+
+=
+rN
+N z∗′ε + op(1)
+1
+N z∗′x + op(1) = rN
+
+ˆβ [z∗] − β
+
++ op(1),
+44
+
+===== PAGE 45 =====
+
+implying the proposition’s claim.
+Proof of Proposition D2. We verify the conditions for Lemma D4. First consider
+rN
+N δ′ ˆD−1ε = rN
+N δ′ ˆD−1 ˜ε
+| {z }
+(A)
++ rN
+N δ′ ˆD−1 ˆψ
+| {z }
+(B)
++ rN
+N δ′ ˆD−1
+
+ψ − ˆψ
+
+| {z }
+(C)
+.
+Term (A) is op(1) by applying Lemma D2 with F = ( g, w), A = ˆD−1, u = ˜ε, and v = rN√
+N δ. Here
+∥E [˜ε˜ε′ | g, w]∥op = ∥Ω∥op = Op(1) and
+ ˆD−1
+
+op
+= λ−1
+min
+
+ˆD
+
+= λ−1
+min
+
+ˆΩ + ˆψ ˆψ′
+
+≤ λ−1
+min
+
+ˆΩ
+
+≤ c−1
+with probability approaching 1, which implies
+ ˆD−1
+
+op
+= Op(1). Moreover,
+ r2
+N
+N
+
+· 1
+N ∥δ∥2 =
+O(1) · 1
+N ∥δ∥2 = op(1).
+For term (B) we have:
+ rN
+N δ′ ˆD−1 ˆψ
+ ≤ rN
+N
+ˆh − h
+ ·
+ ˆD−1 ˆψ
+
+= rN√
+N
+s
+1
+N
+X
+i
+
+ˆhi − hi
+2
+·
+ ˆD−1 ˆψ
+ .
+Using the Sherman-Morrison formula for ˆD = ˆΩ + ˆψ ˆψ′,
+ˆD−1 ˆψ = ˆΩ−1
+ 
+I −
+ˆψ ˆψ′ ˆΩ−1
+1 + ˆψ′ ˆΩ−1 ˆψ
+!
+ˆψ =
+ˆΩ−1 ˆψ
+1 + ˆψ′ ˆΩ−1 ˆψ
+where
+ ˆΩ−1 ˆψ
+
+2
+=
+
+ˆψ′ ˆΩ−1/2
+
+ˆΩ−1
+
+ˆΩ−1/2 ˆψ
+
+≤
+ ˆΩ−1
+
+op
+ˆψ′ ˆΩ−1 ˆψ
+such that
+ ˆD−1 ˆψ
+ ≤
+ ˆΩ−1
+
+1/2
+op
+·
+q
+ˆψ′ ˆΩ−1 ˆψ
+1 + ˆψ′ ˆΩ−1 ˆψ
+≤ 1
+2
+ ˆΩ−1
+
+1/2
+op
+≤ 1
+2 c−1/2
+with probability approaching 1 since supx≥0
+√x
+1+x = 1
+2 . Therefore
+ ˆD−1 ˆψ
+ = Op(1) and
+ rN
+N δ′ ˆD−1 ˆψ
+ =
+op(1) · Op(1) = op(1).
+For term (C), we apply Lemma D2 with F = w, A = ˆD−1, u = δ, and v = rN√
+N
+
+ψ − ˆψ
+
+.
+Combining terms (A)–(C), we conclude that rN
+N δ′ ˆD−1ε = op(1).
+45
+
+===== PAGE 46 =====
+
+Now consider:
+rN
+N h′
+
+ˆD−1 − D−1
+
+ε = rN
+N h′
+
+ˆD−1 − D−1
+
+˜ε
+| {z }
+(D)
++ rN
+N h′
+
+ˆD−1 − D−1
+
+ψ
+| {z }
+(E)
+.
+For term (D), by Sherman–Morrison,
+rN
+N h′
+
+ˆD−1 − D−1
+
+˜ε = rN
+N h′
+
+ˆΩ−1 − Ω−1
+
+˜ε
+| {z }
+(D1)
++ rN
+N h′ Ω−1ψψ′Ω−1
+1 + ψ′Ω−1ψ ˜ε
+| {z }
+(D2)
+− rN
+N h′ ˆΩ−1 ˆψ ˆψ′ ˆΩ−1
+1 + ˆψ′ ˆΩ−1 ˆψ
+˜ε
+| {z }
+(D3)
+.
+For (D1) we apply Lemma D2 with F = (g, w), A = I, u = ˜ε, and v = rN√
+N
+
+ˆΩ−1 − Ω−1
+
+h where
+1√
+N
+∥v∥ = rN
+N
+
+
+ˆΩ−1 − Ω−1
+
+h
+
+≤ rN√
+N
+ ˆΩ−1 − Ω−1
+
+op
+· 1√
+N
+∥h∥
+= O(1) · op(1) · Op(1) = op(1).
+Here 1√
+N ∥h∥ = Op(1) because E
+h
+1
+N ∥h∥2 | w
+i
+= 1
+N tr E [hh′ | w] ≤ ∥E [hh′ | w]∥op = ∥Var [h | w]∥op =
+Op(1) and applying Lemma D1.
+For (D2), let
+ζ = Ω−1ψp
+1 + ψ′Ω−1ψ
+so
+(D2) = rN
+N (h′ζ)(ζ ′ ˜ε).
+Note
+∥ζ∥2 = ψ′Ω−2ψ
+1 + ψ′Ω−1ψ
+≤
+Ω−1
+op
+ψ′Ω−1ψ
+1 + ψ′Ω−1ψ
+≤
+Ω−1
+op = Op(1).
+Then h′ζ = Op(1) by Lemma D3 with F = w, u = h, and v = ζ. Moreover ζ ′ ˜ε = Op(1) by Lemma
+D3, with F = ( g, w), u = ˜ε, and v = ζ. Hence (D2) = rN
+N Op(1) = op(1) as rN /N → 0. The same
+46
+
+===== PAGE 47 =====
+
+steps show (D3) = op(1), by defining
+ˆζ =
+ˆΩ−1 ˆψq
+1 + ˆψ′ ˆΩ−1 ˆψ
+,
+noting that
+ˆζ
+
+2
+≤
+ ˆΩ−1
+
+op
+= Op(1), and following the same steps as with ζ.
+For term (E), write
+rN
+N h′
+
+ˆD−1 − D−1
+
+ψ = rN
+N h′ ˆD−1 ˆψ
+| {z }
+(E1)
++ rN
+N h′ ˆD−1
+
+ψ − ˆψ
+
+| {z }
+(E2)
+− rN
+N h′D−1ψ
+| {z }
+(E3)
+.
+For (E1), recall from the proof for (B) that
+ ˆD−1 ˆψ
+ = Op(1). Then h′ ˆD−1 ˆψ = Op(1) by Lemma
+D3, with F = w, u = h, and v = ˆD−1 ˆψ. Hence (E1) = rN
+N Op(1) = op(1) as rN /N → 0. For
+(E3), analogous steps show
+D−1ψ
+ = Op(1) and so rN
+N h′D−1ψ = op(1) again by Lemma D3,
+with v = D−1ψ. Finally, for (E2), we apply Lemma D2 with F = w, A = ˆD−1, u = h, and
+v = rN√
+N
+
+ψ − ˆψ
+
+. Thus, we conclude that rN
+N h′
+
+ˆD−1 − D−1
+
+ψ = op(1).
+Finally, we turn to the first stage. Using Sherman-Morrison,
+1
+N ˆz∗′x − 1
+N z∗′x = 1
+N
+ˆh′ ˆD−1x − 1
+N h′D−1x
+= 1
+N
+
+ˆh − h
+′
+ˆD−1x + 1
+N h′
+
+ˆD−1 − D−1
+
+x
+= 1
+N
+
+ˆh − h
+′
+ˆD−1x + 1
+N h′
+ 
+ˆΩ−1 − Ω−1 + Ω−1ψ · ψ′Ω−1
+1 + ψ′Ω−1ψ −
+ˆΩ−1 ˆψ · ˆψ′ ˆΩ−1
+1 + ˆψ′ ˆΩ−1 ˆψ
+!
+x
+= 1
+N δ′ ˆD−1x
+| {z }
+(F )
++ 1
+N h′
+
+ˆΩ−1 − Ω−1
+
+x
+| {z }
+(G)
++ 1
+N h′ζ · ζ ′x
+| {z }
+(H)
+− 1
+N h′ ˆζ · ˆζ ′x
+| {z }
+(I)
+.
+Here
+|(F )| ≤
+ 1
+N ∥δ∥2
+1/2 ˆD−1
+
+op
+ 1
+N ∥x∥2
+1/2
+= op(1)Op(1)Op(1) = op(1),
+|(G)| ≤
+ 1
+N ∥h∥2
+1/2 ˆΩ−1 − Ω−1
+
+op
+ 1
+N ∥x∥2
+1/2
+= Op(1)op(1)Op(1) = op(1),
+For term (H), we have established earlier that h′ζ = Op(1). Moreover, 1√
+N |ζ ′x| ≤ ∥ ζ∥ · 1√
+N ∥x∥ =
+Op(1) such that 1
+N h′ζ · ζ ′x = Op(1/
+√
+N ) = op(1). The same argument applies to term (I).
+With all conditions of Lemma D4 verified, we conclude that ˆβ [ˆz∗] has the same asymptotic
+distribution as ˆβ [z∗].
+47
+
+===== PAGE 48 =====
+
+D.4 Reconciling Simulated and Recentered IV Estimates
+This appendix first discusses how measurement error in Medicaid eligibility calculations can bias
+both simulated and recentered IV estimates of eligibility effects. We then show how such bias is
+avoided in IV regressions which use Medicaid enrollment as the endogenous variable instead.
+For clarity of the theoretical discussion, we simplify the setup. First, we suppose that a single iid
+cross-section of 2014 data is available and state fixed effects are not included; we correspondingly
+drop the t subscript throughout. Second, we assume that state decisions to expand Medicaid cov-
+erage are unconditionally as-good-as-random and mutually independent with the same probability.
+We then consider the simple causal model of yi = βx∗
+i + εi where yi is a measure of insurance
+coverage for individual i and x∗
+i ∈ { 0, 1} is i’s true Medicaid eligibility. We suppose changes in x∗
+i
+come from the exogenous expansion of eligibility policy; formally, we write x∗
+i = x∗
+i0 + e∗
+i gi where
+x∗
+i0, e∗
+i , gi ∈ { 0, 1} with x∗
+i0e∗
+i = 0 . Here the x∗
+i0 indicator switches on for individuals who would
+be eligible for Medicaid regardless of the binary expansion shock gi, while e∗
+i is on for those who
+become eligible when gi = 1 (i.e. exposed individuals). Individuals who are never eligible regard-
+less of gi correspond to x∗
+i0 = e∗
+i = 0 . Rather than observing x∗
+i0 and e∗
+i directly, we assume the
+researcher computes eligibility xi from mismeasured xi0 and ei: i.e., xi = xi0 + eigi where again
+xi0, ei ∈ {0, 1} and xi0ei = 0. Such measurement error could reflect error in self-reported household
+income or demographics (Brooks 2019). We assume the as-good-as-random expansion shocks only
+affect outcomes by changing eligibility, making them exogenous: gi ⊥ ⊥(εi, x∗
+i0, e∗
+i , xi0, ei).
+We first show how simulated and recentered IV estimates of β, which use measured eligibility
+as the right-hand side variable, are biased by this measurement error. The simulated IV estimate
+uses the expansion shock to instrument measured eligibility in the full sample of individuals. This
+IV regression identifies
+βSI = Cov [yi, gi]
+Cov [xi, gi]
+= Cov [β(x∗
+i0 + e∗
+i gi) + εi, gi]
+Cov [xi0 + eigi, gi]
+= β E [e∗
+i ]
+E [ei] , (A3)
+where we use the independence of gi in the third line. The recentered IV estimate of β, implemented
+as in Panel A of Table 2, regresses the outcome on measured eligibility in the sample of individuals
+who are exposed according to the observed ei. This estimator identifies
+˜β = Cov [yi, xi | ei = 1]
+Var [xi | ei = 1]
+= Cov [β(x∗
+i0 + e∗
+i gi) + εi, gi | ei = 1]
+Var [gi | ei = 1]
+= βE [e∗
+i | ei = 1] , (A4)
+48
+
+===== PAGE 49 =====
+
+where we again use the independence of gi in the third line. Since E [e∗
+i | ei = 1] ∈ [0, 1) whenever
+P r(e∗
+i = 0 , ei = 1) > 0 and E [e∗
+i | ei = 1] = E [e∗
+i ei] /E [ei] < E [e∗
+i ] /E [ei] whenever P r(e∗
+i = 1 , ei =
+0) > 0, these expressions show that the recentered IV estimand is generally attenuated relative to
+both the causal parameter of interest and the simulated IV estimand:
+ ˜β
+ < |β| and
+ ˜β
+ <
+βSI.
+The simulated IV estimand can either be larger or smaller than the causal parameter, depending
+on the relative shares of true and computed exposure E [e∗
+i ] and E [ei].
+Such bias, however, does not arise when estimating the effects of Medicaid enrollment using
+either of the two instruments. This follows because in such IV regressions both the first stage
+regression (of enrollment on the eligibility instrument) and the reduced form (some outcome, such
+as private insurance coverage, on the same instrument) have the same proportionate bias given by
+equations ( A3) and ( A4), depending on the instrument.
+D.5 Eﬀiciency of Full-Sample Recentered IV Estimates
+Appendix Table A4 reports recentered IV estimates of Medicaid takeup and crowdout effects in the
+full sample of 2014 and 2013 individuals, not restricting to the exposed sample as in our baseline
+specification. Panel B, which includes demographic controls, again finds much narrower confidence
+intervals relative to the simulated eligibility instrument. However, excluding these controls in Panel
+A yields an intriguing pattern: confidence intervals for the recentered IV are much wider than those
+of the simulated instrument.
+Here we explain how a combination of two factors generates the discrepancy between panels A
+and B of the table. First, the regression residuals are strongly correlated with the indicator for
+an individual being exposed to the ACA expansion experiment, which is not controlled for in this
+regression. Second, exogenous shocks are assigned at the level of states, which include both exposed
+and non-exposed individuals. This discussion reveals why the problem does not arise when focusing
+on the exposed sample or when appropriate controls are included. We further relate this problem
+to the third step of Algorithm 1.
+For clarity of the theoretical discussion, we simplify the setup. First, we suppose that a single
+2014 cross-section is available and thus state fixed effects are not included; we correspondingly drop
+the t subscript throughout. We allow for other controls to be included. Second, we assume states
+only change eligibility as prescribed by their expansion decision, i.e., e∆
+k = ∅ . Finally, we assume
+that state decisions to expand are independent with a known propensity E [gk | w] (e.g., as a function
+of the state governor’s party). Thus, the recentered expansion indicator ˜gk = gk − E [gk | w] can
+be computed without permutations. 38 We compare the recentered simulated instrument zSI
+i to the
+recentered best predictor instrument ˜zi, ignoring controls that span E [gk | w] (e.g., the state party
+indicator).
+Under these additional assumptions, using the recentered simulated instrument is equivalent to
+using the recentered expansion indicator: zSI
+i = ˜gs(i). The recentered best predictor instrument
+38Formally, we assume that w does not include the permutation class of g. Under this assumption, ˜gk is independent
+across states conditionally on w, simplifying the analysis.
+49
+
+===== PAGE 50 =====
+
+only differs by setting zSI
+i to zero for the non-exposed sample: ˜zi = zi − E [zi | w] = fi˜gs(i), where
+fi is an indicator for individual i being in the exposed group. With xi = zi, the first stage can be
+written xi = µi + fi˜gs(i), where the expected instrument µi equals 0 for individuals who are not
+eligible regardless of gs(i), 1 for those always eligible, and E
+
+gs(i) | w
+
+otherwise.
+We now consider the approximate variances of the two estimators, Var
+ 1
+N
+P
+i zSI
+i ε⊥
+i
+
+/E
+ 1
+N
+P
+i zSI
+i x⊥
+i
+2
+and Var
+ 1
+N
+P
+i ˜ziε⊥
+i
+
+/E
+ 1
+N
+P
+i ˜zix⊥
+i
+2, where ⊥ denotes the in-sample projection residual on the con-
+trol variables (including a constant). We focus our attention on the numerators of these expressions
+because the first-stage covariances in the denominator are asymptotically equivalent (and equal in
+finite samples without controls). 39 For simplicity of exposition we also consider an individual’s state
+of residence s(i) as fixed. Letting Nk =P
+i 1 [s(i) = k] denote the (fixed) number of individuals in
+each state k, it can then be shown that
+Var
+ 1
+N
+P
+i ˜ziε⊥
+i
+
+Var
+ 1
+N
+P
+i zSI
+i ε⊥
+i
+ =
+P
+k
+
+Nk
+N
+2
+Var [˜gk] E
+h
+e2
+RI,k
+i
+P
+k
+
+Nk
+N
+2
+Var [˜gk] E
+h
+e2
+SI,k
+i , (A5)
+where eRI,k = 1
+Nk
+P
+i : s(i)=k ε⊥
+i fi is the sum of residuals of exposed individuals in state k (normalized
+by Nk), while eSI,k = 1
+Nk
+P
+i : s(i)=k ε⊥
+i averages over all observations in the state. 40
+Equation ( A5) shows that the recentered IV delivers power gains relative to the simulated
+instrument approach whenever the normalized sum of residuals is closer to zero for a typical state,
+in the mean-squared sense, when restricting to exposed individuals. The restricted sum has fewer
+summands, working in favor of the recentered IV. If the expansion shocks were assigned at the
+individual level, without state clustering, this would guarantee that the recentered IV is more
+eﬀicient (since eRI,k = eSI,k for exposed individuals in that case).
+However, this simplified example shows that the recentered IV is likely to deliver a power loss
+when the shocks gk are clustered and ε⊥
+i is strongly correlated with the indicator of exposed sample
+fi (i.e., exposed individuals have systematically different residuals, and fi is not controlled for). To
+see this simply, suppose E
+
+ε⊥
+i | fi = 1, w
+
+= α ̸= 0 for all i. In this scenario eRI,k is not mean-zero,
+even on average across states, which potentially yields a high mean-squared residual:
+E [eRI,k ] = E [E [eRI,k | w]] = E
+2
+4 1
+Nk
+X
+i : s(i)=k
+E
+h
+ε⊥
+i fi | w
+i
+3
+5
+= E
+2
+4 1
+Nk
+X
+i : s(i)=k
+E
+h
+ε⊥
+i | fi = 1, w
+i
+fi
+3
+5 = α · E
+"P
+i : s(i)=k fi
+Nk
+#
+̸= 0.
+39Namely, since fi is binary, E
+[ 1
+N
+∑
+i zSI
+i xi
+]
+= E
+[ 1
+N
+∑
+i ˜gs(i)
+(
+µi + fi˜gs(i)
+)]
+= E
+[ 1
+N
+∑
+i fi˜g2
+s(i)
+]
+=
+E
+[ 1
+N
+∑
+i fi˜gs(i)
+(
+µi + fi˜gs(i)
+)]
+= E
+[ 1
+N
+∑
+i ˜zixi
+]
+. With controls this equality holds asymptotically, since the differ-
+ence between xi and x⊥
+i is uncorrelated with zSI
+i − ˜zi = (1 − fi) ˜gs(i).
+40Namely, Var
+[ 1
+N
+∑
+i ˜ziε⊥
+i
+]
+= ∑
+k
+(
+Nk
+N
+) 2
+E
+[(
+1
+Nk
+∑
+i : s(i)=k ˜ziε⊥
+i
+) 2]
+= ∑
+k
+(
+Nk
+N
+) 2
+E
+[
+˜g2
+k ·
+(
+1
+Nk
+∑
+i : s(i)=k fiε⊥
+i
+) 2]
+=
+∑
+k
+(
+Nk
+N
+) 2
+Var [˜gk] E
+[
+e2
+RI,k
+]
+, since E
+[ 1
+N
+∑
+i ˜ziε⊥
+i
+]
+= 0, and similarly for Var
+[ 1
+N
+∑
+i zSI
+i ε⊥
+i
+]
+.
+50
+
+===== PAGE 51 =====
+
+The simulated instrument, which does not condition on fi = 1 , does not suffer from this problem
+since ε⊥
+i is mean-zero in the sample. Another interpretation of this problem is that in this case the
+sums of residuals over the exposed and non-exposed individuals of a given state will tend to have
+opposite signs, increasing eﬀiciency of the simulated instrument that uses both subsamples.
+The predictions of this discussion are borne out in the data. In Panel C of Appendix Table
+A4 we verify that the confidence interval of recentered IV becomes dramatically narrowed with a
+single control of fi (interacted with the 2014 indicator appropriately for the difference-in-differences
+setting).41 Moreover, demographic controls in Panel B of Appendix Table A4 capture most of the
+variation in fi, delivering similar results. Our recentered IV specifications in the main text, by
+restricting the sample to the exposed individuals, effectively control for year interacted with fi.
+We note that here controlling for the exposed sample indicator is closely related to our third step
+in constructing the optimal recentered IV, discussed in Section 3.3: this control happens to play the
+role of the predetermined predictors of the residual, ψ. Our application therefore highlights that in
+general there is no guarantee of an eﬀiciency gain from improving the first stage with a recentered
+IV (i.e., approximating the recentered best predictor) if adjustment for ψ is not feasible.
+References
+Angrist, Joshua. 1998. “Estimating the labor market impact of voluntary military service using
+social security data on military applicants. ” Econometrica 66:249–288.
+Borusyak, Kirill, and Peter Hull. 2024. “Negative weights are no concern in design-based speci-
+fications. ” InAEA Papers and Proceedings, 114:597–600. American Economic Association 2014
+Broadway, Suite 305, Nashville, TN 37203.
+Brooks, T ricia. 2019. “What Some Researchers Get Wrong About Medicaid’s Income Eligibility
+Requirements. ”Health Affairs Blog.
+Chernozhukov, Victor, Denis Chetverikov, Mert Demirer, Esther Duflo, Christian Hansen,
+Whitney Newey, and James Robins. 2018. “Double/debiased machine learning for treat-
+ment and structural parameters. ” Econometrics Journal 21:C1–C68.
+Imbens, Guido W., and Joshua D. Angrist. 1994. “Identification and Estimation of Local
+A verage Treatment Effects. ”Econometrica 62:467–475.
+Kolesár, Michal, and Mikkel Plagborg-Møller. 2025. “Dynamic causal effects in a nonlinear
+world: the good, the bad, and the ugly. ” Journal of Business & Economic Statistics 43:737–754.
+Small, Dylan S, Zhiqiang T an, Roland R Ramsahai, Scott A Lorch, and M Alan Brookhart.
+2017. “Instrumental variable estimation with a stochastic monotonicity assumption. ”
+41The eﬀiciency of IV specifications that only control for the expected eligibility prediction in columns 2, 4, and 6
+of Panel A is lower because this control does not span fi.
+51
+
+===== PAGE 52 =====
+
+W ager, Stefan. 2025. “Causal inference: A statistical learning approach. ” URL https://web. stan-
+ford. edu/swager/causal_inf_book. pdf.
+52
+
+===== PAGE 53 =====
+
+Online Appendix Figures and Tables
+Figure A1: Causal Diagram with Fixed Effects
+yit
+αs
+δs
+cit, s(i), u
+γs
+gs
+xit
+Notes: This figure illustrates the causal model in Appendix D.2.
+53
+
+===== PAGE 54 =====
+
+Figure A2: Medicaid Application: Simulated Estimator Distributions
+A. Has Medicaid
+01020304050Density-.1-.050.05.1Coefficient EstimateSimulated IVRecentered IV
+B. Has Employer-Sponsored Insurance
+020406080Density-.1-.050.05.1Coefficient EstimateSimulated IVRecentered IV
+Notes: This figure plots the simulated distributions of the two IV regression discussed in the text:
+one using a conventional simulated instrument and the other using as an instrument a recentered
+prediction of Medicaid eligibility. See Appendix B.2 for a description of the simulation procedure.
+The true effect of zero in both panels is indicated by the dashed vertical line.
+54
+
+===== PAGE 55 =====
+
+Table A1: Medicaid Application: Second Stage-Estimates with Additional Controls
+Has Medicaid Has Private Insurance Has Employer-Sponsored
+Insurance
+Simulated IV Recentered IV Simulated IV Recentered IV Simulated IV Recentered IV
+(1) (2) (3) (4) (5) (6)
+Panel A. Medicaid Eligibility Effects
+Eligible 0.135 0.073 −0.050 −0.024 0.003 −0.008
+(0.029) (0.010) (0.022) (0.007) (0.013) (0.005)
+[0.082,0.224] [0.050,0.095] [-0.112,0.001] [-0.042,-0.008] [-0.039,0.037] [-0.019,0.005]
+Panel B. Medicaid Enrollment Effects
+Has Medicaid −0.372 −0.334 0.023 −0.108
+(0.146) (0.091) (0.097) (0.060)
+[-0.767,0.008] [-0.566,-0.121] [-0.238,0.322] [-0.235,0.081]
+Exposed Sample N Y N Y N Y
+States 43 43 43 43 43 43
+Individuals 2,397,313 421,042 2,397,313 421,042 2,397,313 421,042
+Notes: Panel A of this table reports second-stage coeﬀicients from the two IV regressions described in the text: one using a conventional
+simulated instrument and the other using as an instrument a recentered prediction of Medicaid eligibility. Columns 1, 3, and 5 estimate
+regressions in the full sample of individuals in 2013–2014, while Columns 2, 4, and 6 restrict to the sample of individuals whose charac-
+teristics and state of residence make them exposed to the partial ACA Medicaid expansion in 2014. All regressions control for state and
+year fixed effects, an indicator for Republican-governed states interacted with year, and full interactions of deciles of household income,
+parental status, work status, and year. Panel B shows estimates from IV regressions which use an indicator for Medicaid enrollment as
+the endogenous variable, instead of an indicator for Medicaid eligibility. State-clustered standard errors are reported in parentheses; 95%
+confidence intervals, obtained by a wild score bootstrap, are reported in brackets.
+55
+
+===== PAGE 56 =====
+
+Table A2: Medicaid Application: Pre-Trend Estimates
+Has Medicaid Has Private Insurance Has Employer-Sponsored
+Insurance
+Simulated IV Recentered IV Simulated IV Recentered IV Simulated IV Recentered IV
+(1) (2) (3) (4) (5) (6)
+Panel A. Baseline Specification
+Eligibile 0.022 0.020 −0.015 −0.011 −0.011 −0.007
+(0.009) (0.004) (0.017) (0.004) (0.017) (0.005)
+[-0.005,0.043] [0.008,0.028] [-0.071,0.022] [-0.020,-0.003] [-0.061,0.026] [-0.020,0.004]
+Panel B. With Additional Controls
+Eligibile 0.023 0.020 −0.019 −0.014 −0.016 −0.011
+(0.010) (0.004) (0.014) (0.004) (0.016) (0.005)
+[-0.012,0.040] [0.009,0.027] [-0.056,0.020] [-0.022,-0.006] [-0.051,0.031] [-0.023,0.001]
+Exposed Sample N Y N Y N Y
+States 43 43 43 43 43 43
+Individuals 2,400,142 425,112 2,400,142 425,112 2,400,142 425,112
+Notes: This table reports pre-trend estimates for the two IV regressions described in the text: one using a conventional simulated
+instrument and the other using as an instrument a recentered prediction of Medicaid eligibility. Pre-trend estimates come from the IV
+specifications described in the text replacing 2013 individuals with 2012 individuals and replacing 2014 individuals with 2013 individuals.
+Columns 1, 3, and 5 estimate regressions in the full sample of individuals, while Columns 2, 4, and 6 restrict to the sample of individuals
+whose characteristics and state of residence make them exposed to the partial ACA Medicaid expansion in 2014. All regressions control for
+state and year fixed effects and an indicator for Republican-governed states interacted with year. The regressions in Panel B additionally
+control for deciles of household income, interacted with indicators for parental and work status and year. Conventional state-clustered
+standard errors are reported in parentheses; 95% confidence intervals, obtained by a wild score bootstrap, are reported in brackets.
+56
+
+===== PAGE 57 =====
+
+Table A3: Medicaid Application: Alternative Designs
+Has Medicaid Has Private
+Insurance
+Has Employer-
+Sponsored
+Insurance
+(1) (2) (3)
+Panel A. Republican Governor and 2012 Median Income
+Eligible 0.078 −0.016 −0.003
+(0.011) (0.008) (0.006)
+[0.053,0.099] [-0.041,0.001] [-0.018,0.010]
+Has Medicaid −0.210 −0.043
+(0.106) (0.073)
+[-0.526,0.016] [-0.217,0.169]
+Panel B. Republican Governor, 2012 Median Income, 2012 Medicaid Coverage
+Eligible 0.076 −0.023 −0.009
+(0.012) (0.007) (0.005)
+[0.053,0.103] [-0.040,-0.007] [-0.021,0.003]
+Has Medicaid −0.302 −0.123
+(0.095) (0.059)
+[-0.543,-0.094] [-0.254,0.056]
+Exposed Sample Y Y Y
+States 43 43 43
+Individuals 421,042 421,042 421,042
+Notes: This table adds additional controls to the recentered IV regressions in Table 2; each row
+corresponds to a different IV specification, paralleling the two panels in Table 2. The regressions
+in both panels of this table add interactions of the 2009-2013 state median income, year, and the
+Republican governor indicator. The regressions in Panel B additionally control for the interactions
+of 2012 state Medicaid coverage rates with those three variables. State-clustered standard errors are
+reported in parentheses; 95% confidence intervals, obtained by a wild score bootstrap, are reported
+in brackets.
+57
+
+===== PAGE 58 =====
+
+Table A4: Medicaid Application: Recentered IV Including Non-Exposed Individuals
+Has Medicaid Has Private Insurance Has Employer-Sponsored
+Insurance
+Recentered Controlled Recentered Controlled Recentered Controlled
+(1) (2) (3) (4) (5) (6)
+Panel A. Baseline Controls
+Eligible 0.032 0.071 0.193 0.098 0.208 0.110
+(0.085) (0.044) (0.290) (0.168) (0.301) (0.173)
+[-0.425,0.149] [-0.093,0.139] [-0.209,1.795] [-0.170,0.693] [-0.208,1.872] [-0.172,0.729]
+Panel B. With Demographics × Post
+Eligible 0.116 0.114 −0.029 −0.029 −0.018 −0.018
+(0.012) (0.012) (0.013) (0.013) (0.012) (0.014)
+[0.092,0.150] [0.083,0.146] [-0.052,0.002] [-0.052,0.012] [-0.040,0.013] [-0.040,0.026]
+Panel C. With Exposed Sample × Post
+Eligible 0.094 0.093 −0.012 −0.011 −0.005 −0.004
+(0.011) (0.023) (0.015) (0.043) (0.017) (0.045)
+[0.063,0.118] [-0.000,0.128] [-0.038,0.034] [-0.072,0.176] [-0.033,0.047] [-0.067,0.192]
+Exposed Sample N N N N N N
+States 43 43 43 43 43 43
+Individuals 2,397,313 2,397,313 2,397,313 2,397,313 2,397,313 2,397,313
+Notes: Panel A of this table reports second-stage coeﬀicients from versions of the recentered IV regressions in Table 2, estimated in the
+full sample of individuals in 2013–14. Columns 1, 3, and 5 use as an instrument a recentered prediction of Medicaid eligibility while
+Columns 2, 4, and 6 do not recenter but control for the expected prediction. All regressions control for state and year fixed effects and
+an indicator for Republican-governed states interacted with year. The regressions in Panel B additionally control for deciles of household
+income, interacted with indicators for parental and work status and year. The regressions in Panel C instead add the interaction of
+year and an indicator for an individual having characteristics that make them exposed to the partial ACA Medicaid expansion in 2014.
+State-clustered standard errors are reported in parentheses; 95% confidence intervals, obtained by a wild score bootstrap, are reported in
+brackets.
+58
