@@ -304,9 +304,14 @@ Fixed across all specifications: FE = `firm + muni×year`; sample =
 private productive firms only (D5-op). The minimum core run is
 `7 × 3 × 2 = 42` firm-level specifications: channel form × baseline
 window × central exposure scale, with owner-year pooling and alignment
-levels. Baseline-pooling, binary-exposure, employment-weighted exposure,
-lower-order-controlled interaction, stack, and shift-timing arms are
-layered robustness once feasibility and compute budget are confirmed.
+levels. **The two central exposure scales for the 42-cell core are
+(i) within-firm total-owner share and (ii) municipality-denominator
+owner share**, as defined in the exposure-scale axis text above. The
+baseline-employment-weighted municipality share is robustness only and
+does **not** enter the 42-cell core. Baseline-pooling, binary-exposure,
+employment-weighted exposure, lower-order-controlled interaction, stack,
+and shift-timing arms are layered robustness once feasibility and
+compute budget are confirmed.
 Any pruning comes from firm-level feasibility, placebo, or anticipation
 evidence, not from D1 sector-weight rankings. Recentering (Phase 3)
 preserves validity for any selected variant.
@@ -316,12 +321,12 @@ preserves validity for any selected variant.
 Selection is by **held-out sector first stage F**, not in-sample F. The
 four mayoral electoral cycles in 2002–2017 are:
 
-| Fold | Years | Underlying election |
-|---|---|---|
-| 1 | 2002–2004 | post-2000 (truncated by data start) |
-| 2 | 2005–2008 | post-2004 |
-| 3 | 2009–2012 | post-2008 |
-| 4 | 2013–2017 | post-2012 (2017 folded in: the 2016 election's term lies mostly outside the panel) |
+| Fold | Years     | Underlying election                                                                |
+| ---- | --------- | ---------------------------------------------------------------------------------- |
+| 1    | 2002–2004 | post-2000 (truncated by data start)                                                |
+| 2    | 2005–2008 | post-2004                                                                          |
+| 3    | 2009–2012 | post-2008                                                                          |
+| 4    | 2013–2017 | post-2012 (2017 folded in: the 2016 election's term lies mostly outside the panel) |
 
 Folds are defined on the mayoral calendar because M is the most
 data-rich channel and the FE structure pivots on muni × year. For
@@ -344,6 +349,21 @@ Rank variants by the pooled held-out sector-level F after additive
 aggregation. The champion is the variant with the highest held-out F;
 close runners-up (within 2 F units) are carried into Phase 3 for the
 robustness sweep.
+
+**Crossfit storage scope.** The four-fold leave-one-out predictions are
+materialized as a stored object only for the **champion** (and runners-up
+within 2 F units, if any). For the other variants, the held-out F is
+computed in-memory inside `B2` and written to `grid_results.qs2`; the
+fold-level predictions themselves are not persisted. This keeps the
+Phase 2 disk footprint manageable on the 44M-row firm panel.
+
+**Stop point — confirm with user before Phase 3.** After the champion
+is identified and `grid_results.qs2` is on disk, stop and report: (i)
+champion variant and held-out F; (ii) runners-up within 2 F units;
+(iii) the proposed crossfit-storage scope (champion + runners-up only).
+Wait for user go-ahead before materializing `champion_predictor_crossfit.qs2`
+and launching Phase 3 recentering. This is the second mandatory stop
+point in the plan (the first is the §3 Phase-1 `summary.md` review).
 
 This discipline is honest because Lemma 1 guarantees first-stage R²
 optimization for the *population* recentered best predictor; selecting by
@@ -386,9 +406,11 @@ post-treatment composition into the instrument.
   **sanity-check** companion, four leave-one-out cycle folds, with
   columns `firm_id, muni_id, policy_block, year, channel,
   ŝ^emp_{f,m,t}, fold_id` where `fold_id ∈ {1, 2, 3, 4}` indexes the
-  held-out cycle from §2.3. Used only to report the held-out vs
-  in-sample F gap as a finite-sample-overfit diagnostic; not
-  recentered, not consumed by Phase 3.
+  held-out cycle from §2.3. **Scope: champion only** (and runners-up
+  within 2 F units, if any) — materialized only after the §2.3 stop
+  point clears. Used to report the held-out vs in-sample F gap as a
+  finite-sample-overfit diagnostic; not recentered, not consumed by
+  Phase 3.
 - `output/firm_first_stage/champion_aggregated.qs2` — aggregated to
   `(muni_id, policy_block, year, channel, ŝ^emp_{j,m,t})` and
   `(muni_id, policy_block, S3, year, channel, ŝ^emp_{j,m,t})`, built
@@ -422,6 +444,13 @@ Channel-by-channel design:
   cycles, which is absorbed by year FE. **Skip recentering for purely
   presidential channels**; document in the script header. Cross-office
   channels involving P are recentered via the M or G leg's permutation.
+  **Pure-P singletons are therefore dropped from the recentered grid
+  at Phase 3** — they are not carried through with `z̃ = ŝ`, and they
+  do not enter the Phase 4 wide-form or AR tables as a recentered
+  column. If the Phase 2 champion or a runner-up is a pure-P singleton,
+  the routing rule (D34) selects the next-best non-pure-P candidate
+  for Phase 3; the pure-P result is reported only in the Phase 2
+  grid_summary as a non-recenterable benchmark.
 - **Cross-office channels (e.g., M·G).** Permute the joint draw
   `(M, G)` to preserve the interaction structure: the permuted M·G
   column must equal the product of the permuted M leg and the permuted
@@ -678,6 +707,11 @@ B9 inline.
       explicit.
 - [ ] Champion identified (highest held-out F at `policy_block`);
       runners-up within 2 F units flagged.
+- [ ] **Stop point:** champion + runners-up + proposed crossfit-storage
+      scope presented to user; Phase 3 awaits go-ahead.
+- [ ] Crossfit predictions materialized **only for champion** (and
+      runners-up within 2 F units, if any) — other variants' fold-level
+      predictions are not persisted to disk.
 - [ ] `B3` produces `ŝ^emp_{j,m,t}` and `ŝ^emp_{j,m,S3,t}` for champion
       and runners-up.
 - [ ] Full-sample fit on champion is the production object; cross-fit
@@ -690,6 +724,10 @@ B9 inline.
       legs (D38 algebraic constraint preserved) **within the §3.1.1
       governing class** — state × year when M is present, region × year
       when only G is present.
+- [ ] **Pure-P singletons are dropped from the recentered grid** — no
+      `z̃` produced, no Phase 4 column. If champion/runner-up is pure-P,
+      the next-best non-pure-P candidate replaces it per the routing
+      rule (D34).
 - [ ] Recentered `z̃` produced for champion and runners-up at both
       margins.
 - [ ] Sanity checks pass: regression of `z̃` on `w` = {muni FE, year
