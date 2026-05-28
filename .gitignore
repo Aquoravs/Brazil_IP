@@ -46,6 +46,7 @@ AGENTS.md
 # IDE
 .vscode/
 .idea/
+.obsidian/
 *.swp
 *.swo
 *~
@@ -77,3 +78,6 @@ docs/methodology/build/
 journal/meetings/**/build/
 explorations/**/build/
 explorations/**/output/build/
+
+# Literature PDFs (large binaries; tracked as text excerpts in bh2026_text.txt)
+docs/literature/*.pdf

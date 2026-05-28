@@ -1,0 +1,449 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{itemize items}[circle]
+
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{appendixnumberbeamer}
+\usepackage{hyperref}
+
+\newcommand*{\bkmtranslateto}{\languagename}
+\newcommand*{\bkmtranslate}[1]{%
+  \ifcsname tr@@@\bkmtranslateto @#1\endcsname
+    \csname tr@@@\bkmtranslateto @#1\endcsname
+  \else
+    #1%
+  \fi
+}
+\pdfstringdefDisableCommands{%
+  \let\translate\bkmtranslate
+}
+
+\newcommand{\iotaVec}{\mathbf{1}}
+\newcommand{\Align}{\mathrm{Align}}
+\newcommand{\FA}{\mathrm{FA}}
+\newcommand{\EC}{\mathrm{EC}}
+
+\newcommand{\sectordirmain}{../BNDES/output/muni_reg_tables_grouped}
+\newcommand{\firmdir}{../BNDES/output/firm_reg_tables}
+
+\definecolor{darkblue}{RGB}{0,51,102}
+\definecolor{alertred}{RGB}{180,30,30}
+
+\setbeamercolor{frametitle}{fg=white}
+\setbeamercolor{title}{fg=white}
+\setbeamercolor{structure}{fg=darkblue}
+
+\newcommand{\ArtifactPlaceholder}[2]{%
+  \fcolorbox{darkblue}{gray!10}{%
+    \parbox{0.9\linewidth}{%
+      \centering
+      \small
+      \textbf{Pending artifact}\\[3pt]
+      \texttt{\detokenize{#1}}\\[6pt]
+      #2
+    }%
+  }%
+}
+
+\newcommand{\OptionalInputTable}[2]{%
+  \IfFileExists{#1}{\input{#1}}{\ArtifactPlaceholder{#1}{#2}}%
+}
+
+\newcommand{\OptionalFigure}[2]{%
+  \IfFileExists{#1}{\includegraphics[width=\linewidth]{#1}}{\ArtifactPlaceholder{#1}{#2}}%
+}
+
+\title{Testing Industrial Policymakers:\\Evidence from Brazil's BNDES}
+\subtitle{First-Stage Results}
+\author{}
+\date{March 2026}
+
+\begin{document}
+
+% ===========================================================================
+\begin{frame}
+\titlepage
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Research Question}
+
+\textbf{Is the sector-level allocation of BNDES lending across municipalities GDP-optimal?}
+
+\bigskip
+
+\begin{itemize}
+    \item BNDES disburses $\sim$3\% of GDP annually in subsidized industrial lending
+    \item Existing literature (Lane 2025, Juh\'asz 2018) shows IP ``works'' for targeted sectors
+    \item \textbf{But}: does the policymaker target the \emph{right} sectors?
+    \item We derive and test the \textbf{first-order condition for optimality}: at an interior optimum, marginal reallocations across sectors have zero effect on GDP
+\end{itemize}
+
+\bigskip
+
+\textbf{Contribution}: Move from ``does IP work?'' to ``is IP \emph{optimal}?''
+--- and if not, identify which sectors are over/under-supported
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Theory: Local Optimality Test}
+
+Sector shares $s_m \in \Delta^{J-1}$, municipal output $Y_m = Y_m(s_m)$.
+
+\medskip
+
+\textbf{Directional derivative condition} --- at any interior optimum:
+\begin{equation*}
+    \frac{dY_m}{d\varepsilon}\bigg|_{\varepsilon=0}
+    = \nabla_{s_m} Y_m \cdot v_m = 0
+    \quad\text{for all } v_m \perp \iotaVec
+\end{equation*}
+
+\textbf{Empirical projection} (within-simplex, $\iotaVec'\Delta s_{mt}=0$):
+\begin{equation*}
+    \Delta Y_{m,t+h} = \beta' \Delta s_{mt} + u_{m,t+h}
+\end{equation*}
+
+\textbf{Null hypothesis (optimality)}:
+\begin{equation*}
+    H_0: \quad \beta = \mathbf{0}
+\end{equation*}
+
+\begin{itemize}
+    \item Model-free: valid under any smooth objective
+    \item $\hat\beta_j > 0$: sector $j$ under-supported $\implies$ tilt more toward $j$
+    \item $\hat\beta_j < 0$: sector $j$ over-supported
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}[allowframebreaks]{Identification: Shift-Share IV from Political Alignment}
+
+$\Delta s_{mt}$ is endogenous $\implies$ need instruments that shift the sector mix exogenously.
+
+\bigskip
+
+\textbf{Shift} --- Political alignment turnover:
+\begin{itemize}
+    \item When party $p$ wins office $\ell \in \{\text{mayor, governor, president}\}$, BNDES credit tilts toward $p$-affiliated firms (Lazzarini et al.~2015, Carvalho 2014)
+    \item $\Delta\Align^\ell_{mpt}$: party-$p$ alignment shock in municipality $m$, year $t$
+\end{itemize}
+
+\medskip
+
+\textbf{Share} --- Baseline sectoral exposure to each party:
+\begin{equation*}
+    w_{jmp,\tau} \equiv \frac{\sum_{f \in \mathcal{F}(j,m)} L_{f,p,\tau}}
+    {\sum_{f \in \mathcal{F}(j,m)} L_{f,\tau}}
+\end{equation*}
+where $L_{fp}$ = number of owners of firm $f$ affiliated to party $p$; $L_f$ = total owners (affiliated and unaffiliated).
+
+\textbf{Instrument} (sector-specific, within municipality):
+\begin{equation*}
+    Z^\ell_{jmt} \equiv \sum_p w_{jmp,\tau} \cdot \Delta\Align^\ell_{mpt}
+\end{equation*}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Estimation Strategy}
+
+\textbf{Firm first stage} (firm $\times$ municipality $\times$ year):
+\begin{equation*}
+    \mathbf{1}(\text{BNDES}_{fmt} > 0) = \sum_\ell \lambda_\ell\, \FA^\ell_{fmt}
+    + \gamma_f + \alpha_{mt} + u_{fmt}
+\end{equation*}
+\begin{itemize}
+    \item $\FA^\ell_{fmt} = \sum_p \omega_{fp,\tau} \Align^\ell_{mpt}$: firm-level alignment exposure
+    \item FE: firm + municipality$\times$year; clustering: firm + municipality; weights: employment
+    \item Also estimated for intensive margin ($\log$ BNDES $|$ BNDES $> 0$) and in changes
+\end{itemize}
+
+\medskip
+
+\textbf{Sector first stage} (municipality $\times$ sector $\times$ year):
+\begin{equation*}
+    \Delta s_{jmt} = \sum_\ell \lambda_\ell\, Z^\ell_{jmt} + \phi\,\EC_{jm,\tau} + \gamma_{jm} + \alpha_{jt} + u_{jmt}
+\end{equation*}
+\begin{itemize}
+    \item $\EC_{jm,\tau}$: exposure control (overall political connectedness of sector-municipality cell)
+    \item Primary FE: municipality$\times$sector + sector$\times$year; clustering: municipality + sector
+    \item Identification from \textbf{cross-sector variation} in party exposure $w_{jmp,\tau}$
+\end{itemize}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Data Sources and Sector Groups}
+\hypertarget{slide:datasources}{}
+
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.52\textwidth}
+\footnotesize
+\begin{tabular}{lll}
+\toprule
+\textbf{Source} & \textbf{Content} & \textbf{Coverage} \\
+\midrule
+BNDES portal & Loan-level & 2002--2024 \\
+RAIS (MTE) & Employer-employee & 2002--2017 \\
+TSE / Colonnelli & Party affiliation & 2002--2019 \\
+IBGE PIB Muni & Municipality GDP & 2002--2017 \\
+IBGE Population & Population & 1991--2025 \\
+\bottomrule
+\end{tabular}
+\end{column}
+
+\begin{column}{0.46\textwidth}
+\footnotesize
+21 CNAE 2.0 sections $\to$ 10 sector groups:
+\begin{itemize}\setlength{\itemsep}{0pt}
+    \item Manufacturing split into Light (CL), Heavy (CH), Advanced (CA)
+    \item Utilities + Construction merged (UCo)
+    \item Services: Trade (Tr), Transport (Tp), Market Services (MS), Public/Social (PSO)
+    \item Residual (XX) dropped from estimation
+\end{itemize}
+\end{column}
+\end{columns}
+
+\bigskip
+
+\textbf{Geographic unit}: 5,570 municipalities \quad\textbf{Sample}: 2002--2017
+\hfill\hyperlink{appendix:sectors}{\beamergotobutton{sector distribution}}
+
+\end{frame}
+
+% ===========================================================================
+% FIRM FIRST STAGE — COALITION
+% ===========================================================================
+
+\begin{frame}{Firm First Stage: Levels, Extensive Margin (Coalition)}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/fc_t1_levels_extensive.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Firm First Stage: Levels, Intensive Margin (Coalition)}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/fc_t2_levels_intensive.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Firm First Stage: Changes, Extensive Margin (Coalition)}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/fc_t3_changes_extensive.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Firm First Stage: Changes, Intensive Margin (Coalition)}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/fc_t4_changes_intensive.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+% FIRM FIRST STAGE — PARTY
+% ===========================================================================
+
+\begin{frame}{Firm First Stage: Levels, Extensive Margin (Party)}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/fc_t5a_party_levels_ext.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Firm First Stage: Changes, Extensive Margin (Party)}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/fc_t5b_party_changes_ext.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+% SECTOR FIRST STAGE — COALITION
+% ===========================================================================
+
+\begin{frame}{Sector First Stage: Baseline (Coalition, Sector$\times$Year FE)}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\sectordirmain/fs_t1_baseline.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Sector First Stage: Muni$\times$Year FE (Coalition)}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\sectordirmain/fs_t2_fe_muni_year.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Sector First Stage: Levels (Coalition, $s_{jmt}$ on $Z^{\text{levels}}_{jmt}$)}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\sectordirmain/fs_t7_levels.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+% SECTOR FIRST STAGE — PARTY
+% ===========================================================================
+
+\begin{frame}{Sector First Stage: Party Alignment}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\sectordirmain/fs_t4_party_alignment.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+% SECTOR FIRST STAGE — ROBUSTNESS
+% ===========================================================================
+
+\begin{frame}{Sector First Stage: Without Exposure Control}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\sectordirmain/fs_t5_no_control.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Key Takeaways}
+
+\textbf{Firm first stage}:
+\begin{itemize}
+    \item Political alignment predicts firm-level BNDES access and loan size
+    \item Effect operates through both extensive and intensive margins
+    \item Validates the micro political-lending channel underlying the sector-level instruments
+\end{itemize}
+
+\bigskip
+
+\textbf{Sector first stage}:
+\begin{itemize}
+    \item Baseline (sector$\times$year FE): instruments are weak under coalition alignment
+    \item Municipality$\times$year FE and year-only FE yield stronger first stages
+    \item Party-level alignment produces distinct variation at subnational tiers
+    \item Exposure control matters: coefficients drop without it
+    \item 2002-fixed weights are weaker than cycle-specific across the board
+\end{itemize}
+
+\bigskip
+
+{\color{alertred} Main question: which FE structure and alignment definition should be primary? Coalition with sector$\times$year FE is the most demanding but weakest specification.}
+
+\end{frame}
+
+% ===========================================================================
+% APPENDIX
+% ===========================================================================
+\appendix
+
+% ===========================================================================
+\begin{frame}{Appendix: Firm --- 2002-Fixed Baseline, Levels}
+\hypertarget{appendix:firmrobust}{}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/fc_t6a_2002fixed_levels_ext.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix: Firm --- 2002-Fixed Baseline, Changes}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/fc_t6b_2002fixed_changes_ext.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix: Firm --- Unweighted, Levels}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/fc_t7a_unweighted_levels_ext.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix: Firm --- Unweighted, Changes}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\firmdir/fc_t7b_unweighted_changes_ext.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix: Sector --- Year FE Only (Coalition)}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\sectordirmain/fs_t3_fe_year.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix: Sector --- 2002-Fixed Weights}
+\begin{center}
+\footnotesize
+\OptionalInputTable{\sectordirmain/fs_t6_2002_fixed.tex}{Table pending.}
+\end{center}
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix: Sector Group Distribution}
+\hypertarget{appendix:sectors}{}
+
+\begin{center}
+\footnotesize
+\OptionalInputTable{\sectordirmain/sector_group_distribution.tex}{Table pending --- run build\_sector\_distribution\_table.R.}
+\end{center}
+
+\end{frame}
+
+% ===========================================================================
+\begin{frame}{Appendix: Sector Group Definitions}
+
+\footnotesize
+\begin{center}
+\begin{tabular}{llp{7.5cm}}
+\toprule
+\textbf{Group} & \textbf{Label} & \textbf{CNAE Sections} \\
+\midrule
+Ag  & Agriculture               & A \\
+Mi  & Mining                    & B \\
+CL  & Light Manufacturing       & C (divisions 10--18: food, textiles, wood, paper, printing) \\
+CH  & Heavy Manufacturing       & C (divisions 19--25: petroleum, chemicals, metals, rubber) \\
+CA  & Advanced Manufacturing    & C (divisions 26--33: electronics, machinery, vehicles, equipment) \\
+UCo & Utilities \& Construction & D (electricity/gas), E (water/waste), F (construction) \\
+Tr  & Trade                     & G (wholesale and retail) \\
+Tp  & Transport                 & H (transport and storage) \\
+MS  & Market Services           & I, J, L, M--N (accommodation, information, real estate, professional/admin) \\
+PSO & Public, Social \& Other   & P (education), Q (health), R (arts), S (other services) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\hfill\hyperlink{slide:datasources}{\beamerreturnbutton{Back to Data Sources}}
+
+\end{frame}
+
+\end{document}
