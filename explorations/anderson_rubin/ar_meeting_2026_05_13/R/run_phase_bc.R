@@ -24,6 +24,8 @@
 #   --phase=2
 #     after checkpoint #2, for each margin:
 #       B6            : three-volume AR test on the user-chosen set(s)
+#       B9            : baseline AR screen over the explicit excluded-stack list
+#       B10           : compact sector-share first-stage tables for the deck
 #
 # B2, B2b, B3, B3b, B5 remain in the Phase 1A pass as descriptive companions —
 # they no longer feed the routing rule or the exclusion diagnostic.
@@ -72,7 +74,9 @@ phase1a_steps <- c("B2_composition_first_stage.R",
                    "B7_collinearity_diagnosis.R")
 phase1b_steps <- c("B8_wide_first_stage.R",
                    "B4_channel_routing.R")
-phase2_steps  <- c("B6_three_volume_ar.R")
+phase2_steps  <- c("B6_three_volume_ar.R",
+                   "B9_stack_ar_screen.R",
+                   "B10_first_stage_slide_tables.R")
 
 if (identical(PHASE, "1a")) {
   message("=========== PHASE 1A: collinearity diagnosis ===========")
