@@ -1,0 +1,220 @@
+\documentclass{article}
+\usepackage[top=2.3cm, bottom=2.3cm, left=2.1cm, right=2.1cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{bbm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{iftex}
+\usepackage[default,regular,black]{sourceserifpro}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+\fi
+\hypersetup{colorlinks,linkcolor={blue},citecolor={blue},urlcolor={red}}
+
+% Colour for the controls toggled across the volume treatments.
+\definecolor{toggle}{RGB}{179,89,0}
+\newcommand{\tog}[1]{\textcolor{toggle}{#1}}
+
+% ====== Notation macros (consistent with ar_test_specification.tex) ======
+\newcommand{\Align}{\mathrm{Align}}
+\newcommand{\EC}{\mathrm{EC}}
+\newcommand{\Vol}{\mathrm{Vol}}
+\newcommand{\Zbar}{\bar Z}
+\newcommand{\ind}{\mathbf{1}}
+\newcommand{\cF}{\mathcal{F}}
+\newcommand{\cS}{\mathcal{S}}
+\newcommand{\bzero}{\mathbf{0}}
+
+\renewcommand{\ttdefault}{lmtt}
+\sloppy
+
+\begin{document}
+
+\title{Anderson--Rubin Test: First Stages and the Baseline Screen\\[2pt]
+       \large Companion to the May 21, 2026 slides}
+\author{}
+\date{}
+\maketitle
+
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{12pt}
+
+\section{The three regressions on the slides}\label{sec:eq}
+
+Every cell on the slides comes from a cluster-robust regression at the
+municipality--year level, with municipality and year fixed effects
+$\alpha_m,\delta_t$ and standard errors clustered by municipality. The deck
+reports three kinds of regression, each run at two margins: the four BNDES
+aggregate sectors, and BNDES sector $\times$ firm size (12 groups).
+
+\paragraph{(a) First stage of the sector shares (slides 4--5).}
+The endogenous object is the vector $s_{mt}$ of sector employment shares. For an
+instrument stack $\cS$ (a set of channels, \autoref{sec:stacks}), each share is
+projected on the stack's full instrument block:
+\begin{equation}\label{eq:fs-shares}
+  s_{jmt}
+  \;=\;
+  \alpha^{(j)}_m + \delta^{(j)}_t
+  \;+\; \Pi_j'\,Z^{\cS}_{mt}
+  \;+\; \Phi_j'\,\EC^{\cS}_{mt}
+  \;+\; \mu_j\,\Vol_{mt}
+  \;+\; \nu_{jmt}.
+\end{equation}
+This is the first stage embedded in the AR-test IV system; $\EC$ and $\Vol$
+are included controls. Reported: the Sanderson--Windmeijer $F$ for each share
+and the Kleibergen--Paap rank statistic of the block (\autoref{sec:diag}).
+
+\paragraph{(b) First stage of the volume control (slide 6).}
+The volume ratio is regressed, one channel $c$ at a time, on that channel's
+muni-aggregated instrument $\Zbar^{c}_{mt}=\sum_j Z^{c}_{jmt}$:
+\begin{equation}\label{eq:fs-vol}
+  \Vol_{mt}
+  \;=\;
+  \alpha_m + \delta_t
+  \;+\; \pi_c\,\Zbar^{c}_{mt}
+  \;+\; \Phi_c'\,\EC^{c}_{mt}
+  \;+\; \nu_{mt}.
+\end{equation}
+Reported: the cluster-robust partial $F$ on $\Zbar^{c}$. Channels clearing the
+5\% gate are the volume instruments used in treatment~(iii) below.
+
+\paragraph{(c) The AR test --- baseline screen (slides 7--8).}
+The AR reduced form, run once per excluded stack $\cS$:
+\begin{equation}\label{eq:rf}
+  \log\mathrm{GDP}_{mt}
+  \;=\;
+  \alpha_m + \delta_t
+  \;+\; \gamma'\,Z^{\cS}_{mt}
+  \;+\; \psi'\,\EC^{\cS}_{mt}
+  \;+\; \tog{(\text{volume treatment})}
+  \;+\; \eta_{mt}.
+\end{equation}
+This is the GDP equation with $s_{mt}$ substituted out through its first
+stage~\eqref{eq:fs-shares}. The reported \textbf{AR joint $F$} is the
+cluster-robust Wald statistic for $\gamma=\bzero$ --- the joint significance of
+the stack's instruments \emph{only}; $\EC^{\cS}$ and the volume term are
+partialled out, not tested.
+
+\section{The seven channels and the excluded-stack design}\label{sec:stacks}
+
+Each alignment channel $c$ pairs a set of political offices with an alignment
+shock $\Align^{c}_{mpt}$; the cross-office shocks are products of the
+tier-specific alignment indicators.
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Channel & Offices & $\Align^{c}_{mpt}=1$ when party $p$\ldots \\
+\midrule
+M               & mayor                & holds the mayoralty of $m$ \\
+G               & governor             & is in the governor's coalition of $s(m)$ \\
+P               & president            & is in the presidential coalition \\
+M$\cdot$P       & mayor, pres.         & holds the mayoralty \emph{and} is in the presidential coalition \\
+M$\cdot$G       & mayor, gov.          & holds the mayoralty \emph{and} is in the governor's coalition \\
+G$\cdot$P       & gov., pres.          & is in the governor's \emph{and} the presidential coalition \\
+M$\cdot$G$\cdot$P & mayor, gov., pres. & is aligned at all three tiers simultaneously \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+A \textbf{stack} $\cS$ is a set of channels. Equations~\eqref{eq:fs-shares}
+and~\eqref{eq:rf} enter the full per-sector instrument block $Z^{c}$ of
+\emph{every} channel in $\cS$ as excluded instruments: $Z^{\cS}_{mt}$ stacks
+those blocks, $\EC^{\cS}_{mt}$ the matching exposure controls. Thus
+$\{$M,\,P,\,M$\cdot$P$\}$ means $Z^{\mathrm M}$, $Z^{\mathrm P}$, \emph{and}
+$Z^{\mathrm{M\cdot P}}$ are all excluded instruments at once. Eighteen stacks
+are evaluated:
+
+\begin{itemize}[leftmargin=*,nosep]
+\item \textbf{Singletons} (7): each channel alone.
+\item \textbf{Mayor stacks} (4): $\{$M,\,M$\cdot$P$\}$, $\{$M,\,M$\cdot$G$\}$,
+  $\{$M,\,M$\cdot$G$\cdot$P$\}$, $\{$M,\,M$\cdot$P,\,M$\cdot$G,\,M$\cdot$G$\cdot$P$\}$.
+\item \textbf{Parent pairs} (3): $\{$M,\,G$\}$, $\{$M,\,P$\}$, $\{$G,\,P$\}$.
+\item \textbf{Parent $+$ interaction} (4): $\{$M,\,P,\,M$\cdot$P$\}$,
+  $\{$M,\,G,\,M$\cdot$G$\}$, $\{$G,\,P,\,G$\cdot$P$\}$,
+  $\{$M,\,G,\,P,\,M$\cdot$G$\cdot$P$\}$.
+\end{itemize}
+
+\section{The three volume treatments}\label{sec:vol}
+
+The volume term in~\eqref{eq:rf} is toggled across three treatments.
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Slide label & Volume term in~\eqref{eq:rf} & Role \\
+\midrule
+No vol.\          & ---                                  & volume left uncontrolled \\
+Vol.\ control     & $\tog{\lambda\,\Vol_{mt}}$, included  & volume as a predetermined control \\
+Vol.\ instr.\     & $\tog{\lambda\,\Vol_{mt}}$, instrumented & Full IV: $\Vol_{mt}$ instrumented \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Under \emph{Vol.\ instr.}, $\Vol_{mt}$ is instrumented by $\Zbar^{c}$ of the
+volume-relevant channels from~\eqref{eq:fs-vol} that are \emph{not} in the
+stack $\cS$ --- using a channel already in $\cS$ would make $\Zbar^{c}$
+collinear with that stack's excluded $Z^{c}$ block.
+
+\section{Diagnostics}\label{sec:diag}
+
+\begin{itemize}[leftmargin=*,nosep]
+\item \textbf{Sanderson--Windmeijer $F$} --- the cluster-robust first-stage $F$
+  for one endogenous share, conditional on the other shares. ``Identified
+  shares'' counts shares with SW $F\ge10$.
+\item \textbf{Kleibergen--Paap rank statistic} --- the cluster-robust rank test
+  for the stack's instrument block, the relevance diagnostic for a
+  vector-valued endogenous object.
+\item \textbf{AR joint $F$} --- the cluster-robust Wald test of $\gamma=\bzero$
+  in~\eqref{eq:rf}, computed on the stack's instrument coefficients only.
+\end{itemize}
+
+\section{Variable construction}\label{sec:vars}
+
+\paragraph{Outcome --- $\log\mathrm{GDP}_{mt}$.}
+Municipal log GDP (2018 prices), 2002--2017.
+
+\paragraph{Endogenous shares --- $s_{jmt}$.}
+Sector $j$'s share of municipality $m$'s formal employment in year $t$, from
+RAIS. The simplex hold-out sector is the omitted base, leaving $J-1$ endogenous
+shares.
+
+\paragraph{Instrument --- $Z^{c}_{jmt}$ (muni-relative owner share).}
+$Z^{c}_{jmt}=\sum_{p}\tilde w^{c}_{jmp,t}\,\Align^{c}_{mpt}$, one column per
+retained sector. The weight
+\[
+  \tilde w^{c}_{jmp,t}
+  \;=\;
+  \frac{\sum_{s\in T^{c}_{t}}\sum_{f\in\cF(j,m)} L_{f,p,s}}
+       {\sum_{j'}\sum_{p'}\sum_{s\in T^{c}_{t}}\sum_{f\in\cF(j',m)} L_{f,p',s}}
+\]
+is cell $(j,m)$'s share of municipality $m$'s pre-window affiliated owner-years
+at party $p$; $L_{f,p,s}$ counts owners of firm $f$ affiliated with party $p$ in
+year $s$ (unaffiliated owners dropped), and $\cF(j,m)$ is the set of firms ever
+active in sector $j$ of $m$. The window
+$T^{c}_{t}=[\,e^{\min}_{c}(t)-4,\;e^{\min}_{c}(t)-1\,]\cap[2002,2017]$ closes
+before any office in channel $c$ can turn over, with $e^{\min}_{c}(t)$ the most
+recent election --- among the channel's offices --- on or before $t$.
+
+\paragraph{Exposure control --- $\EC^{c}_{jm,t}$.}
+The same weights summed over parties without the shift,
+$\EC^{c}_{jm,t}=\sum_{p}\tilde w^{c}_{jmp,t}$: cell $(j,m)$'s share of the
+municipality's affiliated owner mass. It absorbs the share-component
+confounding of the shift-share instrument; one column per retained sector per
+channel.
+
+\paragraph{Aggregate channel instrument --- $\Zbar^{c}_{mt}$.}
+$\Zbar^{c}_{mt}=\sum_j Z^{c}_{jmt}$, the channel's instrument summed over
+sectors. It is the scalar instrument for $\Vol_{mt}$ in the volume first
+stage~\eqref{eq:fs-vol} and in the Full-IV treatment.
+
+\paragraph{Volume control --- $\Vol_{mt}$.}
+$\Vol_{mt}=\mathrm{BNDES\_total}_{mt}/\mathrm{GDP}_{m,2002}$: current-year total
+municipal BNDES disbursements over initial-period (2002) municipal GDP. The
+denominator is fixed pre-treatment, so $\Vol_{mt}$ varies in $t$ only through
+the numerator.
+
+\end{document}

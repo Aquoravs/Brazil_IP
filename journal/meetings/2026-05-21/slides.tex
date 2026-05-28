@@ -12,7 +12,7 @@
 \usepackage{microtype}
 \usepackage{graphicx}
 \usepackage{makecell}
-\title{\textbf{AR Test: Instrument Combinations \& Channel Routing}}
+\title{\textbf{AR Test: Channel First Stages \& the Baseline Screen}}
 \date{May 21, 2026}
 \begin{document}
 
@@ -23,264 +23,101 @@
 
 % ------------------------------------------------------------------
 \begin{frame}{Tasks done}
-\begin{itemize}\setlength{\itemsep}{0.9em}
+\begin{itemize}\setlength{\itemsep}{1.2em}
 \item \textbf{Which political office moves local economic composition?}
-      Instead of using Mayor-crossed channels by assumption, we can verify which of them actually move sector shares.
-\item \textbf{Stacking different offices and their interactions can produce better results?}
-      Whether to test the interaction in isolation or stacked with their constituent channels.
-\item \textbf{Updated version of the AR test.} The AR test now includes an instrumented version of volume controls and is also evaluated for sector by size groups. 
+      Instead of using Mayor-crossed channels by assumption, I verify which of them actually move sector shares.
+\item \textbf{Updated version of the AR test.}
+      The AR test now includes an instrumented version of volume controls and is also evaluated for sector by size groups.
 \end{itemize}
 \end{frame}
 
 % ------------------------------------------------------------------
-\begin{frame}{Summary}
-\begin{itemize}\setlength{\itemsep}{0.8em}
-\item \textbf{First-stage answers.} At policy block, the President is the only composition-relevant channel; Governor and Mayor\,$\cdot$\,Governor are volume-relevant. At 12 groups no channel clears the composition gate, so I stick to the Mayor-crossed channels.
-\item \textbf{Stacking is the better default.} \{M, G, M\,$\cdot$\,G\} stacked rejects more sharply than M\,$\cdot$\,G alone at both margins.
-\item \textbf{Mayor\,$\cdot$\,Governor is the robust composition channel.} It rejects at policy block across all three volume treatments; at 12 groups it rejects without and with a volume control but not under Full IV.
-\item \textbf{Open question.} Why does Full IV overturn the 12-group rejection --- weak volume instrument, or a genuine volume-composition entanglement at the finer margin?
+\begin{frame}{Summary of findings}
+\begin{itemize}\setlength{\itemsep}{0.7em}
+\item \textbf{Sector-share first stage.} At BNDES aggregate sector every channel's instrument block moves only the Infrastructure share (SW $F$ from 10 to 33); the Agriculture and Industry shares are never identified. At the finer 12-group margin relevance is weak.
+\item \textbf{Volume first stage.} Mayor and Mayor\,$\cdot$\,Governor move the volume control.
+\item \textbf{AR test, policy block.} Stack carrying the Governor block tend to reject the null of no composition effect, and the rejection survives instrumenting volume.
+\item \textbf{AR test, 12 groups.} Governor, President, and Governor\,$\cdot$\,President reject, but on weak first stages --- read as a possible exclusion/direct-effect warning, not as a composition-channel finding.
 \end{itemize}
 \end{frame}
 
 % ------------------------------------------------------------------
-\begin{frame}{We let the data decide each channel's role}
-\begin{itemize}\setlength{\itemsep}{0.55em}
-\item \textbf{Seven cross-office channels.} Mayor (M), Governor (G), President (P), and the pairs and triple M\,$\cdot$\,G, M\,$\cdot$\,P, G\,$\cdot$\,P, M\,$\cdot$\,G\,$\cdot$\,P.
-\item \textbf{Two saturated first stages.} A \emph{composition} first stage (does the channel move sector employment shares?) and a \emph{volume} first stage (does it move total BNDES volume?).
-\item \textbf{Two margins.} Policy block (4 groups: Agriculture, Industry, Infrastructure, Services) and policy block $\times$ firm size (12 groups).
-\item \textbf{Three volume treatments.} No volume control; volume as a predetermined control; volume instrumented (Full IV).
-\end{itemize}
+\begin{frame}{Sector shares: relevance concentrates in Infrastructure}
+{\footnotesize First stage of the endogenous sector employment shares --- BNDES aggregate sector (Services is the omitted base). All 18 evaluated stacks; each cell is the cluster-robust SW first-stage $F$ per sector share.}
+\vskip 0.3em
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+\centering
+{\scriptsize\textit{Singletons and Mayor stacks}}\\[0.35em]
+\resizebox{0.84\columnwidth}{!}{\input{tables/first_stage_shares_policy_block_a.tex}}
+\end{column}
+\begin{column}{0.5\textwidth}
+\centering
+{\scriptsize\textit{Parent pairs, parent $+$ interaction}}\\[0.35em]
+\resizebox{0.84\columnwidth}{!}{\input{tables/first_stage_shares_policy_block_b.tex}}
+\end{column}
+\end{columns}
 \vskip 0.4em
-{\footnotesize Sample: 5{,}544 municipalities; 88{,}694 municipality-years. Muni and year fixed effects; SE clustered by municipality.}
+{\footnotesize Relevance concentrates in the Infrastructure share across singletons and stacks alike; Agriculture and Industry rarely clear the threshold. KP is the Kleibergen--Paap rank statistic. The first stage matches the AR test --- same unit, FE, exposure control, and clustering.}
 \end{frame}
 
 % ------------------------------------------------------------------
-\begin{frame}{The routing rule, in one line}
+\begin{frame}{Twelve groups: sector-share relevance is weak}
+{\footnotesize First stage of the endogenous sector shares --- BNDES aggregate sector $\times$ firm size (12 groups). All 18 evaluated stacks; per stack the KP rank statistic, the SW $F$ range over the 11 shares, and the count clearing SW $F\ge10$.}
+\vskip 0.3em
+\begin{columns}[t]
+\begin{column}{0.5\textwidth}
+\centering
+{\scriptsize\textit{Singletons and Mayor stacks}}\\[0.35em]
+\resizebox{0.9\columnwidth}{!}{\input{tables/first_stage_shares_policy_block_size_bin_a.tex}}
+\end{column}
+\begin{column}{0.5\textwidth}
+\centering
+{\scriptsize\textit{Parent pairs, parent $+$ interaction}}\\[0.35em]
+\resizebox{0.9\columnwidth}{!}{\input{tables/first_stage_shares_policy_block_size_bin_b.tex}}
+\end{column}
+\end{columns}
+\vskip 0.4em
+{\footnotesize Relevance is thin at the 12-group margin --- at most 3 of 11 shares are identified, and most stacks identify none. The KP statistic and the SW $F$ disagree. The first stage matches the AR test --- same unit, FE, exposure control, and clustering.}
+\end{frame}
+
+% ------------------------------------------------------------------
+\begin{frame}{Volume control: Mayor and Mayor\,$\cdot$\,Governor move volume}
+{\footnotesize First stage of the volume control --- each channel's aggregate instrument regressed on the volume ratio.}
+\vskip 0.3em
+\centerline{\resizebox{0.78\textwidth}{!}{%
+\setlength{\tabcolsep}{7pt}%
+\footnotesize%
+\input{tables/volume_first_stage_policy_block.tex}%
+}}
 \vskip 0.6em
-\begin{itemize}\setlength{\itemsep}{0.7em}
-\item \textbf{Composition gate.} A channel is composition-relevant if its partial $F$ in the composition first stage clears the 5\% threshold ($p<0.05$).
-\item \textbf{Volume gate.} A channel is volume-relevant if its partial $F$ in the volume first stage clears the 5\% threshold ($p<0.05$).
-\item \textbf{Assignment.} Composition-relevant $\rightarrow$ \emph{composition} instrument set. Volume-relevant only $\rightarrow$ \emph{volume} instrument. Neither $\rightarrow$ \emph{dropped}.
-\item \textbf{Fallback.} If no channel clears the composition gate, the test reverts to the four Mayor-crossed channels \{M, M\,$\cdot$\,P, M\,$\cdot$\,G, M\,$\cdot$\,G\,$\cdot$\,P\} as the composition set.
-\end{itemize}
-\vskip 0.5em
-{\footnotesize The exposure control (EC) is an included control in every specification, first stages and AR test alike.}
+{\footnotesize Mayor and Mayor\,$\cdot$\,Governor clear the 5\% relevance gate; Governor, President, and the remaining channels do not. These two channels supply the instrument for the volume ratio in the volume-instrumented AR specification. The partial $F$ is a cluster-robust Wald test on the channel's aggregate instrument; municipality-year observations, muni $+$ year FE, clustered by municipality, exposure control included throughout. The 12-group margin selects the same two channels. $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.}
 \end{frame}
 
 % ------------------------------------------------------------------
-\begin{frame}{Policy block: only the President moves sector shares}
-{\footnotesize Composition first stage --- does the channel move sector employment shares?}
-\vskip 0.25em
-\resizebox{\textwidth}{!}{%
+\begin{frame}{BNDES aggregate sector: Governor-containing stacks reject}
+{\footnotesize AR test by excluded-instrument stack. \{M,\,P,\,M\,$\cdot$\,P\} means M, P, \emph{and} M\,$\cdot$\,P are all excluded instruments at once.}
+\vskip 0.15em
+\centerline{\resizebox{0.95\textwidth}{!}{%
 \setlength{\tabcolsep}{5pt}%
 \footnotesize%
-\input{tables/ar_first_stage_comp_policy_block.tex}%
-}
-\vskip 0.5em
-{\footnotesize Cluster-robust partial Wald test on each channel's instrument coefficient only; the exposure control is included throughout. President is the sole channel clearing the 5\% relevance gate. The seven channels are collinear, so the joint test is rank-deficient. $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.}
-\end{frame}
-
-% ------------------------------------------------------------------
-\begin{frame}{Policy block: Governor and Mayor\,$\cdot$\,Governor move volume}
-{\footnotesize Volume first stage --- does the channel move total BNDES volume?}
-\vskip 0.25em
-\resizebox{\textwidth}{!}{%
-\setlength{\tabcolsep}{5pt}%
-\footnotesize%
-\input{tables/ar_first_stage_vol_policy_block.tex}%
-}
-\vskip 0.5em
-{\footnotesize Cluster-robust partial Wald test on each channel's instrument coefficient only; the exposure control is included throughout. Governor and Mayor\,$\cdot$\,Governor clear the 5\% relevance gate; no other channel does. $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.}
-\end{frame}
-
-% ------------------------------------------------------------------
-\begin{frame}{Pairwise first stage: Mayor channels move composition}
-{\footnotesize Composition first stage --- channels entered two at a time, and two plus their interaction.}
-\vskip 0.25em
-\centerline{\resizebox{0.40\textwidth}{!}{%
-\setlength{\tabcolsep}{5pt}%
-\footnotesize%
-\input{tables/ar_first_stage_comp_multi_policy_block.tex}%
+\input{tables/stack_ar_screen_policy_block.tex}%
 }}
-\vskip 0.4em
-{\footnotesize Per-channel columns: cluster-robust partial Wald $F$/$p$ on that channel's instrument coefficient. \emph{Joint}: Wald over all channels in the set, shown only when joint $F$ stays below the largest per-channel $F$ --- above that bound the channels are collinear and the joint Wald is unreliable (\emph{collinear}). \emph{Volume control} = Yes adds BNDES volume as a predetermined control. The AR statistic is a cluster-robust joint Wald test on the instrument coefficients only --- not on all regressor coefficients. The exposure control is included in every specification. $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.}
+\vskip 0.2em
+{\footnotesize Three volume treatments: no control, volume control, and volume instrumented (Full IV). The AR statistic is a cluster-robust joint Wald test on the instrument coefficients only. The exposure control is included in every specification. $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.}
 \end{frame}
 
 % ------------------------------------------------------------------
-\begin{frame}{Pairwise first stage: Mayor and Mayor\,$\cdot$\,Governor move volume}
-{\footnotesize Volume first stage --- channels entered two at a time, and two plus their interaction.}
+\begin{frame}{Twelve groups: all three screened stacks reject, on weak first stages}
+{\footnotesize AR test by excluded-instrument stack --- BNDES aggregate sector $\times$ firm size (12 groups).}
 \vskip 0.25em
-\centerline{\resizebox{0.48\textwidth}{!}{%
-\setlength{\tabcolsep}{6pt}%
+\centerline{\resizebox{\textwidth}{!}{%
+\setlength{\tabcolsep}{8pt}%
 \footnotesize%
-\input{tables/ar_first_stage_vol_multi_policy_block.tex}%
+\input{tables/stack_ar_screen_policy_block_size_bin.tex}%
 }}
 \vskip 0.5em
-{\footnotesize Per-channel columns: cluster-robust partial Wald $F$/$p$ on that channel's instrument coefficient; \emph{Joint} is the Wald over all channels in the set. The dependent variable is total BNDES volume, so there is no volume-control split. The AR statistic is a cluster-robust joint Wald test on the instrument coefficients only --- not on all regressor coefficients. The exposure control is included in every specification. $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.}
-\end{frame}
-
-% ------------------------------------------------------------------
-\begin{frame}{Policy block routing: President is composition, Governor is volume}
-{\footnotesize Channel assignment from the two first stages above.}
-\vskip 0.25em
-\resizebox{\textwidth}{!}{%
-\setlength{\tabcolsep}{6pt}%
-\footnotesize%
-\input{tables/ar_routing_policy_block.tex}%
-}
-\vskip 0.5em
-{\footnotesize \textbf{Reading:} President is the only composition-relevant channel; Governor and Mayor\,$\cdot$\,Governor are volume-relevant; the remaining four channels are dropped. The 5\% relevance gate: a channel is assigned to a role only if its partial $F$ in that first stage has $p<0.05$. $F$ and $p$ are from a cluster-robust partial Wald test on the channel's instrument coefficient only; the exposure control is included throughout.}
-\end{frame}
-
-% ------------------------------------------------------------------
-\begin{frame}{Twelve groups: no channel clears the composition gate}
-{\footnotesize Composition first stage --- policy block $\times$ firm size (12 groups).}
-\vskip 0.25em
-\resizebox{\textwidth}{!}{%
-\setlength{\tabcolsep}{5pt}%
-\footnotesize%
-\input{tables/ar_first_stage_comp_policy_block_size_bin.tex}%
-}
-\vskip 0.5em
-{\footnotesize Cluster-robust partial Wald test on each channel's instrument coefficient only; the exposure control is included throughout. At the finer 12-group margin no individual channel clears the 5\% relevance gate, though the joint test is significant. $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.}
-\end{frame}
-
-% ------------------------------------------------------------------
-\begin{frame}{Twelve groups: Governor and Mayor\,$\cdot$\,Governor move volume}
-{\footnotesize Volume first stage --- policy block $\times$ firm size (12 groups).}
-\vskip 0.25em
-\resizebox{\textwidth}{!}{%
-\setlength{\tabcolsep}{5pt}%
-\footnotesize%
-\input{tables/ar_first_stage_vol_policy_block_size_bin.tex}%
-}
-\vskip 0.5em
-{\footnotesize Cluster-robust partial Wald test on each channel's instrument coefficient only; the exposure control is included throughout. Governor and Mayor\,$\cdot$\,Governor clear the 5\% relevance gate. $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.}
-\end{frame}
-
-% ------------------------------------------------------------------
-\begin{frame}{Twelve groups: pairwise composition relevance nearly vanishes}
-{\footnotesize Composition first stage --- policy block $\times$ firm size (12 groups).}
-\vskip 0.25em
-\centerline{\resizebox{0.40\textwidth}{!}{%
-\setlength{\tabcolsep}{5pt}%
-\footnotesize%
-\input{tables/ar_first_stage_comp_multi_policy_block_size_bin.tex}%
-}}
-\vskip 0.4em
-{\footnotesize Per-channel columns: cluster-robust partial Wald $F$/$p$ on that channel's instrument coefficient. \emph{Joint}: Wald over all channels in the set, shown only when joint $F$ stays below the largest per-channel $F$ --- above that bound the channels are collinear and the joint Wald is unreliable (\emph{collinear}). \emph{Volume control} = Yes adds BNDES volume as a predetermined control. The AR statistic is a cluster-robust joint Wald test on the instrument coefficients only --- not on all regressor coefficients. The exposure control is included in every specification. $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.}
-\end{frame}
-
-% ------------------------------------------------------------------
-\begin{frame}{Twelve groups: only the stacked Mayor\,$\cdot$\,Governor set moves volume}
-{\footnotesize Volume first stage --- policy block $\times$ firm size (12 groups).}
-\vskip 0.25em
-\centerline{\resizebox{0.48\textwidth}{!}{%
-\setlength{\tabcolsep}{6pt}%
-\footnotesize%
-\input{tables/ar_first_stage_vol_multi_policy_block_size_bin.tex}%
-}}
-\vskip 0.5em
-{\footnotesize Per-channel columns: cluster-robust partial Wald $F$/$p$ on that channel's instrument coefficient; \emph{Joint} is the Wald over all channels in the set. The dependent variable is total BNDES volume, so there is no volume-control split. The AR statistic is a cluster-robust joint Wald test on the instrument coefficients only --- not on all regressor coefficients. The exposure control is included in every specification. $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.}
-\end{frame}
-
-% ------------------------------------------------------------------
-\begin{frame}{Twelve groups routing: the rule falls back to Mayor-crossed channels}
-{\footnotesize Channel assignment from the two 12-group first stages above.}
-\vskip 0.25em
-\resizebox{\textwidth}{!}{%
-\setlength{\tabcolsep}{6pt}%
-\footnotesize%
-\input{tables/ar_routing_policy_block_size_bin.tex}%
-}
-\vskip 0.5em
-{\footnotesize \textbf{Reading:} No channel clears the 5\% composition gate, so the rule falls back to the four Mayor-crossed channels \{M, M\,$\cdot$\,P, M\,$\cdot$\,G, M\,$\cdot$\,G\,$\cdot$\,P\} as the composition set; Governor is the volume instrument. The 5\% relevance gate: a channel is assigned to a role only if its partial $F$ in that first stage has $p<0.05$. $F$ and $p$ are from a cluster-robust partial Wald test on the channel's instrument coefficient only; the exposure control is included throughout.}
-\end{frame}
-
-% ------------------------------------------------------------------
-\begin{frame}{Stacking M, G, M\,$\cdot$\,G sharpens the test --- policy block}
-\resizebox{\textwidth}{!}{%
-\setlength{\tabcolsep}{8pt}%
-\footnotesize%
-\input{tables/ar_b5_comparison_policy_block.tex}%
-}
-\vskip 0.5em
-{\footnotesize Both instrument sets reject the null of no composition effect at 5\%; the stacked \{M, G, M\,$\cdot$\,G\} test is sharper (lower $p$). The AR statistic is a cluster-robust joint Wald test on the instrument coefficients only --- not on all regressor coefficients. The exposure and the volume controls are included in every specification.}
-\end{frame}
-
-% ------------------------------------------------------------------
-\begin{frame}{Stacking sharpens the test at 12 groups too}
-\resizebox{\textwidth}{!}{%
-\setlength{\tabcolsep}{8pt}%
-\footnotesize%
-\input{tables/ar_b5_comparison_policy_block_size_bin.tex}%
-}
-\vskip 0.5em
-{\footnotesize Same pattern as the policy block margin: both sets reject at 5\%, and the stacked \{M, G, M\,$\cdot$\,G\} test has the lower $p$-value. The AR statistic is a cluster-robust joint Wald test on the instrument coefficients only --- not on all regressor coefficients.}
-\end{frame}
-
-% ------------------------------------------------------------------
-\begin{frame}{Policy block: the data-selected composition set never rejects}
-{\footnotesize Three-volume AR test --- composition set = President (the routed composition channel).}
-\vskip 0.25em
-\resizebox{0.72\textwidth}{!}{%
-\setlength{\tabcolsep}{8pt}%
-\footnotesize%
-\input{tables/ar_three_volume_compset_policy_block.tex}%
-}
-\vskip 0.5em
-{\footnotesize Three volume treatments: no volume control; volume as a predetermined control; volume instrumented (Full IV). The President composition set fails to reject the null of no composition effect under all three treatments. The AR statistic is a cluster-robust joint Wald test on the instrument coefficients only --- not on all regressor coefficients.}
-\end{frame}
-
-% ------------------------------------------------------------------
-\begin{frame}{Policy block: Mayor\,$\cdot$\,Governor rejects, and does so stably}
-{\footnotesize Three-volume AR test --- the four Mayor-crossed channels, one at a time.}
-\vskip 0.25em
-\resizebox{\textwidth}{!}{%
-\setlength{\tabcolsep}{8pt}%
-\footnotesize%
-\input{tables/ar_three_volume_mayor_policy_block.tex}%
-}
-\vskip 0.5em
-{\footnotesize Each cell: AR joint $F$ with $[p]$ in brackets. Among the four Mayor-crossed channels, Mayor\,$\cdot$\,Governor is the only one that rejects at 5\%, and it rejects stably across all three volume treatments. The AR statistic is a cluster-robust joint Wald test on the instrument coefficients only --- not on all regressor coefficients. The exposure control is included in every specification. $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.}
-\end{frame}
-
-% ------------------------------------------------------------------
-\begin{frame}{Twelve groups: the composition set rejects, but not under Full IV}
-{\footnotesize Three-volume AR test --- composition set = the four Mayor-crossed channels \{M, M\,$\cdot$\,P, M\,$\cdot$\,G, M\,$\cdot$\,G\,$\cdot$\,P\} (routing fallback).}
-\vskip 0.25em
-\resizebox{0.74\textwidth}{!}{%
-\setlength{\tabcolsep}{8pt}%
-\footnotesize%
-\input{tables/ar_three_volume_compset_policy_block_size_bin.tex}%
-}
-\vskip 0.5em
-{\footnotesize The composition set rejects the null with no volume control and with a volume control, but \emph{not} once volume is instrumented (Full IV). The AR statistic is a cluster-robust joint Wald test on the instrument coefficients only --- not on all regressor coefficients. The exposure control is included in every specification. $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.}
-\end{frame}
-
-% ------------------------------------------------------------------
-\begin{frame}{Twelve groups: Mayor\,$\cdot$\,Governor again the strongest channel}
-{\footnotesize Three-volume AR test --- the four Mayor-crossed channels, one at a time (12 groups).}
-\vskip 0.25em
-\resizebox{\textwidth}{!}{%
-\setlength{\tabcolsep}{8pt}%
-\footnotesize%
-\input{tables/ar_three_volume_mayor_policy_block_size_bin.tex}%
-}
-\vskip 0.5em
-{\footnotesize Each cell: AR joint $F$ with $[p]$ in brackets. Mayor\,$\cdot$\,Governor rejects at 5\% without and with a volume control; under Full IV no channel rejects. The AR statistic is a cluster-robust joint Wald test on the instrument coefficients only --- not on all regressor coefficients. The exposure control is included in every specification. $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.}
-\end{frame}
-
-% ------------------------------------------------------------------
-\begin{frame}{Twelve-group thin cells carry little GDP}
-\begin{itemize}\setlength{\itemsep}{0.7em}
-\item At the 12-group margin, thin cells (5 or fewer affiliated owners) are \textbf{64.8\% of cells}.
-\item But thin-identified municipality-years carry only \textbf{9.3\% of municipal GDP}.
-\item The muni-relative weighting denominator keeps per-channel weights thick; the effective number of shocks has a median of 12.5.
-\item Thin cells concentrate in small municipalities, so the GDP-relevant AR estimand is not driven by them.
-\end{itemize}
-\vskip 0.5em
-{\footnotesize Source: C3 thin-cell coverage audit, policy block $\times$ firm size margin, 452{,}842 cell-years.}
+{\footnotesize Governor, President, and Governor\,$\cdot$\,President all reject without and with a volume control. Under Full IV Governor and Governor\,$\cdot$\,President still reject, but President falls to the 10\% margin. The first stages are weak (1 to 3 of 11 shares identified), so a rejection here is read as a possible exclusion/direct-effect warning, not as evidence of a composition channel. The AR statistic is a cluster-robust joint Wald test on the instrument coefficients only. The exposure control is included in every specification. $^{*}$ $p<0.10$, $^{**}$ $p<0.05$, $^{***}$ $p<0.01$.}
 \end{frame}
 
 \end{document}
