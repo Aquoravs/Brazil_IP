@@ -232,3 +232,173 @@ instrument-collinearity diagnosis — and stop at checkpoint #1.
   outputs.
 - Pending: user checkpoint #2 decision on which composition instrument set(s)
   to carry into Phase 2. Phase 2 not started.
+
+## 2026-05-22 — Phase 2 baseline AR screen (B9)
+
+**Goal:** Checkpoint #2 resolved by the user — proceed with the Phase 2 AR
+screen on the explicit excluded-stack list (current excluded-stack design).
+The residualized interaction-only excluded-IV design is deferred to the next
+diagnostic.
+
+**Decisions:**
+- New script `B9_stack_ar_screen.R` rather than extending B6: B6 runs only the
+  B4-routed set and the four mayor-crossed channels; B9 runs the AR test on an
+  arbitrary stack list. B9 stack ids match B8 so the Phase 1B relevance verdict
+  joins by `stack_id`.
+- Two volume treatments: no-volume companion and volume-control verdict.
+  Volume-instrumented (Full IV) is not run — the screen has no designated
+  volume channel, so there is no `Zbar` to instrument `vol_ratio`; B6 keeps
+  the Full-IV variant for the routed sets.
+- AR structure copied from B6 `run_ar`: unit muni-year, outcome `log_gdp`,
+  FE `muni_id + year`, cluster `muni_id`, controls = stack EC block + `vol_ratio`,
+  excluded instruments = stack Z blocks, AR stat = cluster-robust joint Wald on
+  Z coefficients only.
+
+**Operations:**
+- New `R/B9_stack_ar_screen.R`; added to `phase2_steps` in `run_phase_bc.R`
+  after B6.
+- Ran B9 for `policy_block` (12 stacks: MP, MG, MGP, G, P, GP, {M,G}, {M,P},
+  {G,P}, {M,P,MP}, {G,P,GP}, {M,G,P,MGP}) and `policy_block_size_bin`
+  (3 stacks: G, P, GP). Wrote `stack_ar_screen_<tax>.{csv,tex}`.
+- Copied B9 + routing + wide-first-stage tables to
+  `journal/meetings/2026-05-21/tables/`.
+- Rewrote `slides.tex` around the Phase 1A/1B/2 story (12 frames): collinearity
+  null, wide-form relevance per margin, baseline AR screen per margin, reading
+  frame, interaction-only excluded-IV next diagnostic, thin-cells slide kept.
+  XeLaTeX clean — 12 pages, no overfull boxes, no undefined references; the
+  three table slides visually checked at 110 DPI.
+
+**Results — baseline AR screen, volume-control verdict:**
+- `policy_block`: rejection tracks the Governor channel. G (F=11.97),
+  M·G (3.20), {M,G} (6.52), {G,P} (6.63), {G,P,GP} (5.23), {M,G,P,MGP} (4.21)
+  reject at 5%. The mayoral-interaction stacks M·P (0.263), M·G·P (0.239),
+  P (0.452), G·P (0.095), {M,P} (0.317), {M,P,MP} (0.320) do not reject.
+- `policy_block_size_bin`: all three screened stacks reject — G (6.00),
+  P (2.14), G·P (2.13) — but on weak Phase 1B first stages (3/11, 2/11, 1/11
+  shares identified). Read as a possible exclusion/direct-effect warning, not
+  as a composition-channel finding.
+- The no-volume companion is numerically identical to the volume-control
+  verdict to three decimals — the volume control is inert here.
+- Caveat surfaced by fixest: for G/P-containing stacks the Governor and
+  President EC blocks are partly collinear (shared gov/pres election calendar),
+  so fixest drops the redundant EC controls. This touches included controls
+  only; the Z-only AR statistic is unaffected.
+
+**Status:**
+- Done: B9 script, runner wiring, both margins run, tables copied, slides
+  rewritten and compiled, visual check.
+- Pending: the interaction-only excluded-IV diagnostic (exclude Z_{M·P}, include
+  Z_M and Z_P as controls) — flagged on the slides as the next step, not run.
+
+## 2026-05-22 — Follow-up: volume first stage + Full-IV column restored
+
+**Why:** The first B9 pass dropped the volume-instrumented (Full-IV) spec. Root
+cause: the Full-IV needs an instrument for `vol_ratio`; B6 draws it from the
+routing volume set, but `B4_channel_routing.R` hard-codes an empty `vol_set`
+(B8 built only a composition first stage, no volume first stage). B6's own
+Full-IV is dropped for the same reason. B9 inherited the gap.
+
+**Decisions:**
+- Restore the volume first stage inside B9 rather than touching B4/B6. For each
+  channel c: `vol_ratio ~ Zbar_c + EC_c | muni + year`, cluster muni; partial F
+  on `Zbar_c`; p<0.05 selects volume instruments. `Zbar_c = sum_j Z^c_jmt` is
+  the same aggregate B6's Full-IV uses.
+- Full-IV per stack: instrument `vol_ratio` with `Zbar` of the volume-relevant
+  channels NOT in the stack — using a channel inside the stack would be
+  collinear with that stack's excluded Z block. Every stack ended up with at
+  least one usable volume instrument, so no Full-IV cell is N/A.
+- Restoring `vol_set` in the Phase 1B routing (B4) and B6 is a larger, separate
+  change — left untouched; B9 is self-contained.
+
+**Operations:**
+- Rewrote `R/B9_stack_ar_screen.R`: added the volume first stage, `volIV` spec
+  in `run_ar`, and the embedded first-stage F. New outputs
+  `volume_first_stage_<tax>.{csv,tex}`; `stack_ar_screen_<tax>.{csv,tex}`
+  gained the Full-IV column.
+- Re-ran B9 for both margins; copied 4 tables to the meeting `tables/` folder.
+- Slides: added a volume first-stage frame, reworked the Phase 2 intro to the
+  three-volume structure, widened the screen tables to 7 columns, added a
+  Full-IV bullet to the reading frame. Deck now 13 pages; XeLaTeX clean, table
+  slides visually checked at 110 DPI.
+
+**Results:**
+- Volume first stage selects Mayor (F=3.97, p=0.046) and Mayor·Governor
+  (F=4.60, p=0.032) as volume instruments at both margins; Governor, President,
+  and the rest do not clear the 5% gate.
+- Full-IV verdict, `policy_block`: the standalone-Governor stacks reject under
+  all three volume treatments; Mayor·Governor rejects under no-control and
+  volume-control but its rejection vanishes under Full IV (F 3.20 → 0.30).
+- Full-IV verdict, 12-group: Governor and Governor·President still reject;
+  President falls from p=0.012 to p=0.078 (10% margin) under Full IV.
+
+**Status:**
+- Done: volume first stage + Full-IV column; both margins; slides; compile.
+- Pending: same as above — interaction-only excluded-IV diagnostic, not run.
+  Note: B4/B6 still carry an empty `vol_set` in the Phase 1B routing; a future
+  pass should restore the volume first stage there too.
+
+## 2026-05-22 — Deck restructured to the user's spine
+
+**Goal:** Reorganise the meeting deck per the user's instruction — tasks,
+summary, first stages, then the AR test; drop the collinearity exercise.
+
+**Decisions (user, via clarifying questions):**
+- Sector-share first stage: policy block shown as a per-share SW $F$ table
+  (channel x sector share); the 12-group margin shown as a per-channel verdict
+  (KP, SW $F$ range, identified shares) — 11 shares are too wide for a per-share
+  slide.
+- Deck ends on the thin-cells slide; the interaction-only excluded-IV
+  next-diagnostic slide is dropped.
+- The Phase 1A collinearity slide is removed entirely.
+
+**Operations:**
+- New `R/B10_first_stage_slide_tables.R`: reads B8's `wide_first_stage_<tax>.csv`
+  (volume-control rows, singleton channels) and writes
+  `first_stage_shares_<tax>.tex` — a per-share table for `policy_block`, a
+  per-channel verdict for `policy_block_size_bin`. No model is re-fit. Added to
+  `phase2_steps` in `run_phase_bc.R`.
+- Rewrote `slides.tex` to 9 frames: title; Tasks done (2 bullets); Summary of
+  findings; sector-share first stage (policy block, then 12 groups); volume
+  first stage; AR test (policy block, then 12 groups); thin cells.
+- Copied the two `first_stage_shares_*.tex` tables to the meeting `tables/`
+  folder. XeLaTeX clean — 9 pages, no overfull boxes, no undefined references;
+  all table slides visually checked at 105 DPI.
+
+**Status:**
+- Done: B10 script, runner wiring, deck restructure, compile, visual check.
+- Pending: unchanged — interaction-only excluded-IV diagnostic not run; B4/B6
+  still carry an empty Phase 1B `vol_set`.
+
+## 2026-05-22 — First-stage slides extended to all 18 stacks
+
+**Why:** The first-stage slides showed only the seven singleton channels; the
+user asked for the multi-channel stacks ({M,G}, {M,G,M·G}, etc.) too.
+
+**Operations:**
+- `B10`: now emits all 18 evaluated stacks (singletons, Mayor stacks, parent
+  pairs, parent + interaction), families separated by `\addlinespace` rather
+  than header rows. Writes the full table plus a two-panel split — `_a`
+  (singletons + Mayor stacks, 11 rows) and `_b` (parent pairs + parent +
+  interaction, 7 rows) — since one 18-row table is too tall for a slide.
+- `slides.tex`: the two sector-share first-stage frames now use a two-column
+  layout, panel `_a` left and panel `_b` right. XeLaTeX clean — 9 pages, no
+  overfull boxes; both frames visually checked at 140 DPI.
+
+**Status:**
+- Done: B10 18-stack tables + two-panel split; deck updated; compile + check.
+- Pending: unchanged.
+
+## 2026-05-22 — Specification note for the 2026-05-21 deck
+
+**Operations:**
+- New `journal/meetings/2026-05-21/specification_note.tex`, modelled on the
+  2026-05-14 companion note. Documents the three regression types behind the
+  deck: (a) the first stage of the sector shares, (b) the first stage of the
+  volume control, (c) the AR test / baseline screen — plus the seven channels,
+  the excluded-stack design (18 stacks), the three volume treatments, the
+  diagnostics (SW $F$, KP rank, AR joint $F$), and variable construction.
+- Compiled under XeLaTeX — 3 pages, clean.
+
+**Status:**
+- Done: specification note written and compiled.
+- Pending: unchanged.
