@@ -481,3 +481,45 @@ Spec deviation: C1_FE uses year FE only (not muni + year FE) because Z is time-i
 **Score:** N/A (simplified exploration loop; verification checklist passed)
 **Verdict:** Phase 1B wide-form first stage complete and halted at checkpoint #2. B8 evaluated all 18 stacks at both margins with the AR-matching muni-year IV system, EC controls, muni/year FE, vol_ratio verdict fit, and muni clustering. B4 now consumes the B8 wide-form verdict rather than B2/B3 stacked-form CSVs; all seven singleton channels route to composition at both margins, with no Phase 1B volume set.
 **Report:** journal/sessions/2026-05-21_multi-channel-first-stages.md
+
+### 2026-05-22 — Coder (simplified mode)
+**Phase:** Execution (exploration) — Phase 2 baseline AR screen
+**Target:** B9_stack_ar_screen.R; run_phase_bc.R --phase=2; journal/meetings/2026-05-21/slides.tex
+**Score:** N/A (simplified exploration loop; verification checklist passed)
+**Verdict:** Phase 2 baseline AR screen complete on the explicit excluded-stack design (checkpoint #2 resolved by the user). New B9 runs the AR test on arbitrary stack lists — muni-year, log_gdp, muni+year FE, muni clustering, EC + vol_ratio controls, Z-only joint Wald — with no-volume companion and volume-control verdict. At policy_block rejection tracks the Governor channel (G, M·G, and every standalone-Governor stack reject; mayoral interactions do not); at the 12-group margin all three screened stacks reject on weak Phase 1B first stages. Slides rewritten around the Phase 1A/1B/2 story; XeLaTeX clean (12 pages). Interaction-only excluded-IV design flagged as the next diagnostic, not run.
+**Report:** journal/sessions/2026-05-21_multi-channel-first-stages.md
+
+### 2026-05-22 — Coder (simplified mode)
+**Phase:** Execution (exploration) — Phase 2 baseline AR screen, follow-up
+**Target:** B9_stack_ar_screen.R (volume first stage + Full-IV); journal/meetings/2026-05-21/slides.tex
+**Score:** N/A (simplified exploration loop; verification checklist passed)
+**Verdict:** Restored the volume-instrumented (Full-IV) AR spec, dropped in the first B9 pass because B4's Phase 1B routing carries an empty vol_set (B8 built only a composition first stage). B9 now runs a self-contained volume first stage — vol_ratio ~ Zbar_c + EC_c per channel — selecting Mayor and Mayor·Governor as volume instruments, and instruments vol_ratio with the volume-relevant channels outside each stack. Full-IV verdict: standalone-Governor stacks reject under all three volume treatments; Mayor·Governor's rejection vanishes under Full IV; at the 12-group margin President falls to the 10% margin under Full IV. Slides updated to the three-volume structure (13 pages, XeLaTeX clean). B4/B6 still carry an empty Phase 1B vol_set — flagged for a later pass.
+**Report:** journal/sessions/2026-05-21_multi-channel-first-stages.md
+
+### 2026-05-27 19:56 - Codex
+**Phase:** Execution (documentation)
+**Target:** journal/plans/2026-05-26_bh2026_optimal_first_stage.md
+**Score:** N/A
+**Verdict:** BH-2026 plan clarified: D1 is a legacy sector-collapse diagnostic, while Phase 2 selects firm-level `FA` definitions by held-out sector-level first-stage F after additive aggregation.
+**Report:** journal/sessions/2026-05-27_bh2026-plan-clarification.md
+
+### 2026-05-27 20:10 - Codex
+**Phase:** Execution (documentation)
+**Target:** journal/plans/2026-05-26_bh2026_optimal_first_stage.md
+**Score:** N/A
+**Verdict:** Baseline-window grid updated to pre-earliest primary, pre-latest recency stress test, and pre-mayor local-mechanism robustness.
+**Report:** journal/sessions/2026-05-27_bh2026-plan-clarification.md
+
+### 2026-05-28 10:43 - Codex
+**Phase:** Execution (documentation)
+**Target:** journal/plans/2026-05-26_bh2026_optimal_first_stage.md
+**Score:** N/A
+**Verdict:** Firm-level grid narrowed: total-owner denominator primary, owner-year vs equal-year baseline pooling added, binary exposure retained, and channel robustness clarified as lower-order-controlled interactions plus gated stacks.
+**Report:** journal/sessions/2026-05-28_bh2026-grid-clarification.md
+
+### 2026-05-28 10:51 - Codex
+**Phase:** Execution (documentation)
+**Target:** journal/plans/2026-05-26_bh2026_optimal_first_stage.md
+**Score:** N/A
+**Verdict:** Firm-level exposure grid expanded to compare within-firm and municipality-denominator owner exposure as central candidates, with employment-weighted municipality exposure as robustness.
+**Report:** journal/sessions/2026-05-28_bh2026-grid-clarification.md

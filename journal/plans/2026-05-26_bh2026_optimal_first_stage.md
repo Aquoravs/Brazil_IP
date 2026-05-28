@@ -79,11 +79,13 @@ flagged as irreducible.
 
 ## Scope and out-of-scope
 
-**Margin run order.** The firm panel is 44M rows; the Phase 2 grid is
-21 firm-level fits × 4 leave-one-out folds = 84 fits. Running both
-margins in lockstep doubles every downstream object (predictors,
-permutation maps, recentered instruments, AR tables). Operational
-default is therefore: **run `policy_block` end-to-end first** (Phases
+**Margin run order.** The firm panel is 44M rows; the Phase 2 core grid
+starts with 42 firm-level fits × 4 leave-one-out folds = 168 fits before
+baseline-pooling, binary-exposure, employment-weighted, and shift-timing
+robustness arms.
+Running both margins in lockstep doubles every downstream object
+(predictors, permutation maps, recentered instruments, AR tables).
+Operational default is therefore: **run `policy_block` end-to-end first** (Phases
 1 → 5), confirm sanity checks pass, then re-enter at the earliest
 phase affected by adding `policy_block × S3`. The orchestrator's
 `--margin` flag exposes this — `--margin=policy_block` is the default,
@@ -128,27 +130,32 @@ Out of scope:
 
 ## Phase 1 — Diagnostic audit
 
-**Goal:** measure how much room there is to gain on each of the three
-mechanisms identified in the original plan, at both production margins,
-so that the Phase 2 grid is dimensioned to the actual problem.
+**Goal:** audit how much the legacy/current sector-collapse pipeline
+loses through each of the three mechanisms identified in the original
+plan, at both production margins. This phase informs diagnostics and
+compute budget. It does **not** select the BH-2026 production predictor.
 
 **Margins:** `policy_block` (4 blocks) and `policy_block × S3` (12 cells).
 Drop `cnae_section` from this phase — it is robustness-only per D29.
 
 **Mechanisms (one diagnostic each):**
 
-- **D1 — aggregation weight sensitivity.** Read the existing script 53
-  spec-engine output, filter to the four instrument-weight variants
-  (`owner_count`, `employment`, `equal_firm`, `binary`), tabulate
-  wide-form first-stage F per channel at both margins, side-by-side. Add
-  a placeholder row for `firm_coef` that Phase 2 fills in. This is a
+- **D1 — legacy aggregation-weight audit.** Read the existing script 53
+  spec-engine output, filter to the four sector-collapse instrument
+  weight variants (`owner_count`, `employment`, `equal_firm`, `binary`),
+  and tabulate wide-form first-stage F per channel at both margins,
+  side-by-side. `equal_firm` means equal averaging of firm-level
+  instruments inside a legacy sector cell; it is not the BH-2026
+  additive aggregation rule. If useful, reserve a separate benchmark row
+  for the Phase 2 firm-coefficient result, but do not treat the D1
+  weights as candidates for the BH-2026 production design. This is a
   *re-read* of existing output, not a new estimation.
 - **D2 — within-cell heterogeneity.** For each `(j, m, t)` cell at both
   margins, compute `Var_f(FA^c_{f,m,t})` and the count of firms with
   positive vs negative firm-level alignment. Summarize: distribution of
   `Var_f` across cells (deciles), fraction of cells with mixed signs,
   correlation between `Var_f` and `|mean FA_f|` within cell. Run
-  separately for the four candidate single-office channels (M, G, P) and
+  separately for the three candidate single-office channels (M, G, P) and
   for one cross-office channel (MG, as the strongest D34 candidate).
 - **D3 — ratio diagnostic.** Re-run the existing sector first stage with
   three alternative LHS variables at both margins, keeping the production
@@ -168,16 +175,17 @@ gap quantifies firm-support construction effects only.
 - `output/audit_aggregation/results.qs2` — F-stats, partial R², coefs,
   SEs, all diagnostics.
 - `output/audit_aggregation/summary.md` — three tables (D1, D2, D3),
-  one-paragraph interpretation: which mechanism(s) dominate at each
-  margin, expected gain ceiling from Phases 2–3.
+  one-paragraph interpretation: where legacy aggregation loss appears
+  at each margin, expected gain ceiling from Phases 2–3.
 
 **Stop point:** present `summary.md` to user before launching Phase 2.
 
 ## Phase 2 — Firm-level predictor with grid search
 
 **Goal:** estimate a firm-level model that predicts each firm's share of
-muni employment, and select the variant that maximizes *held-out*
-sector-level first-stage F.
+muni employment, and select the firm-level `FA^c_{f,m,t}` definition
+that maximizes *held-out* sector-level first-stage F after additive
+firm-to-sector aggregation.
 
 ### 2.1 The firm-level regression — primary specification
 
@@ -189,6 +197,16 @@ set `c`. `FA^c` is the channel-`c` alignment shock interacted with
 firm-owner partisan exposure, constructed identically to the production
 firm-level instrument (script 36) but parameterized by channel set and
 baseline window.
+
+The design object is
+
+```
+FA^c_{f,m,t} = Σ_p ω^c_{f,p,t} · Align^c_{m,p,t}
+```
+
+where `ω^c_{f,p,t}` is firm `f`'s party-exposure share under the selected
+firm-level definition. Evaluating variants of `ω`, `Align`, channel set,
+and timing at the firm level is central to the BH-2026 route.
 
 Specification:
 
@@ -214,19 +232,84 @@ defend with the extreme zero-inflation of BNDES disbursements; we side-step
 this by predicting shares directly. PPML survives as a deferred robustness
 option.
 
-### 2.2 The grid
+### 2.2 The firm-level `FA` grid
 
-We search over two firm-level dimensions:
+The main design space is the firm-level definition of
+`FA^c_{f,m,t}`. The legacy sector-level `owner_count`, `employment`,
+`equal_firm`, and `binary` weights from Phase 1 D1 do not enter this
+grid; they only audit the old sector-collapse pipeline.
 
-| Dimension       | Variants                                                                                                                                                                                                        |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Channel set `c` | `{M}`, `{G}`, `{P}`, `{M·G}`, `{M·P}`, `{G·P}`, `{M·G·P}` — seven single-channel candidates. Stacks added if the D34 routing rule selects a stack with multiple channels relevant at the saturated first stage. |
-| Baseline window | channel-specific pre-earliest-election (D31 primary, Variant F); pre-mayoral (Variant A, mechanism-aligned robustness); higher-tier pre-window (Variant E, second timing robustness). Three variants. Pending discussion before Phase 2 launches. |
+| Dimension        | Primary                                                                                           | Robustness / candidates                                                                             |
+| ---------------- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Baseline window  | channel-specific pre-earliest-election exposure                                                   | pre-latest-election exposure; pre-mayor exposure                                                    |
+| Exposure scale   | within-firm total-owner share; municipality-denominator owner share                               | baseline-employment-weighted municipality share                                                     |
+| Baseline pooling | owner-year pooled share                                                                           | equal-year average of within-year owner shares                                                      |
+| Exposure form    | owner share `ω^c_{f,p,t}`                                                                         | binary any-party exposure                                                                           |
+| Channel form     | singleton channels and raw interactions `{M}`, `{G}`, `{P}`, `{M·G}`, `{M·P}`, `{G·P}`, `{M·G·P}` | lower-order-controlled interactions; stacks only after the singleton/interaction screen             |
+| Shift timing     | alignment levels                                                                                  | turnover/change instruments if the mechanism is an inauguration shock rather than persistent access |
 
-Fixed across all specifications: FE = `firm + muni×year`; sample = private
-productive firms only (D5-op). Full grid is `7 × 3 = 21` firm-level
-specifications. Recentering (Phase 3) preserves validity for any selected
-variant.
+The baseline-window axis has three options. **Pre-earliest** is the clean
+primary because the exposure is measured before every election entering
+the channel. **Pre-latest** is a recency stress test: it allows the
+freshest within-channel baseline, but can be post-treatment for the
+office elected earlier. **Pre-mayor** is the local-mechanism robustness:
+it asks whether results survive the baseline most aligned with the
+municipal intermediary, even when that window is not clean for every
+higher-tier office.
+
+The exposure-scale axis compares two central definitions. The
+**within-firm total-owner share** keeps unaffiliated owners in the firm
+denominator. This preserves political-affiliation intensity inside the
+firm: one affiliated owner among ten differs from one affiliated owner
+among one. The **municipality-denominator owner share** divides firm
+`f`'s party-`p` owner-years by total owner-years in municipality `m`
+over the same baseline window. This aligns the exposure scale with the
+outcome denominator, since `s^emp_{f,m,t}` is a municipality employment
+share.
+
+The **baseline-employment-weighted municipality share** is a robustness
+arm: multiply the firm-party owner exposure by firm `f`'s baseline share
+of municipality employment. It may predict `s^emp_{f,m,t}` well because
+it bakes in predetermined local employment mass, but its interpretation
+is a mass-weighted political shock rather than pure owner-party
+exposure. The affiliated-only denominator is feasible if all-unaffiliated
+cells are assigned zero, but it normalizes away affiliation intensity and
+is not central to this sweep.
+
+The baseline-pooling axis compares two ways to average over the selected
+pre-window. **Owner-year pooled share** sums owner-party counts and total
+owner counts over all baseline years, then divides once. Years with more
+observed owners receive more weight. **Equal-year average** first
+computes the party share within each baseline year, then averages those
+annual shares. Each year receives the same weight, independent of the
+number of owners observed that year.
+
+The binary exposure robustness keeps party identity but drops intensity:
+for each firm-party pair, replace the owner-share exposure with an
+indicator for any owner-year affiliated with party `p` inside the
+baseline window.
+
+The channel-form axis starts with singleton channels and raw
+interactions. A lower-order-controlled interaction includes the relevant
+main effects in the firm-level regression, e.g.
+`s^emp_{f,m,t} ~ FE + FA^M + FA^G + FA^{M·G}` for the `M·G`
+interaction, so the interaction coefficient is the incremental
+prediction beyond its lower-order legs. Stacks are not a blind grid:
+after the singleton and interaction screen, estimate a multi-channel
+stack only if multiple channels survive the saturated first-stage /
+routing screen, then rank it by the same held-out sector-level F after
+additive aggregation.
+
+Fixed across all specifications: FE = `firm + muni×year`; sample =
+private productive firms only (D5-op). The minimum core run is
+`7 × 3 × 2 = 42` firm-level specifications: channel form × baseline
+window × central exposure scale, with owner-year pooling and alignment
+levels. Baseline-pooling, binary-exposure, employment-weighted exposure,
+lower-order-controlled interaction, stack, and shift-timing arms are
+layered robustness once feasibility and compute budget are confirmed.
+Any pruning comes from firm-level feasibility, placebo, or anticipation
+evidence, not from D1 sector-weight rankings. Recentering (Phase 3)
+preserves validity for any selected variant.
 
 ### 2.3 Held-out evaluation discipline
 
@@ -252,13 +335,15 @@ For each variant:
 - Fit the firm-level model on three cycles.
 - Predict `ŝ^emp_{f,m,t}` on the held-out cycle (out-of-sample for the
   firm coefficients).
-- Aggregate to `ŝ^emp_{j,m,t}` within the held-out cycle.
+- Aggregate to `ŝ^emp_{j,m,t}` within the held-out cycle using the
+  additive rule in §2.5.
 - Compute the wide-form sector first stage F on the held-out cycle,
   pooled across the four leave-one-out folds.
 
-Rank variants by the pooled held-out F. The champion is the variant with
-the highest held-out F; close runners-up (within 2 F units) are carried
-into Phase 3 for the robustness sweep.
+Rank variants by the pooled held-out sector-level F after additive
+aggregation. The champion is the variant with the highest held-out F;
+close runners-up (within 2 F units) are carried into Phase 3 for the
+robustness sweep.
 
 This discipline is honest because Lemma 1 guarantees first-stage R²
 optimization for the *population* recentered best predictor; selecting by
@@ -289,8 +374,8 @@ post-treatment composition into the instrument.
 
 ### 2.6 Outputs
 
-- `output/firm_first_stage/grid_results.qs2` — for each of the 126
-  variants: held-out F per margin, in-sample F per margin, partial R²,
+- `output/firm_first_stage/grid_results.qs2` — for each documented grid
+  variant: held-out F per margin, in-sample F per margin, partial R²,
   coefficient on `FA^c`, SE, N. Long format.
 - `output/firm_first_stage/champion_predictor.qs2` — the **production**
   predictor at firm level, full-sample fit, with columns
@@ -575,7 +660,9 @@ B9 inline.
 
 **Phase 1:**
 - [ ] `B1` runs without error at both margins.
-- [ ] D1 table reports four weight variants × five channels × two margins.
+- [ ] D1 table reports four legacy sector-collapse weight variants × five
+      channels × two margins, with `equal_firm` labeled as equal averaging
+      inside sector cells.
 - [ ] D2 deciles, mixed-sign fractions, and `Var_f`–`|mean FA_f|`
       correlations reported for the five channels × two margins.
 - [ ] D3 wide-form F reported for the three LHS variables at both
@@ -584,9 +671,9 @@ B9 inline.
       go-ahead.
 
 **Phase 2:**
-- [ ] `B2` runs the full `7 × 3 = 21` firm-level grid without error.
-- [ ] Held-out F (four-fold cycle leave-one-out) reported per variant
-      per margin.
+- [ ] `B2` runs the documented firm-level `FA` grid without error.
+- [ ] Held-out sector-level F after additive aggregation (four-fold
+      cycle leave-one-out) reported per variant per margin.
 - [ ] In-sample F reported alongside; the held-out vs in-sample gap is
       explicit.
 - [ ] Champion identified (highest held-out F at `policy_block`);
@@ -662,9 +749,11 @@ Open after Phase 1, to confirm before Phase 2 launches:
    margin-clustering in heterogeneity, escalate to state-margin.
 2. **Skip presidential permutation** — confirmed in this plan as default;
    user can override if a within-cycle permutation design is preferred.
-3. **Grid pruning** — if Phase 1 D1 shows two weighting families collapse
-   onto the same F, prune to one and reduce the grid from 126 to a
-   smaller cardinality. Decision after Phase 1.
+3. **Firm-level grid pruning** — if the full robustness grid is too
+   costly, prune baseline-pooling, binary-exposure, lower-order-controlled
+   interaction, stack, employment-weighted, or shift-timing arms before
+   Phase 2. D1 sector-weight results cannot select the BH-2026 production
+   design.
 
 Deferred for after Phase 4 results:
 
@@ -695,8 +784,9 @@ A null result — recentered F essentially equal to production F at both
 margins — implies one of: (a) mechanism 3 dominates and the share
 endogenous is the binding constraint; (b) the firm-level model is too
 weak to extract structural responsiveness in this panel; (c) the
-production owner-count weights are already near-optimal at these
-margins. The Phase 1 diagnostic is the dispositive read on which.
+existing sector-collapse instrument leaves little relevance to recover
+at these margins. Phase 1 diagnoses which mechanism is binding; it does
+not choose the BH-2026 predictor.
 
 ## References
 
